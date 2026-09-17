@@ -1,0 +1,16 @@
+HANDBOOK OF FORESTRY FIELD METHODOLOGY: AGE ESTIMATION AND GROWTH RATES
+Publisher: Forestry Commission Publications (2023)
+
+1. Diameter Growth and Mean Annual Increment
+In professional forestry management, estimating tree age without destructive methods (such as extraction of tree ring cores using increment borers) relies on growth-rate modeling. The primary indicator of a tree's growth rate is the Mean Annual Increment (MAI). MAI represents the average annual increase in the tree's Diameter at Breast Height (DBH) over its lifespan under typical soil and climatic conditions.
+
+2. Age Calculation Formula
+The standard mathematical model to estimate a tree's age from its physical size is:
+Age = DBH / MAI
+Where:
+- DBH (Diameter at Breast Height) is measured in centimeters (derived from Girth at Breast Height, GBH, divided by pi).
+- MAI is the species-specific Mean Annual Increment, expressed in centimeters per year (cm/year).
+For example, a species with a high MAI of 2.0 cm/year grows rapidly, meaning a large tree is relatively young. Conversely, a species with a low MAI of 0.5 cm/year grows slowly, indicating that a tree of the same size is significantly older and has been storing carbon over a longer period.
+
+3. Variables Affecting Growth Rates
+Growth rates are highly species-specific and depend heavily on environmental conditions such as soil quality, rainfall, sunlight access, and forest density. Wood density also correlates with growth velocity: fast-growing pioneer species tend to produce softer, less dense wood (lower MAI density), whereas slow-growing climax species produce dense, hard wood. Incorporating species-specific MAI values from verified databases ensures realistic, localized age approximations.

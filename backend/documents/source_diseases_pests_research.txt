@@ -1,0 +1,44 @@
+MULTIPLE-SOURCE BOTANICAL KNOWLEDGE BASE: DISEASES, PESTS & CONSERVATION STATUS
+Sources: ICAR Indian Institute of Horticultural Research, FAO Plant Production and Protection Division, IUCN Red List of Threatened Species, PubMed, Semantic Scholar, Crossref, DOAJ.
+
+=== SPECIES: AZADIRACHTA INDICA (NEEM) ===
+1. Diseases & Pests
+- Common Diseases: Leaf spot (caused by Colletotrichum gloeosporioides), powdery mildew (Oidium azadirachtae), root rot (Ganoderma lucidum), and damping-off (Fusarium oxysporum).
+- Pests: Tea mosquito bug (Helopeltis antonii), scale insects (Pulvinaria maxima), neem scale (Aonidiella orientalis), and leaf webber (Loboschiza koenigiana).
+- Symptoms: Yellowing leaves, white powdery patches, brown necrotic lesions, tip dieback, and stunted growth.
+- Treatment & Prevention: Apply neem oil spray or bio-fungicides like Trichoderma viride. Maintain proper spacing to ensure canopy aeration and avoid waterlogging. Prune infected branches (verified by ICAR guidelines).
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC).
+- Threats: Habitat clearing, localized over-harvesting of seeds, and monoculture scale infestations.
+- Research Papers:
+  - "Azadirachtin: Phytochemistry and modern biocontrol efficacy" (Semantic Scholar) - Details the synthesis of azadirachtin and its impact as a growth disruptor for over 400 species of insect pests.
+  - "Antifungal activity of Neem leaf extracts against human dermatophytic fungi" (PubMed) - A clinical study showing rapid inhibition of Trichophyton species.
+
+=== SPECIES: SARACA ASOCA (ASHOKA) ===
+1. Diseases & Pests
+- Common Diseases: Leaf spot (Pestalotiopsis versicolor), seedling blight (Phytophthora nicotianae), and root rot (Rhizoctonia solani).
+- Pests: Pod borers (Deudorix isocrates), leaf miners (Acrocercops tetradelta), and mealybugs (Pseudococcus species).
+- Symptoms: Dark brown spots with yellow halos on leaves, curling leaves, white cottony deposits on twigs, and pod rot.
+- Treatment & Prevention: Spray organic copper fungicides (Bordeaux mixture). Apply organic neem-based insecticidal soaps for sucking pests. Remove leaf litter around stream banks to prevent fungal spore overwintering.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Vulnerable (VU).
+- Threats: Heavy bark harvesting for Ashokarishta production, riverbank habitat degradation, and poor seed germination rate in the wild.
+- Research Papers:
+  - "Conservation and population fragmentation of Saraca asoca in the Western Ghats" (Semantic Scholar) - A study detailing the genetic erosion of wild populations due to commercial bark collection.
+  - "Evaluation of the analgesic and anti-inflammatory properties of Saraca asoca bark" (PubMed) - Demonstrates significant reduction in tissue inflammation models in vivo.
+
+=== SPECIES: HEVEA BRASILIENSIS (RUBBER TREE) ===
+1. Diseases & Pests
+- Common Diseases: South American Leaf Blight (Microcyclus ulei) - a highly destructive disease, powdery mildew (Oidium heveae), white root disease (Rigidoporus microporus), and phytophthora leaf fall (Phytophthora palmivora).
+- Pests: Termites (Coptotermes curvignathus), scale insects, and rubber tree leafhoppers.
+- Symptoms: Black necrotic spots on leaves leading to defoliation, white fungal mycelia on roots, and excessive leaf fall during rainy periods.
+- Treatment & Prevention: Strict quarantine regulations (especially preventing South American Leaf Blight from spreading to Asia). Use sulfur dusting for powdery mildew. Apply propiconazole or copper oxychloride for leaf diseases.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC) globally due to extensive industrial farming, though wild Amazonian genetic germplasms are under threat from deforestation.
+- Threats: Amazonian deforestation, climate change restricting moisture zones, and extreme vulnerability to South American Leaf Blight (SALB).
+- Research Papers:
+  - "Climatic limitations and disease challenges in Southeast Asian rubber plantations" (Crossref) - Evaluates the threat of SALB and seasonal drought on rubber yields.
+  - "Antioxidant flavonoids of Hevea brasiliensis leaves and their industrial applications" (DOAJ) - Isolates bioactive phenolics for potential skin-care applications.

@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-slate-950;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+      radial-gradient(at 50% 50%, rgba(99, 102, 241, 0.03) 0px, transparent 50%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
+/* Glassmorphism Components */
+.glass-panel {
+  @apply bg-slate-900/40 backdrop-blur-xl border border-slate-800/80 rounded-2xl transition-all duration-300;
+}
+
+.glass-panel-hover {
+  @apply hover:bg-slate-900/60 hover:border-slate-700/60 hover:shadow-lg hover:shadow-emerald-500/5;
+}
+
+.glass-card {
+  @apply bg-slate-900/50 backdrop-blur-lg border border-slate-800/60 rounded-xl p-6 transition-all duration-300;
+}
+
+.glass-input {
+  @apply bg-slate-950/50 border border-slate-800 rounded-lg px-4 py-2 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500/80 focus:ring-1 focus:ring-emerald-500/30 transition-all duration-200;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-950;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 rounded-full hover:bg-slate-700;
+}
+
+/* Pulse animation for active states */
+@keyframes soft-pulse {
+  0%, 100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.glow-bg {
+  position: absolute;
+  filter: blur(120px);
+  z-index: -1;
+  pointer-events: none;
+  animation: soft-pulse 8s infinite ease-in-out;
+}
+
+/* Bubble animation for Medicinal section */
+@keyframes bubble-up {
+  0% {
+    transform: translateY(200px) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.65;
+  }
+  80% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-300px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+.animate-bubble {
+  animation: bubble-up 7s infinite ease-in;
+}
+
+/* Sway animation for Canopy Habitat elements */
+@keyframes leaf-sway {
+  0%, 100% {
+    transform: rotate(0deg) translate(0px, 0px);
+  }
+  50% {
+    transform: rotate(8deg) translate(4px, -6px);
+  }
+}
+
+.animate-sway {
+  animation: leaf-sway 6s infinite ease-in-out;
+}
+
+/* Image background overlays */
+.card-image-bg {
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-image-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.2) 0%, rgba(15, 23, 42, 0.85) 60%, rgba(15, 23, 42, 0.98) 100%);
+  z-index: 1;
+}
+
+.card-image-content {
+  position: relative;
+  z-index: 2;
+}
+

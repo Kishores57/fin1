@@ -1,0 +1,164 @@
+/* ═══════════════════════════════════════════════════════
+   App-wide Theme — Forest Glassmorphism
+   Matches the LandingPage transparent/blurry vibe
+   ═══════════════════════════════════════════════════════ */
+
+/* Fixed forest background that shows through all tabs */
+.app-forest-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background-color: #111c14;
+}
+
+.app-forest-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--app-bg-image);
+  background-size: cover;
+  background-position: center 30%;
+  opacity: 0.55;
+  filter: saturate(1.1) brightness(0.75);
+}
+
+.app-forest-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(10, 20, 12, 0.72) 0%, rgba(10, 20, 12, 0.45) 40%, rgba(10, 20, 12, 0.75) 100%),
+    radial-gradient(ellipse at 30% 20%, rgba(61, 139, 99, 0.12) 0%, transparent 55%),
+    radial-gradient(ellipse at 70% 80%, rgba(167, 201, 87, 0.07) 0%, transparent 55%);
+}
+
+/* ── App shell ── */
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  font-family: 'Sora', 'Inter', system-ui, sans-serif;
+  color: #f0f7ec;
+  overflow-x: hidden;
+}
+
+/* ── Floating glow orbs ── */
+.app-orb {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+  animation: orb-pulse 10s infinite ease-in-out;
+}
+
+@keyframes orb-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.55; transform: scale(1.08); }
+}
+
+/* ── Header ── */
+.app-header {
+  background: rgba(14, 25, 16, 0.55);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(167, 201, 87, 0.18);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: background 0.3s ease;
+}
+
+.app-header:hover {
+  background: rgba(14, 25, 16, 0.68);
+}
+
+/* ── Tab nav buttons ── */
+.app-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.05rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  font-family: 'Sora', sans-serif;
+  color: rgba(240, 247, 236, 0.7);
+  background: transparent;
+}
+
+.app-tab-btn:hover {
+  color: #f0f7ec;
+  background: rgba(167, 201, 87, 0.1);
+  border-color: rgba(167, 201, 87, 0.3);
+}
+
+.app-tab-btn.active {
+  background: rgba(167, 201, 87, 0.18);
+  color: #c8e694;
+  border-color: rgba(167, 201, 87, 0.45);
+  box-shadow: 0 0 16px rgba(167, 201, 87, 0.15);
+}
+
+/* ── Content panels — override glass-panel with nature glassmorphism ── */
+.app-content-wrap .glass-panel {
+  background: rgba(12, 22, 14, 0.45) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+  border: 1px solid rgba(167, 201, 87, 0.15) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25) !important;
+}
+
+.app-content-wrap .glass-card {
+  background: rgba(12, 22, 14, 0.38) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(167, 201, 87, 0.12) !important;
+}
+
+.app-content-wrap .glass-input {
+  background: rgba(8, 16, 10, 0.55) !important;
+  border-color: rgba(167, 201, 87, 0.2) !important;
+  color: #dff0d4 !important;
+}
+
+.app-content-wrap .glass-input:focus {
+  border-color: rgba(167, 201, 87, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(167, 201, 87, 0.1) !important;
+}
+
+/* ── Table inside app-content-wrap ── */
+.app-content-wrap table thead tr {
+  background: rgba(8, 16, 10, 0.6) !important;
+}
+
+/* ── Error banner ── */
+.app-error-banner {
+  background: rgba(120, 20, 20, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 1rem;
+}
+
+/* ── Map wrapper — no extra border ── */
+.app-map-wrap {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  border: 1px solid rgba(167, 201, 87, 0.15);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar-track {
+  background: rgba(8, 16, 10, 0.4) !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(61, 139, 99, 0.5) !important;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(167, 201, 87, 0.55) !important;
+}

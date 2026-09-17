@@ -1,0 +1,59 @@
+MULTIPLE-SOURCE BOTANICAL KNOWLEDGE BASE: TAXONOMY & BIODIVERSITY PROFILE
+Sources: Plants of the World Online (Kew), World Flora Online (WFO), ITIS, Catalogue of Life, GBIF, iNaturalist, Encyclopedia of Life (EOL), IUCN Red List.
+
+=== SPECIES: AZADIRACHTA INDICA (NEEM) ===
+1. Plant Taxonomy
+- Scientific Name: Azadirachta indica A.Juss. (Accepted by Kew Plants of the World Online and World Flora Online)
+- Common Names: Neem, Margosa tree, Indian lilac, Nim, Nimba.
+- Family: Meliaceae (Mahogany family)
+- Genus: Azadirachta
+- Species: Azadirachta indica
+- Botanical Description: A fast-growing evergreen tree reaching heights of 15–20 meters (occasionally 35–40m). It features a wide, spreading round crown, greyish-brown fissured bark, and pinnate leaves with serrated margins. Flowers are small, white, and fragrant, arranged in axillary panicles. Fruits are smooth, olive-like drupes that turn yellow upon ripening, containing one elongated seed.
+- Synonyms: Melia azadirachta L., Antelaea azadirachta (L.) Adelb.
+- Native Range: Indian subcontinent (India, Pakistan, Bangladesh, Nepal) and Myanmar.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Sapindales; Family: Meliaceae; Genus: Azadirachta; Species: A. indica. (Verified by ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Extensively naturalized across tropical and subtropical regions of the world, including East and West Africa, the Caribbean, Central and South America, the Middle East, and northern Australia.
+- Biodiversity Hotspots: High occurrence density in the Western Ghats (India) and dry zone forests of Myanmar.
+- Observation Records: Over 150,000 georeferenced observations recorded globally on GBIF and iNaturalist, showing high urban clustering due to planting in parks, avenues, and domestic gardens.
+- Native and Invasive Status: Native to the Indian subcontinent. Considered an invasive or naturalized species in parts of Australia, South Africa, and several Caribbean islands, where it competes with native dry-forest flora.
+- Conservation Status: IUCN Red List Category: Least Concern (LC). The species is highly abundant, widely cultivated, and faces no immediate threat of global extinction.
+
+=== SPECIES: SARACA ASOCA (ASHOKA) ===
+1. Plant Taxonomy
+- Scientific Name: Saraca asoca (Roxb.) De Wilde (Accepted by Kew Plants of the World Online and World Flora Online)
+- Common Names: Ashoka, Asoca, Sorrowless tree, Jasundi.
+- Family: Fabaceae (Legume family) / Subfamily: Detarioideae
+- Genus: Saraca
+- Species: Saraca asoca
+- Botanical Description: A small to medium-sized evergreen tree growing up to 10 meters in height. It has a beautiful, dense foliage of dark green, compound, pinnate leaves that hang in copper-red pendulous tassels when young. Flowers are bright orange-yellow, turning red as they age, gathered in dense, fragrant corymbose inflorescences. Fruits are flat, leathery, oblong seed pods containing several seeds.
+- Synonyms: Saraca indica auct. non L., Jonesia asoca Roxb.
+- Native Range: Central and Western Ghats of India, Sri Lanka, Bangladesh, and Myanmar.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Fabales; Family: Fabaceae; Genus: Saraca; Species: S. asoca. (Verified by ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Occurs primarily in wet evergreen and semi-evergreen forests, especially along stream banks and shady ravines in India (Western Ghats, Eastern Himalayas, Deccan Peninsula) and Sri Lanka.
+- Biodiversity Hotspots: Western Ghats (India) is the primary biodiversity hotspot for wild populations.
+- Observation Records: Roughly 12,000 verified observations on GBIF and iNaturalist, primarily clustered around reserve forests and sacred temple lands in southern and western India.
+- Native and Invasive Status: Native to South Asia. It is not listed as invasive anywhere in the world and is strictly a cultivated ornamental or protected wild species.
+- Conservation Status: IUCN Red List Category: Vulnerable (VU). Wild populations are highly fragmented and declining due to over-harvesting of its medicinal bark and destruction of riverine forest habitats.
+
+=== SPECIES: HEVEA BRASILIENSIS (RUBBER TREE) ===
+1. Plant Taxonomy
+- Scientific Name: Hevea brasiliensis (Willd. ex A.Juss.) Müll.Arg. (Accepted by Kew Plants of the World Online and World Flora Online)
+- Common Names: Rubber tree, Para rubber tree, Sharinga, Hevea.
+- Family: Euphorbiaceae (Spurge family)
+- Genus: Hevea
+- Species: Hevea brasiliensis
+- Botanical Description: A deciduous, large canopy tree reaching heights of 30–40 meters in the wild, though typically smaller (20–25m) in commercial plantations. It has smooth, greyish bark, trifoliate compound leaves, and small, pale-yellow flowers. The fruit is a large, explosive three-lobed capsule that bursts open when ripe, releasing large, mottled brown seeds. The bark produces a milky white latex containing natural polyisoprene rubber when tapped.
+- Synonyms: Siphonia brasiliensis Willd. ex A.Juss.
+- Native Range: The Amazon Basin (Brazil, Peru, Colombia, Ecuador, Bolivia, Venezuela).
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Malpighiales; Family: Euphorbiaceae; Genus: Hevea; Species: H. brasiliensis. (Verified by ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to the lowland rainforests of South America. Cultivated extensively in large-scale commercial plantations throughout Southeast Asia (Thailand, Indonesia, Malaysia, Vietnam, India) and West Africa (Ivory Coast, Liberia, Nigeria).
+- Biodiversity Hotspots: The Amazon Rainforest remains the key native biodiversity genetic reserve.
+- Observation Records: Over 80,000 records on GBIF and iNaturalist, with massive concentrations in Southeast Asia where agroforestry and monoculture plantations dominate the landscape.
+- Native and Invasive Status: Native to the Amazon. Naturalized in many parts of Southeast Asia, where it occasionally establishes outside plantations but is rarely classified as a destructive invasive species.
+- Conservation Status: IUCN Red List Category: Least Concern (LC) globally due to its vast cultivated footprint, though wild native Amazonian genotypes face localized threats from deforestation.

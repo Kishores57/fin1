@@ -1,0 +1,11 @@
+General Forestry, Biomass and Carbon Sequestration Principles:
+Aboveground Biomass (AGB) is a critical metric for estimating carbon stocks in forest ecosystems.
+The Chave Allometric Equation is one of the most widely accepted and scientifically validated formulas for estimating tree aboveground biomass across tropical forest types.
+The formula is expressed as: AGB = 0.0673 * (ρ * D^2 * H)^0.976, where ρ represents the wood density of the tree species (in g/cm³), D is the Diameter at Breast Height (DBH in cm), and H is the total tree height (in meters). The output represents dry biomass in kilograms.
+DBH (Diameter at Breast Height) is standardly derived from GBH (Girth at Breast Height) measured at 1.3 meters above the ground, using the formula: DBH = GBH / π.
+Mean Annual Increment (MAI) represents the average yearly growth in diameter for a specific tree species. The estimated age of a tree can be calculated by dividing its DBH by its MAI: Age = DBH / MAI.
+Stored Carbon is calculated as approximately 47% of the dry Aboveground Biomass: Carbon = Biomass * 0.47. This is because carbon makes up roughly half of the dry weight of organic tree tissue.
+Carbon Dioxide (CO₂) Sequestration represents the amount of atmospheric CO₂ absorbed by the tree. Since a CO₂ molecule is composed of one carbon atom (atomic weight 12) and two oxygen atoms (atomic weight 16 each), the molecular weight ratio of CO₂ to Carbon is 44 / 12 = 3.67.
+Therefore, CO₂ sequestered is calculated as: CO₂ = Carbon * 3.67.
+Understanding these metrics is vital for evaluating the climate mitigation potential of urban forests. Trees act as natural cooling agents, intercept rainwater to reduce runoff, filter airborne pollutants like PM2.5, and provide habitats for urban biodiversity.
+By quantifying biomass, carbon storage, and CO₂ sequestration, environmental managers can justify urban greening projects and participate in carbon offset markets.

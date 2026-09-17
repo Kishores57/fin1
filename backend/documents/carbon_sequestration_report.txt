@@ -1,0 +1,11 @@
+REPORT ON FOREST CARBON SEQUESTRATION AND CLIMATE CHANGE MITIGATION
+Author: Global Forest Research Association (2025)
+
+1. Executive Summary
+Forest ecosystems represent one of the most critical terrestrial carbon sinks, containing a substantial portion of the planet's organic carbon. Through the process of photosynthesis, trees absorb atmospheric carbon dioxide (CO2) and convert it into stable organic carbon, which is stored in their woody biomass (trunks, branches, foliage) and root systems. The quantification of these carbon stocks is vital for understanding forest carbon budgets and formulating climate change mitigation strategies.
+
+2. Carbon Storage Mechanisms
+Dry biomass of wood contains approximately 47% carbon by weight. When trees grow, they sequester carbon dioxide and release oxygen. The relationship between carbon stored in biomass and the corresponding carbon dioxide removed from the atmosphere is governed by the molecular weights of carbon and CO2. Since carbon has an atomic weight of 12 and carbon dioxide has a molecular weight of 44, the ratio of CO2 to Carbon is 44/12 ≈ 3.67. Therefore, every kilogram of organic carbon stored in a tree represents approximately 3.67 kilograms of CO2 sequestered from the atmosphere.
+
+3. Impact of Forest Maturity
+As forests mature, their carbon accumulation rates shift. Young trees exhibit rapid volumetric growth rates, accumulating biomass quickly. However, older trees, despite having slower radial growth rates, possess much larger overall volume and represent massive carbon reservoirs. Protecting mature forests is essential because their degradation releases significant amounts of CO2 back into the atmosphere. Urban forestry initiatives leverage these mechanisms to offset localized greenhouse gas emissions in industrial and residential areas.

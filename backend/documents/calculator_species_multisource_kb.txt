@@ -1,0 +1,237 @@
+CALCULATOR SPECIES MULTI-SOURCE KNOWLEDGE BASE
+Sources framed: FAO | ICRAF (World Agroforestry) | USDA | GBIF | India Biodiversity Portal | Forest Survey of India (FSI)
+Use only the SECTION matching the selected dropdown species.
+
+================================================================================
+=== SPECIES: MANGO | Mangifera indica | Anacardiaceae ===
+Aliases: Mango, Aam
+================================================================================
+[FAO] Mangifera indica is a major tropical fruit tree in FAO horticulture and agroforestry guidance. It provides fruit, shade, and rural income. Preferred climates are tropical to subtropical with distinct dry/wet seasons; frost damages young flush. Typical mature height 10–30 m with a dense rounded canopy useful for farmstead shading.
+[ICRAF] In ICRAF agroforestry systems, mango is a multipurpose tree: fruit for markets, leaf litter for soil organic matter, and shade for understorey crops. Root systems stabilize farm soils. Spacing and pruning practices improve fruiting while retaining carbon in woody biomass.
+[USDA] USDA / GRIN style plant profile: Mangifera indica L., family Anacardiaceae. Evergreen to semi-evergreen; alternate simple leaves; panicle flowers; fleshy drupe fruit. Growth habit is a medium–large canopy tree. Uses include fresh fruit, processed pulp, and ornamental avenue planting in frost-free zones.
+[GBIF] GBIF taxonomy: Mangifera indica is widely recorded across South and Southeast Asia with extensive cultivated occurrences globally. Family Anacardiaceae; genus Mangifera. Occurrence density is high in India, reflecting cultivation and naturalization near villages and orchards.
+[India Biodiversity Portal] India Biodiversity Portal context: mango is native/long-cultivated across India with many local cultivars. Observed in plains, plateaus, and homestead gardens. Local names include Aam. Supports frugivorous birds and insects during flowering/fruiting.
+[FSI] Forest Survey of India framing: mango contributes to tree cover outside forests (TOF), farm forestry, and urban greening. Its woody biomass stores carbon; canopy cools microclimates. Retention of mature mango trees supports India’s tree-cover and carbon accounting narratives.
+TAXONOMY: Scientific name Mangifera indica; Family Anacardiaceae; Genus Mangifera; Common name Mango.
+HABITAT: Tropical orchards, farm boundaries, village groves, urban avenues; prefers deep well-drained loams; sensitive to waterlogging and severe frost.
+MEDICINAL: Traditional uses include leaves, bark, seed kernel, and unripe fruit in folk preparations for digestion and skin applications (verify clinically). Key phytochemicals include mangiferin and polyphenols.
+CULTURAL: Sacred and cultural fruit tree in South Asia; associated with prosperity, festivals, and homestead identity.
+PESTS: Common issues include mango hopper, fruit fly, anthracnose, and powdery mildew; integrated pest management recommended.
+CARBON/CLIMATE: Dense canopy provides shade cooling; aboveground woody biomass sequesters carbon over decades; leaf litter builds soil carbon.
+BIODIVERSITY: Flowers attract bees and pollinators; ripe fruit feeds birds, bats, and squirrels.
+
+================================================================================
+=== SPECIES: BAMBOO | Bambusa vulgaris | Poaceae ===
+Aliases: Bamboo, Common bamboo
+================================================================================
+[FAO] FAO recognizes bamboo as a fast-growing woody grass used for construction, crafts, food shoots, and land restoration. High annual biomass increment supports climate-smart bioresource strategies.
+[ICRAF] ICRAF agroforestry uses bamboo for soil binding on slopes, windbreaks, and diversified farm income. Culms regenerate after harvest if rhizomes are protected.
+[USDA] Plant profile framing: Bambusa vulgaris Schrad. ex J.C.Wendl., Poaceae. Clumping tropical bamboo with tall culms, rapid vegetative growth, and multiple land-use values.
+[GBIF] GBIF records place Bambusa and related bamboo taxa across tropical Asia and cultivated tropics worldwide.
+[India Biodiversity Portal] Widely planted and naturalized in India; local craft and construction uses; habitat for insects and birds in culm clumps.
+[FSI] Bamboo resources are relevant to India’s forest and TOF assessments; rapid growth aids biomass and livelihood programs.
+TAXONOMY: Bambusa vulgaris; Family Poaceae (Bambusoideae).
+HABITAT: Moist tropical sites, riverbanks, farm edges; prefers fertile soils with moisture.
+MEDICINAL: Shoot and leaf uses appear in traditional diets/remedies; silica-rich tissues noted in ethnobotany.
+CULTURAL: Associated with rural crafts, housing, and festivals in many Indian regions.
+PESTS: Culm borers, fungal culm rot, and grazing damage if unmanaged.
+CARBON/CLIMATE: Very high productivity; stores carbon in culms and rhizomes; useful for erosion control.
+BIODIVERSITY: Dense clumps shelter birds and insects; leaf litter supports decomposers.
+
+================================================================================
+=== SPECIES: CHRISTMAS | Araucaria columnaris | Araucariaceae ===
+Aliases: Christmas tree, Cook pine, New Caledonia pine
+================================================================================
+[FAO] Araucaria columnaris is used as an ornamental conifer in tropical/subtropical urban planting programs and shelterbelts where climate allows.
+[ICRAF] Limited multipurpose food role; valued mainly for amenity shade form and landscape structure in agro-urban mosaics.
+[USDA] Profile: Araucaria columnaris (Forst.) Hook., Araucariaceae. Columnar evergreen conifer; scale-like leaves; distinctive spire form used as “Christmas tree” ornamental in warm regions.
+[GBIF] Native to New Caledonia; widely cultivated occurrence records in tropical cities.
+[India Biodiversity Portal] Planted in Indian parks, campuses, and coastal cities as ornamental conifer; not a native Indian forest dominant.
+[FSI] Contributes to urban tree cover aesthetics rather than timber volume in Indian inventories.
+TAXONOMY: Araucaria columnaris; Family Araucariaceae.
+HABITAT: Warm coastal and urban plantings; prefers well-drained soils; wind-exposed sites common.
+MEDICINAL: Not a primary medicinal species; ornamental value dominates.
+CULTURAL: Used as festive/ornamental “Christmas” tree in tropical settings.
+PESTS: Scale insects and tip dieback under stress; root issues in poorly drained soils.
+CARBON/CLIMATE: Evergreen canopy provides year-round shade; moderate woody carbon storage.
+BIODIVERSITY: Provides perch/roost structure for urban birds.
+
+================================================================================
+=== SPECIES: PALM (BOTTLE PALM) | Hyophorbe lagenicaulis | Arecaceae ===
+Aliases: Bottle palm, Palm
+================================================================================
+[FAO] Bottle palm is an ornamental Arecaceae species used in tropical landscaping and coastal amenity planting.
+[ICRAF] Amenity palm in homestead and institutional landscapes; limited timber/food role compared with coconut/areca.
+[USDA] Hyophorbe lagenicaulis (L.H.Bailey) H.E.Moore, Arecaceae. Swollen bottle-like trunk, pinnate leaves, slow–moderate growth; frost intolerant.
+[GBIF] Native to Round Island (Mauritius) lineage; cultivated ornamental occurrences worldwide in tropics.
+[India Biodiversity Portal] Common in Indian urban gardens and avenue landscaping as Bottle Palm.
+[FSI] Counts toward urban/ greening tree assets rather than natural forest growing stock.
+TAXONOMY: Hyophorbe lagenicaulis; Family Arecaceae.
+HABITAT: Tropical ornamental beds, coastal gardens; well-drained sandy loams; full sun.
+MEDICINAL: Not a major medicinal palm; primarily ornamental.
+CULTURAL: Popular landscape statement palm in public spaces.
+PESTS: Lethal yellowing-type risks in palms regionally; scale and leaf spot under humidity.
+CARBON/CLIMATE: Trunk biomass stores carbon; fronds provide localized shade.
+BIODIVERSITY: Flowering may attract insects; trunk cavities rarely used by fauna compared with native palms.
+
+================================================================================
+=== SPECIES: COCONUT | Cocos nucifera | Arecaceae ===
+Aliases: Coconut palm, Nariyal
+================================================================================
+[FAO] Cocos nucifera is a cornerstone FAO tropical crop tree: food, oil, fiber (coir), timber-like stem uses, and coastal livelihood support.
+[ICRAF] Key multipurpose palm in coastal agroforestry; intercropping under coconut is a classic ICRAF-relevant system.
+[USDA] Cocos nucifera L., Arecaceae. Tall palm, pinnate fronds, large drupe “coconut”; tropical lowland species.
+[GBIF] Pantropical cultivated distribution with dense occurrence records in coastal Asia, Pacific, Africa, and Americas.
+[India Biodiversity Portal] Extensively recorded along Indian coasts and inland irrigated pockets; local name Nariyal/Thengu variants.
+[FSI] Important TOF and plantation species in coastal states; biomass and livelihood relevance in national greening narratives.
+TAXONOMY: Cocos nucifera; Family Arecaceae.
+HABITAT: Coastal sands to coastal plains; salt spray tolerant; needs warmth and moisture.
+MEDICINAL: Water, oil, and kernel used in traditional diets and remedies; lauric-acid rich oil profile.
+CULTURAL: Sacred/ritual and daily-life tree across India; temple and household uses.
+PESTS: Rhinoceros beetle, red palm weevil, mite complexes; lethal diseases in some regions.
+CARBON/CLIMATE: Continuous frond shade; stem stores carbon; coastal windbreak role.
+BIODIVERSITY: Supports insects at inflorescences; fronds host epiphytes in humid coasts.
+
+================================================================================
+=== SPECIES: ASHOKA | Saraca asoca | Fabaceae ===
+Aliases: Ashoka, Sita Ashok, Sorrowless tree
+================================================================================
+[FAO] Saraca asoca is documented in ethnobotany and conservation horticulture; valued as sacred ornamental and medicinal bark source.
+[ICRAF] Suitable for shaded humid plantings and biodiversity gardens; not a major timber multipurpose tree.
+[USDA] Saraca asoca (Roxb.) Willd., Fabaceae. Small evergreen tree; compound leaves; orange-red flowers; tropical humid preference.
+[GBIF] Native South Asia occurrence clusters; cultivated temple/garden records.
+[India Biodiversity Portal] Strong cultural occurrence near temples and sacred groves; Western Ghats wild associations.
+[FSI] Contributes to ornamental/sacred greening; wild populations are conservation-sensitive.
+TAXONOMY: Saraca asoca; Family Fabaceae.
+HABITAT: Humid tropics, stream margins, shaded gardens; moisture-retentive soils.
+MEDICINAL: Bark traditionally used in Ayurveda for gynecological formulations; tannins/flavonoids noted.
+CULTURAL: Sacred tree linked to Hindu/Buddhist traditions; “without sorrow” symbolism.
+PESTS: Leaf caterpillars and fungal spots in humid shade.
+CARBON/CLIMATE: Dense evergreen shade cools micro-sites; modest woody carbon vs large timber trees.
+BIODIVERSITY: Nectar-rich flowers support bees, sunbirds, butterflies.
+
+================================================================================
+=== SPECIES: TEJ PATTA | Cinnamomum tamala | Lauraceae ===
+Aliases: Indian bay leaf, Malabar leaf, Tejpat
+================================================================================
+[FAO] Cinnamomum tamala is an aromatic Lauraceae tree/spice leaf species in Himalayan and NE Indian production systems.
+[ICRAF] Homestead and agroforestry spice tree; leaves harvested as Tej Patta for culinary markets.
+[USDA] Cinnamomum tamala (Buch.-Ham.) T.Nees & Eberm., Lauraceae. Evergreen tree; aromatic leaves; related to culinary cinnamon group.
+[GBIF] Distribution centered on Himalayan foothills and NE India with cultivation records.
+[India Biodiversity Portal] Widely noted as Tejpat/Tej Patta; ethnobotanical culinary species.
+[FSI] Relevant to NTFP (non-timber forest product) leaf harvest systems more than timber volume.
+TAXONOMY: Cinnamomum tamala; Family Lauraceae.
+HABITAT: Subtropical Himalayan foothills, moist forests, farm edges; prefers cooler moist climates than deep tropics.
+MEDICINAL: Leaves used in traditional digestive and aromatic preparations; essential oils contain eugenol-type constituents (varies by chemotype).
+CULTURAL: Culinary staple leaf in Indian cooking; market spice identity.
+PESTS: Leaf miners and fungal leaf blight under dense humidity.
+CARBON/CLIMATE: Evergreen leaf canopy; smaller stature carbon store than large hardwoods.
+BIODIVERSITY: Aromatic flowers/leaves support specialist insects.
+
+================================================================================
+=== SPECIES: BADAM | Terminalia catappa | Combretaceae ===
+Aliases: Indian almond, Tropical almond, Badam
+================================================================================
+[FAO] Terminalia catappa is recommended in coastal planting and amenity forestry for shade, edible seeds, and shoreline stabilization.
+[ICRAF] Multipurpose coastal tree: shade, edible kernel, fuelwood, and soil protection near coasts.
+[USDA] Terminalia catappa L., Combretaceae. Pagoda-like layered branching; large leaves that flush red; coastal tropical tree.
+[GBIF] Pantropical coastal occurrences; widely cultivated.
+[India Biodiversity Portal] Common as Badam/Indian almond in coastal and urban India.
+[FSI] Urban/coastal TOF species contributing shade and amenity tree cover.
+TAXONOMY: Terminalia catappa; Family Combretaceae.
+HABITAT: Coastal sands, avenues, parks; salt tolerant; likes full sun.
+MEDICINAL: Leaves used in folk remedies and aquarium leaf literature; tannins present.
+CULTURAL: Popular shade tree; seeds eaten as “badam” in some locales (distinct from Prunus almond).
+PESTS: Leaf beetles and sooty mold in humid cities.
+CARBON/CLIMATE: Broad leaves give strong shade cooling; substantial trunk biomass.
+BIODIVERSITY: Fruit/seed resources for birds and rodents; nesting shade canopy.
+
+================================================================================
+=== SPECIES: RAIN TREE | Samanea saman | Fabaceae ===
+Aliases: Rain tree, Monkey pod, Cow tamarind
+================================================================================
+[FAO] Samanea saman is a classic tropical shade tree used in pastures and roadsides; nitrogen-fixing Fabaceae benefits soils.
+[ICRAF] Silvopastoral and shade tree; wide crown supports livestock comfort and farm microclimate.
+[USDA] Samanea saman (Jacq.) Merr., Fabaceae. Wide umbrella canopy; bipinnate leaves; pods; tropical lowland species.
+[GBIF] Native Neotropics; extensively cultivated across tropical Asia including India.
+[India Biodiversity Portal] Common avenue/park tree in Indian cities; large canopy observations.
+[FSI] Important urban shade tree in TOF/urban canopy assessments.
+TAXONOMY: Samanea saman; Family Fabaceae.
+HABITAT: Tropical lowlands, avenues, parks, pastures; deep soils preferred.
+MEDICINAL: Traditional pod/leaf uses reported regionally; not a primary AYUSH drug tree.
+CULTURAL: Iconic city shade tree; “rain tree” name from leaflet folding/humidity lore.
+PESTS: Mistakenly associated with sooty mold from sap-sucking insects; branch breakage in storms.
+CARBON/CLIMATE: Exceptional shade cooling; large biomass carbon store.
+BIODIVERSITY: Pods feed livestock/wildlife; canopy nests for birds.
+
+================================================================================
+=== SPECIES: SILVER OAK | Grevillea robusta | Proteaceae ===
+Aliases: Silver oak, Silky oak
+================================================================================
+[FAO] Grevillea robusta is used in plantation and agroforestry as a fast-growing shade/timber companion tree.
+[ICRAF] Classic coffee/tea shade and farm forestry species; rapid growth and pruneable canopy.
+[USDA] Grevillea robusta A.Cunn. ex R.Br., Proteaceae. Feather-like leaves; orange toothbrush flowers; Australian native widely planted.
+[GBIF] Native eastern Australia; naturalized/cultivated in Africa, India, and Americas.
+[India Biodiversity Portal] Common in Indian hill plantations and avenues as Silver Oak.
+[FSI] Plantation/TOF species contributing fast biomass accretion in suitable climates.
+TAXONOMY: Grevillea robusta; Family Proteaceae.
+HABITAT: Subtropical highlands to warm temperate plantings; well-drained soils; intolerant of severe waterlogging.
+MEDICINAL: Not a major medicinal tree; ornamental/plantation focus.
+CULTURAL: Widely planted colonial/estate shade tree identity in India.
+PESTS: Stem cankers and borers under stress; root competition with crops if unpruned.
+CARBON/CLIMATE: Fast biomass = rapid carbon uptake; light shade for understorey crops.
+BIODIVERSITY: Nectar-rich flowers attract birds (sunbirds) and bees.
+
+================================================================================
+=== SPECIES: SUPARI | Areca catechu | Arecaceae ===
+Aliases: Betel nut palm, Areca nut, Supari
+================================================================================
+[FAO] Areca catechu is a major FAO-recognized plantation palm for arecanut (betel nut) economies in South/Southeast Asia.
+[ICRAF] Homestead and plantation palm often intercropped; high cultural-economic value.
+[USDA] Areca catechu L., Arecaceae. Slender solitary palm; pinnate fronds; orange-red seeds in fibrous husk.
+[GBIF] Cultivated across tropical Asia with dense South/SE Asia occurrence records.
+[India Biodiversity Portal] Extensively recorded in Kerala, Karnataka, Assam, and other arecanut belts as Supari/Adakka.
+[FSI] Plantation species relevant to tree cover outside natural forests in arecanut regions.
+TAXONOMY: Areca catechu; Family Arecaceae.
+HABITAT: Humid tropics, heavy rainfall belts, irrigated plantations; rich soils.
+MEDICINAL: Traditional stimulant nut use; public-health cautions apply for habitual chewing; tannins/alkaloids (arecoline) present.
+CULTURAL: Ritual and social uses across India; offered in ceremonies.
+PESTS: Fruit rot, spindle bug, and yellow leaf disease complexes in India.
+CARBON/CLIMATE: Vertical palm biomass; plantation-scale carbon and shade strips.
+BIODIVERSITY: Inflorescences attract insects; monoculture reduces understorey diversity unless intercropped.
+
+================================================================================
+=== SPECIES: AD | Ad | Unknown ===
+Aliases: Ad
+================================================================================
+[FAO] Limited standardized FAO dossier under the short local name “Ad”; treat as locally named farm/urban tree pending botanical confirmation.
+[ICRAF] If used in local agroforestry, document local multipurpose uses from community knowledge while confirming scientific identity.
+[USDA] No unique USDA plants match for bare name “Ad”; require synonym or regional scientific name for precise profiling.
+[GBIF] Search should use local scientific alias when available; otherwise mark taxonomy as unresolved.
+[India Biodiversity Portal] May refer to a regional vernacular; cross-check local flora lists.
+[FSI] Record as vernacular TOF entry until scientific name is verified.
+TAXONOMY: Common name Ad; scientific identity unresolved in catalog — confirm with local botanist.
+HABITAT: Depends on verified species; collect field notes on soil and moisture.
+MEDICINAL: Do not invent claims; collect community-reported uses carefully.
+CULTURAL: Capture local naming and ritual context if any.
+PESTS: Observe and record locally.
+CARBON/CLIMATE: Use measured GBH/height allometrics until species wood density is confirmed.
+BIODIVERSITY: Field observation required.
+
+================================================================================
+=== SPECIES: BEL | Aegle marmelos | Rutaceae ===
+Aliases: Bael, Bengal quince, Wood apple, Bel
+================================================================================
+[FAO] Aegle marmelos is recognized in underutilized fruit and medicinal tree discussions; valued for fruit pulp and rural nutrition.
+[ICRAF] Homestead fruit/medicinal tree; drought-tolerant once established; multipurpose farm tree.
+[USDA] Aegle marmelos (L.) Corrêa, Rutaceae. Deciduous to semi-evergreen; trifoliate leaves; hard-shelled fruit.
+[GBIF] Native South Asia occurrence records; cultivated temple/garden points.
+[India Biodiversity Portal] Sacred Bel/Bael tree widely recorded near temples and villages across India.
+[FSI] Cultural/TOF species supporting biodiversity and rural fruit resources.
+TAXONOMY: Aegle marmelos; Family Rutaceae.
+HABITAT: Dry to moist deciduous zones, plains, temple gardens; tolerates a range of soils if drainage is adequate.
+MEDICINAL: Fruit and leaves used in traditional digestive remedies; coumarins/alkaloids reported in phytochemistry literature.
+CULTURAL: Sacred to Lord Shiva; trifoliate leaves used in worship.
+PESTS: Fruit borer and fungal fruit rots in humid storage/field conditions.
+CARBON/CLIMATE: Medium stature carbon store; shade for homestead yards.
+BIODIVERSITY: Flowers support insects; fruit feeds wildlife when available.

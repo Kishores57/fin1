@@ -1,0 +1,68 @@
+MULTIPLE-SOURCE BOTANICAL KNOWLEDGE BASE: CLIMATE, SOIL & HABITAT PROFILE
+Sources: WorldClim Database, CHELSA Climate Model, NASA EarthData, Copernicus Climate Data, ISRIC SoilGrids, FAO Soil Database.
+
+=== SPECIES: AZADIRACHTA INDICA (NEEM) ===
+1. Habitat Information
+- Natural Habitat: Dry deciduous forests, thorny scrublands, and open savannah woodlands.
+- Forest Type: Tropical dry deciduous forest and thorn forest.
+- Ecosystem: Adapted to arid and semi-arid plains, riverbanks, and disturbed urban ecosystems.
+- Preferred Elevation: Thrives at elevations from sea level up to 700 meters, occasionally up to 1,500 meters in tropical zones.
+- Moisture Requirements: Drought-resistant; prefers moderate to low moisture. It does not tolerate waterlogging, prolonged flooding, or poorly drained soils.
+
+2. Climate Preference
+- Climate Zone: Tropical and subtropical dry zones (Köppen climate classification: Aw, BSh, Cwa).
+- Average Temperature: Annual mean temperature between 21°C and 32°C. Can tolerate extreme heat up to 48°C and mild winter temperatures down to 4°C.
+- Rainfall Range: Annual rainfall of 450mm to 1,200mm is optimal. It can survive in areas with as low as 150mm of rainfall, relying on deep taproots.
+- Humidity: Low to moderate relative humidity (30% to 65%).
+- Tolerances: High drought tolerance; high heat tolerance; extremely low tolerance to frost and waterlogged conditions.
+
+3. Soil Requirements
+- Soil Type: Grows on a wide variety of soils including sandy, stony, clayey, saline, and nutrient-poor soils.
+- Soil Texture: Prefers deep sandy loams for optimal root development, but tolerates gravelly and rocky soils.
+- Soil pH: Thrives in pH ranges from 6.0 to 8.5 (slightly acidic to highly alkaline).
+- Soil Organic Carbon: Can survive in soils with low organic carbon (<0.5%), though growth rate increases in organically rich soils.
+- Soil Drainage: Requires well-drained, sandy-aerated soils. Severe root rot occurs in heavy clays with poor drainage (verified by FAO Soil Database).
+
+=== SPECIES: SARACA ASOCA (ASHOKA) ===
+1. Habitat Information
+- Natural Habitat: Shady understory of tropical rain forests, riverine forests, and coastal green belts.
+- Forest Type: Tropical wet evergreen and semi-evergreen forests.
+- Ecosystem: Riparian zones along rivers, humid forest valleys, and shady ravines.
+- Preferred Elevation: Found at elevations from 50 meters up to 750 meters.
+- Moisture Requirements: Requires high soil moisture and atmospheric humidity year-round. It is sensitive to seasonal soil drying.
+
+2. Climate Preference
+- Climate Zone: Humid tropical zone (Köppen climate classification: Af, Am, monsoon zones).
+- Average Temperature: Annual mean temperature of 24°C to 30°C. Cold-sensitive; temperatures below 10°C cause leaf damage.
+- Rainfall Range: Optimal annual rainfall of 2,000mm to 4,500mm. Requires a short or absent dry season.
+- Humidity: High relative humidity (70% to 90% year-round).
+- Tolerances: Low drought tolerance; low frost tolerance; moderate heat tolerance; moderate flood tolerance, especially in riparian buffer zones.
+
+3. Soil Requirements
+- Soil Type: Prefers deep alluvial, loamy, and clay-loam soils rich in organic matter.
+- Soil Texture: Silty clay loams and alluvial sandy clay loams.
+- Soil pH: Prefers slightly acidic to neutral soils in the pH range of 5.5 to 7.0.
+- Soil Organic Carbon: High organic carbon content (>1.5% in topsoil) is necessary for healthy wild growth.
+- Soil Drainage: Moderate drainage; requires soils that retain moisture but do not experience stagnant, oxygen-deprived waterlogging for long periods.
+
+=== SPECIES: HEVEA BRASILIENSIS (RUBBER TREE) ===
+1. Habitat Information
+- Natural Habitat: Lowland tropical rainforests, floodplains, and non-flooded upland terraces.
+- Forest Type: Tropical evergreen rainforest and agroforestry systems.
+- Ecosystem: Amazonian river basins, humid equatorial ecosystems, and commercial tropical plantations.
+- Preferred Elevation: Sea level up to 200 meters, occasionally up to 600 meters in equatorial regions.
+- Moisture Requirements: Demands continuous high soil moisture. Extremely high transpirational demand requires stable hydrological systems.
+
+2. Climate Preference
+- Climate Zone: Equatorial hot-humid zone (Köppen climate classification: Af, tropical wet zone).
+- Average Temperature: Annual mean temperature of 25°C to 28°C. Requires stable temperatures with minimal seasonal variation.
+- Rainfall Range: Annual rainfall of 1,800mm to 3,000mm, evenly distributed throughout the year with no more than 2-3 dry months.
+- Humidity: Extremely high humidity (>80% relative humidity).
+- Tolerances: Low drought tolerance; zero frost tolerance (temperatures below 5°C are fatal); high heat tolerance up to 36°C; moderate wind tolerance (highly susceptible to trunk snap during storms).
+
+3. Soil Requirements
+- Soil Type: Acidic latosols (oxisols), deep weathered red clay soils, and alluvial forest soils.
+- Soil Texture: Deep clayey or clay-loamy soils.
+- Soil pH: Acidic soil preference, thriving in pH ranges from 4.5 to 5.5 (verified by ISRIC SoilGrids).
+- Soil Organic Carbon: Moderate to high organic carbon (1.0% to 2.0%) required in the topsoil.
+- Soil Drainage: Well-drained to moderately drained soils. Needs high water-holding capacity but suffers from root damage in persistently waterlogged soils.

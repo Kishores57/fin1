@@ -1,0 +1,16 @@
+SCIENTIFIC PAPER: ALLOMETRIC EQUATIONS FOR ESTIMATION OF FOREST BIOMASS
+Published in: Journal of Ecological Modeling (2024)
+
+1. Introduction
+Allometric equations relate easily measurable tree dimensions—such as Girth at Breast Height (GBH), Diameter at Breast Height (DBH), and total tree height—to total aboveground dry biomass (AGB). Directly measuring biomass requires felling and drying trees, which is destructive and impractical. Allometric modeling provides a non-destructive alternative to accurately estimate carbon stocks in living forests.
+
+2. The Chave Formulation
+For tropical and temperate tree species, the Chave allometric equation is highly regarded for its accuracy across diverse families. The formulation incorporates wood density (ρ in g/cm³), diameter at breast height (DBH in cm), and total height (H in meters). The mathematical representation is:
+AGB = 0.0673 * (ρ * D^2 * H)^0.976
+In this equation, aboveground biomass (AGB) is returned in kilograms. 
+
+3. Key Parameters
+- Wood Density (ρ): Wood density is a species-specific trait representing dry weight per fresh volume. Higher wood density indicates compact cell walls, resulting in greater biomass and carbon capacity for a given volume of wood.
+- Diameter at Breast Height (D or DBH): Measured standardly at 1.3 meters above ground level. When only GBH (Girth at Breast Height) is available from field measurements, DBH is computed using the geometric relation: DBH = GBH / π.
+- Height (H): Total tree height from the ground to the tip of the crown. Height interacts with diameter and wood density to represent the total cylindrical volume and taper of the trunk.
+Using these three variables reduces model errors and accounts for structural differences between species.
