@@ -1,5 +1,11 @@
 import express from 'express';
 import { settings } from '../config.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
@@ -9,7 +15,25 @@ let tokenExpiresAt = 0;
 
 let treesCache = null;
 let treesCacheTime = 0;
-const CACHE_DURATION_MS = 2 * 60 * 1000; // 2 minutes in-memory cache to handle zoom/refresh rate limits
+const CACHE_DURATION_MS = 2 * 60 * 1000;
+
+function getFallbackTrees() {
+  const possiblePaths = [
+    path.resolve(__dirname, '../data/parsed_trees.json'),
+    path.resolve(__dirname, '../../VanJeevan-main/parsed_trees.json'),
+  ];
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      try {
+        return JSON.parse(fs.readFileSync(p, 'utf-8'));
+      } catch (e) {
+        console.warn('Error reading fallback trees:', e.message);
+      }
+    }
+  }
+  return [];
+}
+ // 2 minutes in-memory cache to handle zoom/refresh rate limits
 
 // Species parameters based on backend analysis
 const MAI_VALUES = {
@@ -126,6 +150,14 @@ router.get('/trees', async (req, res) => {
     if (treesCache && (now - treesCacheTime < CACHE_DURATION_MS)) {
       console.log('Serving trees from memory cache.');
       return res.json(treesCache);
+    }
+
+    if (!settings.EPICOLLECT_CLIENT_ID || !settings.EPICOLLECT_CLIENT_SECRET) {
+      console.log('Epicollect credentials not set in .env — serving 291 trees from local dataset.');
+      const fallback = getFallbackTrees();
+      treesCache = fallback;
+      treesCacheTime = now;
+      return res.json(fallback);
     }
 
     const token = await getAccessToken();
