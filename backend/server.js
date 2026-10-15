@@ -11,6 +11,9 @@ import calculationRouter from './routes/calculation.js';
 import epicollectRouter from './routes/epicollect.js';
 import registeredTreesRouter, { uploadsRoot } from './routes/registeredTrees.js';
 import detectionRouter from './routes/detection.js';
+import mapAnalysisRouter from './routes/mapAnalysis.js';
+import authRouter from './routes/auth.js';
+import treeCuttingRouter from './routes/treeCutting.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,7 +25,7 @@ const app = express();
 const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*';
 app.use(cors({
   origin: allowedOrigins,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
@@ -31,9 +34,12 @@ app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 
 // Mount API routes
+app.use('/api/auth', authRouter);
+app.use('/api/tree-cutting', treeCuttingRouter);
 app.use('/api', calculationRouter);
 app.use('/api/epicollect', epicollectRouter);
 app.use('/api/detection', detectionRouter);
+app.use('/api/map-analysis', mapAnalysisRouter);
 
 // Additive MongoDB tree-registration module (does not replace SQLite calculator)
 app.use('/api/registered-trees/uploads', express.static(uploadsRoot));

@@ -10,6 +10,7 @@ import { RegisteredTree } from '../models/RegisteredTree.js';
 import { computeEnvironmentalParameters } from '../services/extendedCalculator.js';
 import { buildRegistrationAnalysis } from '../rag/registrationAnalysis.js';
 import { resolveSpeciesMeta } from '../rag/speciesCatalog.js';
+import { verifyToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -301,7 +302,7 @@ router.post('/:id/regenerate-analysis', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, requireRole(['admin']), async (req, res) => {
   try {
     if (!(await requireMongo(res))) return;
     const tree =

@@ -1,4 +1,5 @@
 import db from './connection.js';
+import bcrypt from 'bcryptjs';
 
 /** Species shown in the calculator dropdown (MAI cm/yr, wood density g/cm³). */
 const CALCULATOR_SPECIES = [
@@ -53,7 +54,51 @@ export async function initDb() {
       )
     `);
 
+    // Create users table for role-based authentication
+    await db.run(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        email TEXT UNIQUE NOT NULL COLLATE NOCASE,
+        password TEXT NOT NULL,
+        role TEXT NOT NULL DEFAULT 'user',
+        organization TEXT,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        last_login DATETIME
+      )
+    `);
+
     console.log('Database tables verified/created successfully.');
+
+    // Seed default admin and researcher accounts if they do not exist
+    const defaultAccounts = [
+      {
+        name: 'Dr. Ramesh Kulkarni (Administrator)',
+        email: 'admin@vanjeevan.org',
+        password: 'admin123',
+        role: 'admin',
+        organization: 'VanJeevan Forestry Board & Tree Authority',
+      },
+      {
+        name: 'Pooja Sharma (Field Researcher)',
+        email: 'user@vanjeevan.org',
+        password: 'user123',
+        role: 'user',
+        organization: 'KKWIEER Campus Ecological Survey',
+      },
+    ];
+
+    for (const acc of defaultAccounts) {
+      const existing = await db.get('SELECT id FROM users WHERE email = ? COLLATE NOCASE', [acc.email]);
+      if (!existing) {
+        const hashedPassword = await bcrypt.hash(acc.password, 10);
+        await db.run(
+          'INSERT INTO users (name, email, password, role, organization) VALUES (?, ?, ?, ?, ?)',
+          [acc.name, acc.email, hashedPassword, acc.role, acc.organization]
+        );
+        console.log(`Seeded default ${acc.role} account: ${acc.email}`);
+      }
+    }
 
     // Upsert calculator species so the dropdown always has the full list
     let inserted = 0;

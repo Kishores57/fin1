@@ -261,11 +261,6 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const mapRef = useRef(null);
-  const mapInstance = useRef(null);
-  const markerRef = useRef(null);
-  const registeredLayer = useRef(null);
-
   const gpsValid = hasValidGps(form.latitude, form.longitude);
   const canCalculate = Boolean(form.species && Number(form.gbh) > 0 && Number(form.height) > 0);
   const canAddTree = Boolean(canCalculate && analysisPreview && gpsValid);
@@ -413,129 +408,6 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
     void sp;
   }, [form.species]);
 
-  const placeMarker = useCallback((lat, lng) => {
-    // eslint-disable-next-line no-undef
-    const L = window.L;
-    if (!mapInstance.current || !L) return;
-    if (markerRef.current) {
-      markerRef.current.setLatLng([lat, lng]);
-    } else {
-      markerRef.current = L.marker([lat, lng], { draggable: true }).addTo(mapInstance.current);
-      markerRef.current.on('dragend', () => {
-        const p = markerRef.current.getLatLng();
-        setForm((f) => ({ ...f, latitude: String(p.lat.toFixed(6)), longitude: String(p.lng.toFixed(6)) }));
-        setGpsHint('');
-      });
-    }
-    mapInstance.current.setView([lat, lng], Math.max(mapInstance.current.getZoom(), 16));
-  }, []);
-
-  const renderRegisteredMarkers = useCallback(() => {
-    // eslint-disable-next-line no-undef
-    const L = window.L;
-    if (!mapInstance.current || !L) return;
-    if (registeredLayer.current) {
-      registeredLayer.current.clearLayers();
-    } else {
-      registeredLayer.current = L.layerGroup().addTo(mapInstance.current);
-    }
-
-    trees.forEach((tree) => {
-      if (!hasValidGps(tree.latitude, tree.longitude)) return;
-      const m = L.marker([tree.latitude, tree.longitude], {
-        icon: L.divIcon({
-          className: '',
-          html: `<div style="width:14px;height:14px;border-radius:50%;background:#10b981;border:2px solid #ecfdf5;box-shadow:0 0 0 3px rgba(16,185,129,.35)"></div>`,
-          iconSize: [14, 14],
-          iconAnchor: [7, 7],
-        }),
-      });
-      const dateAdded = tree.createdAt ? new Date(tree.createdAt).toLocaleDateString() : '—';
-      m.bindPopup(`
-        <div style="min-width:200px;font-family:system-ui;font-size:12px">
-          <strong>${tree.treeName || tree.species}</strong><br/>
-          Species: ${tree.species}<br/>
-          Scientific: ${tree.scientificName || '—'}<br/>
-          Age: ${tree.age ?? '—'} yr<br/>
-          Height: ${tree.height ?? '—'} m<br/>
-          DBH: ${tree.dbh ?? '—'} cm<br/>
-          Lat: ${tree.latitude}<br/>
-          Lng: ${tree.longitude}<br/>
-          Health: ${tree.healthStatus || '—'}<br/>
-          Date Added: ${dateAdded}<br/>
-          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-            <button data-act="details" data-id="${tree._id}" style="padding:4px 8px;border-radius:6px;border:0;background:#0f766e;color:#fff;cursor:pointer">View Details</button>
-            <button data-act="analysis" data-id="${tree._id}" style="padding:4px 8px;border-radius:6px;border:0;background:#4f46e5;color:#fff;cursor:pointer">Analysis</button>
-            <button data-act="delete" data-id="${tree._id}" style="padding:4px 8px;border-radius:6px;border:0;background:#b91c1c;color:#fff;cursor:pointer">Delete</button>
-          </div>
-        </div>
-      `);
-      m.on('popupopen', () => {
-        const el = m.getPopup().getElement();
-        if (!el) return;
-        el.querySelectorAll('button[data-act]').forEach((btn) => {
-          btn.onclick = async () => {
-            const id = btn.getAttribute('data-id');
-            const act = btn.getAttribute('data-act');
-            const found = trees.find((t) => String(t._id) === String(id));
-            if (!found) return;
-            if (act === 'delete') {
-              if (!window.confirm('Are you sure you want to delete this tree?')) return;
-              try {
-                await registeredTreeApi.remove(id);
-                setTrees((prev) => prev.filter((t) => String(t._id) !== String(id)));
-                m.closePopup();
-              } catch (e) {
-                alert(e.response?.data?.detail || e.message);
-              }
-              return;
-            }
-            setFocusAnalysis(act === 'analysis');
-            setDetailsTree(found);
-          };
-        });
-      });
-      m.addTo(registeredLayer.current);
-    });
-  }, [trees]);
-
-  useEffect(() => {
-    // eslint-disable-next-line no-undef
-    const L = window.L;
-    if (!mapRef.current || !L || mapInstance.current) return;
-
-    mapInstance.current = L.map(mapRef.current, {
-      center: [20.0131, 73.8213],
-      zoom: 14,
-      scrollWheelZoom: true,
-    });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      maxZoom: 20,
-    }).addTo(mapInstance.current);
-
-    mapInstance.current.on('click', (e) => {
-      const { lat, lng } = e.latlng;
-      setForm((f) => ({
-        ...f,
-        latitude: String(lat.toFixed(6)),
-        longitude: String(lng.toFixed(6)),
-      }));
-      setGpsHint('');
-      placeMarker(lat, lng);
-    });
-
-    setTimeout(() => mapInstance.current?.invalidateSize(), 200);
-  }, [placeMarker]);
-
-  useEffect(() => {
-    renderRegisteredMarkers();
-  }, [renderRegisteredMarkers]);
-
-  useEffect(() => {
-    if (gpsValid) placeMarker(Number(form.latitude), Number(form.longitude));
-  }, [form.latitude, form.longitude, gpsValid, placeMarker]);
-
   const handleDeviceGps = () => {
     if (!navigator.geolocation) {
       setGpsHint('Geolocation is not supported on this device.');
@@ -547,9 +419,8 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
         const lng = pos.coords.longitude.toFixed(6);
         setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
         setGpsHint('');
-        placeMarker(Number(lat), Number(lng));
       },
-      () => setGpsHint('Unable to read device location. Click the map or enter coordinates.'),
+      () => setGpsHint('Unable to read device location. Please manually enter coordinates.'),
       { enableHighAccuracy: true, timeout: 12000 }
     );
   };
@@ -653,7 +524,6 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
         ward: '',
         zone: '',
       }));
-      placeMarker(saved.latitude, saved.longitude);
     } catch (e) {
       onError?.(e.response?.data?.detail || e.message);
     } finally {
@@ -681,51 +551,244 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
   return (
     <div className="space-y-6">
       {successMsg && (
-        <div className="glass-panel border-emerald-500/30 bg-emerald-950/20 p-4 flex items-center gap-3 text-emerald-300 text-sm">
-          <CheckCircle2 className="w-5 h-5 shrink-0" />
+        <div className="p-4 rounded-2xl bg-[#d8f3dc] border border-[rgba(45,106,79,0.25)] flex items-center gap-3 text-[#142e1f] text-sm font-semibold">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-[#2d6a4f]" />
           <span>{successMsg}</span>
         </div>
       )}
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <div className="glass-panel p-6 border-slate-800/50 space-y-5">
-          <div className="border-b border-slate-800/80 pb-3">
-            <h2 className="text-lg font-bold text-slate-200 flex items-center gap-2">
-              <TreePine className="w-5 h-5 text-emerald-400" />
-              Tree Registration Form
-            </h2>
-            <p className="text-xs text-slate-500 mt-1">GPS is mandatory. Calculate first, then Add Tree to MongoDB.</p>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* ═══════════════════════════════════════════════════════════════════
+            LEFT COLUMN: Botanical Identification, Biometrics & Visual Evidence
+            ═══════════════════════════════════════════════════════════════════ */}
+        <div className="lg:col-span-6 space-y-6">
+          {/* Card 1: Botanical Identification & Biometrics */}
+          <div className="nature-card p-6 md:p-7 space-y-5 bg-white border-2 border-slate-200 shadow-sm rounded-2xl">
+            <div className="border-b border-slate-200 pb-3.5 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold font-['Fraunces'] text-[#022c17] flex items-center gap-2">
+                  <TreePine className="w-5 h-5 text-[#059669]" />
+                  Tree Identification &amp; Biometrics
+                </h2>
+                <p className="text-xs text-slate-600 mt-0.5 font-medium">Record botanical taxonomy and allometric measurements</p>
+              </div>
+              <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-[#022c17] border border-emerald-300 shadow-xs">
+                {form.treeId}
+              </span>
+            </div>
+
+            <div className="space-y-4">
+              <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                <span>Tree Identification / Nickname</span>
+                <input
+                  className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                  value={form.treeName}
+                  onChange={(e) => setField('treeName', e.target.value)}
+                  placeholder="e.g. Heritage Banyan North Gate"
+                />
+              </label>
+
+              <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                <span>Botanical Species *</span>
+                <select
+                  className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] transition-all outline-none shadow-xs cursor-pointer"
+                  value={form.species}
+                  onChange={(e) => setField('species', e.target.value)}
+                >
+                  <option value="" className="text-slate-500">Select botanical species</option>
+                  {speciesList.map((s) => (
+                    <option key={s.id} value={s.name} className="text-[#022c17] font-semibold">{s.name}</option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                  <span>Common Name</span>
+                  <input
+                    className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-3.5 py-3 text-sm font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                    value={form.commonName}
+                    onChange={(e) => setField('commonName', e.target.value)}
+                    placeholder="e.g. Indian Banyan"
+                  />
+                </label>
+                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                  <span>Scientific Name</span>
+                  <input
+                    className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-3.5 py-3 text-sm font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs italic"
+                    value={form.scientificName}
+                    onChange={(e) => setField('scientificName', e.target.value)}
+                    placeholder="e.g. Ficus benghalensis"
+                  />
+                </label>
+                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                  <span>Botanical Family</span>
+                  <input
+                    className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-3.5 py-3 text-sm font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                    value={form.family}
+                    onChange={(e) => setField('family', e.target.value)}
+                    placeholder="e.g. Moraceae"
+                  />
+                </label>
+              </div>
+
+              <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                <span>Health &amp; Vitality Status</span>
+                <select
+                  className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] transition-all outline-none shadow-xs cursor-pointer"
+                  value={form.healthStatus}
+                  onChange={(e) => setField('healthStatus', e.target.value)}
+                >
+                  {HEALTH_OPTIONS.map((h) => <option key={h} value={h} className="text-[#022c17] font-semibold">{h}</option>)}
+                </select>
+              </label>
+
+              {/* Allometric Dimensions Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
+                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                  <span>GBH Girth (cm) *</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                    value={form.gbh}
+                    onChange={(e) => setField('gbh', e.target.value)}
+                    placeholder="e.g. 110"
+                  />
+                </label>
+                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                  <span>Height (m) *</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                    value={form.height}
+                    onChange={(e) => setField('height', e.target.value)}
+                    placeholder="e.g. 14.5"
+                  />
+                </label>
+                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                  <span>DBH (auto-computed)</span>
+                  <input
+                    className="w-full rounded-2xl bg-slate-100 border-2 border-slate-300 px-4 py-3 text-[15px] font-bold text-slate-800 outline-none shadow-xs cursor-not-allowed"
+                    value={form.dbh ? `${form.dbh} cm` : '—'}
+                    readOnly
+                  />
+                </label>
+                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                  <span>Estimated Age (yr)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                    value={form.age}
+                    onChange={(e) => setField('age', e.target.value)}
+                    placeholder="e.g. 35"
+                  />
+                </label>
+                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide sm:col-span-2">
+                  <span>Crown Diameter (m)</span>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                    value={form.crownDiameter}
+                    onChange={(e) => setField('crownDiameter', e.target.value)}
+                    placeholder="e.g. 8.2"
+                  />
+                </label>
+              </div>
+            </div>
           </div>
 
-          {/* ===== SPECIES DETECTION SECTION ===== */}
-          <div className="rounded-xl border border-purple-500/25 bg-purple-500/5 p-4 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-bold text-purple-300 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                AI Species Detection
-                {detectionServerUp === true && (
-                  <span className="ml-1 inline-flex items-center gap-1 text-[10px] font-medium text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Online
-                  </span>
-                )}
-                {detectionServerUp === false && (
-                  <span className="ml-1 inline-flex items-center gap-1 text-[10px] font-medium text-red-400 bg-red-500/10 px-2 py-0.5 rounded-full">
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-400" /> Offline
-                  </span>
-                )}
-              </h3>
+          {/* Card 2: Field Visual Evidence & Photos */}
+          <div className="nature-card p-6 md:p-7 space-y-4 bg-white border-2 border-slate-200 shadow-sm rounded-2xl">
+            <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold font-['Fraunces'] text-[#022c17] flex items-center gap-2">
+                  <Camera className="w-5 h-5 text-[#059669]" />
+                  Field Photography &amp; Visual Evidence
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5 font-medium">Upload field images for verified botanical documentation</p>
+              </div>
+              <span className="text-xs font-bold text-slate-500">Optional</span>
             </div>
-            <p className="text-[11px] text-slate-500">Upload a tree photo or use your camera — AI will detect the species automatically.</p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+              {[
+                { label: 'Tree Habit / Full View', file: treeImage, setter: setTreeImage },
+                { label: 'Bark Texture & Trunk', file: barkImage, setter: setBarkImage },
+                { label: 'Leaf & Foliage', file: leafImage, setter: setLeafImage },
+              ].map(({ label, file, setter }) => (
+                <div key={label} className="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-200 hover:border-emerald-500 transition-all space-y-2">
+                  <div className="text-xs font-extrabold text-[#022c17] truncate">{label}</div>
+                  {file ? (
+                    <div className="space-y-2">
+                      <div className="relative rounded-xl overflow-hidden h-28 border border-emerald-300">
+                        <img src={URL.createObjectURL(file)} alt={label} className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setter(null)}
+                          className="absolute top-1.5 right-1.5 p-1 rounded-lg bg-black/70 text-white hover:bg-red-600 transition-colors"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <div className="text-[11px] font-semibold text-emerald-800 truncate">{file.name}</div>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center h-28 rounded-xl border-2 border-dashed border-slate-300 hover:border-emerald-500 bg-white hover:bg-emerald-50/40 cursor-pointer transition-all p-2 text-center">
+                      <Upload className="w-5 h-5 text-[#059669] mb-1" />
+                      <span className="text-xs font-bold text-slate-700">Choose File</span>
+                      <span className="text-[10px] text-slate-500">PNG, JPG, WEBP</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={(e) => setter(e.target.files?.[0] || null)} />
+                    </label>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            RIGHT COLUMN: AI Species Detection, Geospatial Geolocation & Actions
+            ═══════════════════════════════════════════════════════════════════ */}
+        <div className="lg:col-span-6 space-y-6">
+          {/* Card 3: AI Species Detection Scanner */}
+          <div className="nature-card p-6 md:p-7 space-y-4 bg-white border-2 border-slate-200 shadow-sm rounded-2xl">
+            <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold font-['Fraunces'] text-[#022c17] flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-600" />
+                  AI Computer Vision Species Detection
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5 font-medium">Automatic species recognition powered by deep neural networks</p>
+              </div>
+              {detectionServerUp === true && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-full shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> AI Online
+                </span>
+              )}
+              {detectionServerUp === false && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-800 bg-red-100 border border-red-300 px-3 py-1 rounded-full shadow-xs">
+                  <span className="w-2 h-2 rounded-full bg-red-500" /> AI Offline
+                </span>
+              )}
+            </div>
 
             {/* Camera view */}
             {cameraOpen && (
-              <div className="relative rounded-xl overflow-hidden border border-purple-500/30">
+              <div className="relative rounded-2xl overflow-hidden border-2 border-purple-500 shadow-md">
                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-56 object-cover bg-black" />
                 <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-3">
-                  <button type="button" onClick={capturePhoto} className="px-4 py-2 rounded-xl text-sm font-bold bg-purple-600 text-white flex items-center gap-2 shadow-lg shadow-purple-500/30 hover:bg-purple-500 transition-colors">
-                    <Camera className="w-4 h-4" /> Capture
+                  <button type="button" onClick={capturePhoto} className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-700 text-white flex items-center gap-2 shadow-lg hover:bg-purple-600 transition-colors">
+                    <Camera className="w-4 h-4" /> Capture Photo
                   </button>
-                  <button type="button" onClick={closeCamera} className="px-4 py-2 rounded-xl text-sm font-bold bg-slate-800 text-slate-300 flex items-center gap-2 hover:bg-slate-700 transition-colors">
+                  <button type="button" onClick={closeCamera} className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-white flex items-center gap-2 hover:bg-slate-700 transition-colors">
                     <X className="w-4 h-4" /> Cancel
                   </button>
                 </div>
@@ -735,281 +798,249 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
 
             {/* Preview image */}
             {detectionPreview && !cameraOpen && (
-              <div className="relative rounded-xl overflow-hidden border border-slate-800/50">
-                <img src={detectionPreview} alt="Detection preview" className="w-full h-48 object-cover" />
+              <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs">
+                <img src={detectionPreview} alt="Detection preview" className="w-full h-44 object-cover" />
                 <button
                   type="button"
                   onClick={() => { setDetectionImage(null); setDetectionPreview(null); setDetectionResult(null); }}
-                  className="absolute top-2 right-2 p-1.5 rounded-lg bg-slate-900/80 text-slate-400 hover:text-white transition-colors"
+                  className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/70 text-white hover:bg-red-600 transition-colors"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4" />
                 </button>
               </div>
             )}
 
-            {/* Buttons */}
+            {/* Camera / Upload Action Bar */}
             {!cameraOpen && (
-              <div className="flex flex-wrap gap-2">
-                <button type="button" onClick={openCamera} className="px-3 py-2 rounded-xl text-xs font-bold bg-purple-500/15 text-purple-300 border border-purple-500/25 flex items-center gap-1.5 hover:bg-purple-500/25 transition-colors">
-                  <Camera className="w-3.5 h-3.5" /> Open Camera
+              <div className="flex flex-wrap gap-2.5">
+                <button
+                  type="button"
+                  onClick={openCamera}
+                  className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-900 border-2 border-purple-200 hover:bg-purple-100 flex items-center gap-2 transition-all shadow-xs"
+                >
+                  <Camera className="w-4 h-4 text-purple-700" /> Open Camera
                 </button>
-                <label className="px-3 py-2 rounded-xl text-xs font-bold bg-slate-800/60 text-slate-300 border border-slate-700/50 flex items-center gap-1.5 cursor-pointer hover:bg-slate-700/60 transition-colors">
-                  <Upload className="w-3.5 h-3.5" /> Upload Image
+                <label className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-800 border-2 border-slate-200 hover:bg-slate-200 flex items-center gap-2 cursor-pointer transition-all shadow-xs">
+                  <Upload className="w-4 h-4 text-slate-700" /> Upload Photo
                   <input type="file" accept="image/*" className="hidden" onChange={handleDetectionImageUpload} />
                 </label>
                 <button
                   type="button"
                   disabled={!detectionImage || detecting}
                   onClick={handleDetectSpecies}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-600 to-indigo-600 text-white flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 transition-all"
+                  className="px-5 py-2.5 rounded-xl text-xs font-black bg-[#047857] hover:bg-[#065f46] text-white flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all ml-auto"
                 >
-                  {detecting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ScanLine className="w-3.5 h-3.5" />}
-                  {detecting ? 'Detecting...' : 'Detect Species'}
+                  {detecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ScanLine className="w-4 h-4" />}
+                  {detecting ? 'Analyzing Image...' : 'Detect Species with AI'}
                 </button>
               </div>
             )}
 
-            {/* Detection Results */}
+            {/* Detection Results Card */}
             {detectionResult && (
-              <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/5 p-3 space-y-2 animate-in">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-bold text-emerald-300">
-                    {detectionResult.display_name}
-                  </span>
-                  <span className="text-xs text-emerald-400/70 italic">{detectionResult.scientific_name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] text-slate-500 w-16">Confidence</span>
-                  <div className="flex-1 h-2.5 rounded-full bg-slate-800 overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-1000 ease-out"
-                      style={{
-                        width: `${detectionResult.confidence}%`,
-                        background: detectionResult.confidence > 70
-                          ? 'linear-gradient(90deg, #10b981, #34d399)'
-                          : detectionResult.confidence > 40
-                          ? 'linear-gradient(90deg, #f59e0b, #fbbf24)'
-                          : 'linear-gradient(90deg, #ef4444, #f87171)',
-                      }}
-                    />
-                  </div>
-                  <span className="text-xs font-bold text-slate-300 w-14 text-right">{detectionResult.confidence}%</span>
-                </div>
-                {detectionResult.all_predictions && (
-                  <details className="mt-1">
-                    <summary className="text-[10px] text-slate-500 cursor-pointer hover:text-slate-400">All predictions</summary>
-                    <div className="mt-1 space-y-1">
-                      {detectionResult.all_predictions.map((p) => (
-                        <div key={p.class} className="flex items-center gap-2">
-                          <span className="text-[10px] text-slate-400 w-20 truncate">{p.display_name}</span>
-                          <div className="flex-1 h-1.5 rounded-full bg-slate-800/60 overflow-hidden">
-                            <div className="h-full rounded-full bg-purple-500/60 transition-all duration-700" style={{ width: `${p.confidence}%` }} />
-                          </div>
-                          <span className="text-[10px] text-slate-500 w-12 text-right">{p.confidence}%</span>
-                        </div>
-                      ))}
+              <div className="p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50/80 space-y-2.5 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-[#059669]" />
+                    <div>
+                      <span className="text-sm font-black text-[#022c17]">
+                        {detectionResult.display_name}
+                      </span>
+                      <span className="text-xs text-slate-600 italic ml-2">
+                        ({detectionResult.scientific_name})
+                      </span>
                     </div>
-                  </details>
-                )}
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-200 text-[#022c17]">
+                    Confidence: {detectionResult.confidence}%
+                  </span>
+                </div>
+                <p className="text-xs text-slate-700 font-medium">
+                  Identified species has been automatically synchronized to the botanical biometrics form.
+                </p>
               </div>
             )}
           </div>
-          {/* ===== END SPECIES DETECTION ===== */}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>Tree ID (auto)</span>
-              <input className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-300" value={form.treeId} readOnly />
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>Tree Name</span>
-              <input className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.treeName} onChange={(e) => setField('treeName', e.target.value)} />
-            </label>
-            <label className="text-xs text-slate-400 space-y-1 md:col-span-2">
-              <span>Species *</span>
-              <select
-                className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200"
-                value={form.species}
-                onChange={(e) => setField('species', e.target.value)}
+          {/* Card 4: Mandatory Geospatial Location & Administrative Ward */}
+          <div className="nature-card p-6 md:p-7 space-y-5 bg-white border-2 border-slate-200 shadow-sm rounded-2xl">
+            <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold font-['Fraunces'] text-[#022c17] flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-[#059669]" />
+                  Geospatial Location &amp; Administration
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5 font-medium">Mandatory WGS-84 coordinates &amp; administrative sector</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleDeviceGps}
+                className="px-4 py-2 rounded-xl bg-[#047857] hover:bg-[#065f46] text-white flex items-center gap-2 text-xs font-bold shadow-md transition-all"
               >
-                <option value="">Select species</option>
-                {speciesList.map((s) => (
-                  <option key={s.id} value={s.name}>{s.name}</option>
-                ))}
-              </select>
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>Scientific Name</span>
-              <input className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.scientificName} onChange={(e) => setField('scientificName', e.target.value)} />
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>Family</span>
-              <input className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.family} onChange={(e) => setField('family', e.target.value)} />
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>Common Name</span>
-              <input className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.commonName} onChange={(e) => setField('commonName', e.target.value)} />
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>Health Status</span>
-              <select className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.healthStatus} onChange={(e) => setField('healthStatus', e.target.value)}>
-                {HEALTH_OPTIONS.map((h) => <option key={h} value={h}>{h}</option>)}
-              </select>
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>GBH (cm) *</span>
-              <input type="number" min="0" step="0.1" className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.gbh} onChange={(e) => setField('gbh', e.target.value)} />
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>Height (m) *</span>
-              <input type="number" min="0" step="0.1" className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.height} onChange={(e) => setField('height', e.target.value)} />
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>DBH (auto after calc)</span>
-              <input className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-400" value={form.dbh} readOnly />
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>Age (optional override)</span>
-              <input type="number" min="0" step="0.1" className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.age} onChange={(e) => setField('age', e.target.value)} />
-            </label>
-            <label className="text-xs text-slate-400 space-y-1">
-              <span>Crown Diameter (m)</span>
-              <input type="number" min="0" step="0.1" className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.crownDiameter} onChange={(e) => setField('crownDiameter', e.target.value)} />
-            </label>
-          </div>
-
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4 space-y-3">
-            <div className="flex items-center justify-between gap-2">
-              <h3 className="text-sm font-bold text-amber-300 flex items-center gap-2">
-                <MapPin className="w-4 h-4" /> Location (Mandatory GPS)
-              </h3>
-              <button type="button" onClick={handleDeviceGps} className="text-xs px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-200 border border-amber-500/30 flex items-center gap-1">
-                <Crosshair className="w-3.5 h-3.5" /> Current location
+                <Crosshair className="w-4 h-4 text-emerald-200" /> Capture Device GPS
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <label className="text-xs text-slate-400 space-y-1">
+
+            {/* GPS Verification Status Banner */}
+            <div className={`p-3.5 rounded-2xl border-2 flex items-center justify-between gap-3 text-xs font-bold ${
+              gpsValid
+                ? 'bg-emerald-50 border-emerald-300 text-[#022c17]'
+                : 'bg-amber-50 border-amber-300 text-amber-950'
+            }`}>
+              <div className="flex items-center gap-2">
+                {gpsValid ? <CheckCircle2 className="w-4 h-4 text-[#059669] shrink-0" /> : <MapPin className="w-4 h-4 text-amber-600 shrink-0" />}
+                <span>
+                  {gpsValid
+                    ? `GPS Verified: [${Number(form.latitude).toFixed(6)}, ${Number(form.longitude).toFixed(6)}]`
+                    : 'GPS coordinates required before registering tree record.'}
+                </span>
+              </div>
+              {gpsValid && (
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-200 text-[#022c17] text-[11px] font-black">
+                  Locked
+                </span>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-3.5">
+              <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
                 <span>Latitude *</span>
                 <input
-                  className={`w-full rounded-xl bg-slate-950/60 border px-3 py-2 text-slate-200 ${gpsValid ? 'border-slate-800' : 'border-red-500/50'}`}
+                  className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold font-mono text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
                   value={form.latitude}
                   onChange={(e) => { setField('latitude', e.target.value); setGpsHint(''); }}
-                  placeholder="Click map or enter"
+                  placeholder="e.g. 20.013500"
                 />
               </label>
-              <label className="text-xs text-slate-400 space-y-1">
+              <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
                 <span>Longitude *</span>
                 <input
-                  className={`w-full rounded-xl bg-slate-950/60 border px-3 py-2 text-slate-200 ${gpsValid ? 'border-slate-800' : 'border-red-500/50'}`}
+                  className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold font-mono text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
                   value={form.longitude}
                   onChange={(e) => { setField('longitude', e.target.value); setGpsHint(''); }}
-                  placeholder="Click map or enter"
+                  placeholder="e.g. 73.821300"
                 />
               </label>
             </div>
-            {(gpsHint || !gpsValid) && (
-              <p className="text-xs text-red-400">Please capture the tree location before saving.</p>
-            )}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <label className="text-xs text-slate-400 space-y-1 md:col-span-1">
-                <span>Address</span>
-                <input className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.address} onChange={(e) => setField('address', e.target.value)} />
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide sm:col-span-1">
+                <span>Street Address</span>
+                <input
+                  className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-3.5 py-3 text-sm font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                  value={form.address}
+                  onChange={(e) => setField('address', e.target.value)}
+                  placeholder="Campus / Street address"
+                />
               </label>
-              <label className="text-xs text-slate-400 space-y-1">
-                <span>Ward</span>
-                <input className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.ward} onChange={(e) => setField('ward', e.target.value)} />
+              <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                <span>Municipal Ward</span>
+                <input
+                  className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-3.5 py-3 text-sm font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                  value={form.ward}
+                  onChange={(e) => setField('ward', e.target.value)}
+                  placeholder="e.g. Ward 12 (Panchavati)"
+                />
               </label>
-              <label className="text-xs text-slate-400 space-y-1">
-                <span>Zone</span>
-                <input className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200" value={form.zone} onChange={(e) => setField('zone', e.target.value)} />
+              <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
+                <span>Environmental Zone</span>
+                <input
+                  className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-3.5 py-3 text-sm font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                  value={form.zone}
+                  onChange={(e) => setField('zone', e.target.value)}
+                  placeholder="e.g. North Sector"
+                />
               </label>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {[
-              ['Tree Image', treeImage, setTreeImage],
-              ['Bark Image', barkImage, setBarkImage],
-              ['Leaf Image', leafImage, setLeafImage],
-            ].map(([label, file, setter]) => (
-              <label key={label} className="text-xs text-slate-400 space-y-1">
-                <span className="flex items-center gap-1"><Upload className="w-3 h-3" /> {label} (optional)</span>
-                <input type="file" accept="image/*" className="w-full text-xs text-slate-400" onChange={(e) => setter(e.target.files?.[0] || null)} />
-                {file && <span className="text-[10px] text-emerald-400">{file.name}</span>}
-              </label>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-3 pt-2">
-            <button
-              type="button"
-              disabled={!canCalculate || busy}
-              onClick={handleCalculate}
-              className="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calculator className="w-4 h-4" />}
-              Calculate Analysis
-            </button>
-            <button
-              type="button"
-              disabled={!canAddTree || busy}
-              onClick={handleAddTree}
-              className="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 disabled:opacity-40 disabled:cursor-not-allowed"
-              title={!gpsValid ? 'Please capture the tree location before saving.' : undefined}
-            >
-              <Save className="w-4 h-4" />
-              Add Tree
-            </button>
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="glass-panel p-3 border-slate-800/50">
-            <p className="text-xs text-slate-400 mb-2 px-1">Click map to set GPS · Registered trees appear as green markers</p>
-            <div ref={mapRef} className="w-full h-[360px] rounded-xl overflow-hidden border border-slate-800/60" />
-          </div>
-
-          {previewCalcs && (
-            <div className="glass-panel p-5 border-slate-800/50">
-              <h3 className="text-sm font-bold text-slate-200 mb-3">Calculation Preview</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {CALC_LABELS.slice(0, 8).map(([key, label, unit]) => (
-                  <div key={key} className="rounded-lg bg-slate-950/50 border border-slate-800/40 p-2">
-                    <div className="text-[10px] text-slate-500">{label}</div>
-                    <div className="text-xs text-slate-200 font-semibold">{previewCalcs[key]} {unit}</div>
-                  </div>
-                ))}
+          {/* Card 5: Allometric Calculation & Field Action Operations */}
+          <div className="nature-card p-6 md:p-7 space-y-5 bg-white border-2 border-slate-200 shadow-sm rounded-2xl">
+            <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold font-['Fraunces'] text-[#022c17] flex items-center gap-2">
+                  <Calculator className="w-5 h-5 text-[#059669]" />
+                  Allometric Analysis &amp; Field Actions
+                </h3>
+                <p className="text-xs text-slate-600 mt-0.5 font-medium">Compute carbon sequestration and register into MongoDB live inventory</p>
               </div>
-              <p className="text-[11px] text-slate-500 mt-3">RAG analysis ready — click Add Tree to store permanently in MongoDB.</p>
             </div>
-          )}
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                disabled={!canCalculate || busy}
+                onClick={handleCalculate}
+                className="px-5 py-3 rounded-2xl text-xs font-black flex items-center gap-2 bg-indigo-50 text-indigo-900 border-2 border-indigo-200 hover:bg-indigo-100 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-all"
+              >
+                {busy ? <Loader2 className="w-4 h-4 animate-spin" /> : <Calculator className="w-4 h-4 text-indigo-600" />}
+                Calculate Allometric Metrics
+              </button>
+              <button
+                type="button"
+                disabled={!canAddTree || busy}
+                onClick={handleAddTree}
+                className="px-6 py-3 rounded-2xl text-xs font-black flex items-center gap-2 bg-[#047857] hover:bg-[#065f46] text-white disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all ml-auto"
+                title={!gpsValid ? 'Please capture the tree location before saving.' : undefined}
+              >
+                <Save className="w-4 h-4" />
+                Save Tree to Inventory
+              </button>
+            </div>
+
+            {/* Quick Metrics Live Preview */}
+            {previewCalcs ? (
+              <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-200 space-y-3">
+                <div className="text-xs font-black text-[#022c17] uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#059669]" />
+                  Calculation Preview
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {CALC_LABELS.slice(0, 8).map(([key, label, unit]) => (
+                    <div key={key} className="rounded-xl bg-white border border-slate-200 p-2.5 shadow-xs">
+                      <div className="text-[10px] text-slate-600 uppercase font-bold truncate">{label}</div>
+                      <div className="text-xs text-[#022c17] font-black mt-0.5">{previewCalcs[key]} <span className="text-[10px] text-slate-500 font-semibold">{unit}</span></div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-[11px] text-slate-600 font-medium pt-1 border-t border-slate-200">
+                  RAG allometric analysis ready — click 'Save Tree to Inventory' to record permanently in MongoDB.
+                </p>
+              </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-200 text-center py-6 text-slate-600 text-xs space-y-1">
+                <Calculator className="w-6 h-6 text-[#059669] mx-auto opacity-70" />
+                <p className="font-bold text-slate-800">Enter Species, GBH and Height</p>
+                <p className="text-[11px]">Click 'Calculate Allometric Metrics' to preview carbon and ecological telemetry.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* FULL CALCULATOR RESULTS SECTION */}
       {calculatedResult && (
-        <div ref={calculatorRef} className="glass-panel p-6 md:p-8 border-slate-800/60 space-y-6 scroll-mt-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div ref={calculatorRef} className="nature-card p-6 md:p-8 space-y-6 scroll-mt-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[rgba(20,46,31,0.08)] pb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                <span className="nature-chip nature-chip-forest">
                   Calculated Results
                 </span>
-                <span className="text-xs text-slate-400 font-medium">
+                <span className="text-xs text-[#708477] font-semibold">
                   {calculatedResult.species_name}
                 </span>
               </div>
-              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2 mt-1">
-                <Sparkles className="w-5 h-5 text-emerald-400" />
-                Ecological Impact & Allometric Analysis
+              <h3 className="text-xl font-bold font-['Fraunces'] text-[#142e1f] flex items-center gap-2 mt-1">
+                <Sparkles className="w-5 h-5 text-[#2d6a4f]" />
+                Ecological Impact &amp; Allometric Analysis
               </h3>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <button
                 type="button"
                 onClick={() => setShowConservation(true)}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 transition-all"
+                className="px-4 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all"
               >
                 Why not to cut this tree
                 <ArrowRight className="w-4 h-4" />
@@ -1018,28 +1049,28 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
                 type="button"
                 disabled={!canAddTree || busy}
                 onClick={handleAddTree}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                title={!gpsValid ? 'Please capture the tree location on the map before saving.' : undefined}
+                className="btn-forest-primary text-xs !py-2.5 !px-4"
+                title={!gpsValid ? 'Please capture the tree location using GPS or coordinates above before saving.' : undefined}
               >
                 <Save className="w-4 h-4" />
-                Save to Map & Inventory
+                Save Tree to Inventory
               </button>
             </div>
           </div>
 
           <ResultCard result={calculatedResult} />
 
-          <div className="pt-4 border-t border-slate-800/60 flex flex-wrap justify-between items-center gap-4">
-            <p className="text-xs text-slate-400">
+          <div className="pt-4 border-t border-[rgba(20,46,31,0.08)] flex flex-wrap justify-between items-center gap-4">
+            <p className="text-xs font-semibold text-slate-700">
               {!gpsValid
-                ? '⚠️ Capture GPS on the map above to permanently save this tree record to MongoDB and the live map.'
+                ? '⚠️ Capture GPS using the button or coordinates above to permanently save this tree record to MongoDB.'
                 : '✅ Location verified. Ready to register tree.'}
             </p>
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setShowConservation(true)}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30 transition-all"
+                className="px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 transition-all"
               >
                 Why not to cut this tree
                 <ArrowRight className="w-4 h-4" />
@@ -1048,7 +1079,7 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
                 type="button"
                 disabled={!canAddTree || busy}
                 onClick={handleAddTree}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 bg-emerald-500 text-slate-950 font-black hover:bg-emerald-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20"
+                className="btn-harvest-gold text-xs !py-2.5 !px-5"
               >
                 <Save className="w-4 h-4" />
                 Save Tree to Inventory
@@ -1058,54 +1089,58 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
         </div>
       )}
 
-      <div className="glass-panel p-5 border-slate-800/50">
-        <h3 className="text-sm font-bold text-slate-200 mb-3">Registered Trees ({trees.length})</h3>
+      <div className="nature-card p-6">
+        <h3 className="text-base font-bold font-['Fraunces'] text-[#142e1f] mb-3">Registered Trees ({trees.length})</h3>
         {trees.length === 0 ? (
-          <p className="text-xs text-slate-500">No MongoDB trees yet. Complete the workflow above.</p>
+          <p className="text-xs text-[#708477]">No MongoDB trees yet. Complete the workflow above.</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
-              <thead className="text-slate-500 border-b border-slate-800">
+              <thead className="text-[#24523a] bg-[#f3efe6] border-b border-[rgba(20,46,31,0.08)] uppercase font-bold tracking-wider">
                 <tr>
-                  <th className="py-2 pr-3">ID</th>
-                  <th className="py-2 pr-3">Name</th>
-                  <th className="py-2 pr-3">Species</th>
-                  <th className="py-2 pr-3">GPS</th>
-                  <th className="py-2 pr-3">Health</th>
-                  <th className="py-2">Actions</th>
+                  <th className="py-2.5 px-3">Record ID</th>
+                  <th className="py-2.5 px-3">Name</th>
+                  <th className="py-2.5 px-3">Species</th>
+                  <th className="py-2.5 px-3">GPS Coordinates</th>
+                  <th className="py-2.5 px-3">Health</th>
+                  <th className="py-2.5 px-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-[rgba(20,46,31,0.06)]">
                 {trees.map((t) => (
-                  <tr key={t._id} className="border-b border-slate-900/80 text-slate-300">
-                    <td className="py-2 pr-3 font-mono">{t.treeId}</td>
-                    <td className="py-2 pr-3">{t.treeName}</td>
-                    <td className="py-2 pr-3">{t.species}</td>
-                    <td className="py-2 pr-3">{t.latitude}, {t.longitude}</td>
-                    <td className="py-2 pr-3">{t.healthStatus}</td>
-                    <td className="py-2 flex gap-2">
-                      <button type="button" className="p-1.5 rounded-lg hover:bg-slate-800 text-teal-400" title="View Details" onClick={() => { setFocusAnalysis(false); setDetailsTree(t); }}>
-                        <Eye className="w-3.5 h-3.5" />
-                      </button>
-                      <button type="button" className="p-1.5 rounded-lg hover:bg-slate-800 text-indigo-400" title="Analysis" onClick={() => { setFocusAnalysis(true); setDetailsTree(t); }}>
-                        <Calculator className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        className="p-1.5 rounded-lg hover:bg-slate-800 text-red-400"
-                        title="Delete"
-                        onClick={async () => {
-                          if (!window.confirm('Are you sure you want to delete this tree?')) return;
-                          try {
-                            await registeredTreeApi.remove(t._id);
-                            setTrees((prev) => prev.filter((x) => x._id !== t._id));
-                          } catch (e) {
-                            onError?.(e.response?.data?.detail || e.message);
-                          }
-                        }}
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
+                  <tr key={t._id} className="text-[#142e1f] hover:bg-[#fbf9f4]">
+                    <td className="py-2.5 px-3 font-mono font-semibold text-[#708477]">{t.treeId}</td>
+                    <td className="py-2.5 px-3 font-bold">{t.treeName}</td>
+                    <td className="py-2.5 px-3">{t.species}</td>
+                    <td className="py-2.5 px-3 font-mono text-[11px] text-[#24523a]">{t.latitude}, {t.longitude}</td>
+                    <td className="py-2.5 px-3">
+                      <span className="nature-chip nature-chip-forest !text-[10px] !py-0.5 !px-2">{t.healthStatus}</span>
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <div className="inline-flex gap-1.5 justify-end">
+                        <button type="button" className="p-1 rounded-lg bg-[#d8f3dc] text-[#2d6a4f] hover:bg-[#b7e4c7]" title="View Details" onClick={() => { setFocusAnalysis(false); setDetailsTree(t); }}>
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+                        <button type="button" className="p-1 rounded-lg bg-[#f3efe6] text-[#7f4f24] hover:bg-[#ede0d4]" title="Analysis" onClick={() => { setFocusAnalysis(true); setDetailsTree(t); }}>
+                          <Calculator className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-1 rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+                          title="Delete"
+                          onClick={async () => {
+                            if (!window.confirm('Are you sure you want to delete this tree?')) return;
+                            try {
+                              await registeredTreeApi.remove(t._id);
+                              setTrees((prev) => prev.filter((x) => x._id !== t._id));
+                            } catch (e) {
+                              onError?.(e.response?.data?.detail || e.message);
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
