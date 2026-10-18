@@ -8,6 +8,7 @@ import { getLandSurfaceTemperature, getHistoricalClimate, getRealtimeWeather, CL
 import { calculatePlantationPriority, PRIORITY_METADATA } from '../services/plantationPriorityService.js';
 import { simulatePlantation } from '../services/plantationSimulatorService.js';
 import { generatePlantationRecommendations, RECOMMENDATION_METADATA } from '../services/recommendationService.js';
+import { computeCampusForestStory } from '../services/campusForestStoryService.js';
 
 const router = express.Router();
 
@@ -190,6 +191,9 @@ router.post('/analyze', async (req, res) => {
       },
     });
 
+    // 10. Generate Intuitive Campus Forest Story & All-Tree Intelligence
+    const campusForestIntelligence = computeCampusForestStory(treesInside, areaSqM, allTrees);
+
     const responsePayload = {
       areaSummary: {
         name: selectedName,
@@ -201,6 +205,7 @@ router.post('/analyze', async (req, res) => {
           lng: parseFloat(centerLng.toFixed(6)),
         },
       },
+      campusForestIntelligence,
       treeStatistics: {
         totalRegisteredTrees: treeCount,
         treeDensityPerKm2,

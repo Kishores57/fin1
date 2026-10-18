@@ -24,6 +24,12 @@ import {
   Crosshair,
   Globe,
   Palette,
+  Crown,
+  Award,
+  Heart,
+  BarChart3,
+  Wind,
+  Droplets,
 } from 'lucide-react';
 import { mapAnalysisApi, API_BASE_URL } from '../services/api';
 
@@ -62,7 +68,7 @@ export default function MapAnalysis() {
   // State
   const [zones, setZones] = useState([]);
   const [selectedZoneId, setSelectedZoneId] = useState('');
-  const [activeTab, setActiveTab] = useState('recommendations'); // recommendations, distribution, green_zone, priority, climate, planning, report
+  const [activeTab, setActiveTab] = useState('overview'); // overview, recommendations, distribution, green_zone, priority, climate, planning, report
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -235,6 +241,57 @@ export default function MapAnalysis() {
     if (selectedZoneId) {
       runZoneAnalysis(selectedZoneId);
     }
+  };
+
+  // Locate specific standout tree on Leaflet map with smooth fly-to & pulse highlight
+  const handleLocateTree = (tree) => {
+    if (!mapInstance.current || !tree || !tree.lat || !tree.lng) return;
+
+    if (!showTrees) {
+      setShowTrees(true);
+    }
+
+    if (mapContainerRef.current) {
+      mapContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    mapInstance.current.flyTo([tree.lat, tree.lng], 19, {
+      animate: true,
+      duration: 1.2,
+    });
+
+    setTimeout(() => {
+      if (markersLayerRef.current) {
+        markersLayerRef.current.eachLayer((layer) => {
+          if (layer.getLatLng) {
+            const pos = layer.getLatLng();
+            if (
+              Math.abs(pos.lat - tree.lat) < 0.0001 &&
+              Math.abs(pos.lng - tree.lng) < 0.0001
+            ) {
+              layer.openPopup();
+            }
+          }
+        });
+      }
+
+      if (window.L && calloutsLayerRef.current) {
+        calloutsLayerRef.current.clearLayers();
+        const pulseCircle = window.L.circleMarker([tree.lat, tree.lng], {
+          radius: 24,
+          color: '#f59e0b',
+          fillColor: '#f59e0b',
+          fillOpacity: 0.35,
+          weight: 3,
+        }).addTo(calloutsLayerRef.current);
+
+        setTimeout(() => {
+          if (calloutsLayerRef.current) {
+            calloutsLayerRef.current.removeLayer(pulseCircle);
+          }
+        }, 5500);
+      }
+    }, 1250);
   };
 
   // 4. Update Leaflet Map Layers
@@ -848,7 +905,17 @@ export default function MapAnalysis() {
             </div>
 
             <div className="p-3.5 rounded-2xl bg-white border border-[rgba(20,46,31,0.08)] shadow-sm text-center">
-              <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Registered Trees</div>
+              <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Living Canopy</div>
+              <div className="text-base font-bold text-[#2d6a4f] font-['Fraunces'] mt-0.5">
+                {analysisData.campusForestIntelligence?.canopyCovered?.canopyCoverPercent || 0}%
+              </div>
+              <div className="text-[10px] text-[#2d6a4f] font-semibold">
+                {((analysisData.campusForestIntelligence?.canopyCovered?.totalCanopyAreaSqM || 0) / 1000).toFixed(1)}k m² Shaded
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-white border border-[rgba(20,46,31,0.08)] shadow-sm text-center">
+              <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Total Trees</div>
               <div className="text-base font-bold text-[#2d6a4f] font-['Fraunces'] mt-0.5">
                 {analysisData.treeStatistics.totalRegisteredTrees}
               </div>
@@ -858,12 +925,12 @@ export default function MapAnalysis() {
             </div>
 
             <div className="p-3.5 rounded-2xl bg-white border border-[rgba(20,46,31,0.08)] shadow-sm text-center">
-              <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Mean NDVI</div>
-              <div className="text-base font-bold text-[#2d6a4f] font-['Fraunces'] mt-0.5">
-                {analysisData.vegetationAnalysis.meanNDVI}
+              <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Top Tree Species</div>
+              <div className="text-base font-bold text-[#142e1f] font-['Fraunces'] mt-0.5 truncate px-1" title={analysisData.campusForestIntelligence?.mostOccurringTree?.species || 'N/A'}>
+                {analysisData.campusForestIntelligence?.mostOccurringTree?.species || 'N/A'}
               </div>
-              <div className="text-[10px] text-[#708477]">
-                Sentinel-2 MSI (10m)
+              <div className="text-[10px] text-blue-700 font-semibold">
+                {analysisData.campusForestIntelligence?.mostOccurringTree?.percentage || 0}% of Zone
               </div>
             </div>
 
@@ -878,22 +945,12 @@ export default function MapAnalysis() {
             </div>
 
             <div className="p-3.5 rounded-2xl bg-white border border-[rgba(20,46,31,0.08)] shadow-sm text-center">
-              <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Identified Infill</div>
-              <div className="text-base font-bold text-red-600 font-['Fraunces'] mt-0.5">
-                {analysisData.recommendations?.totalCandidatesIdentified || 0} Sites
+              <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Zone Champion</div>
+              <div className="text-base font-bold text-emerald-800 font-['Fraunces'] mt-0.5 truncate px-1" title={analysisData.campusForestIntelligence?.topContributingTree?.species || 'Zone Anchor'}>
+                {analysisData.campusForestIntelligence?.topContributingTree?.species || 'Zone Anchor'}
               </div>
-              <div className="text-[10px] text-red-600 font-semibold">
-                {analysisData.recommendations?.highPriorityCount || 0} High Priority
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-white border border-[rgba(20,46,31,0.08)] shadow-sm text-center">
-              <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Zone Feasibility</div>
-              <div className="text-base font-bold font-['Fraunces'] mt-0.5" style={{ color: analysisData.plantationPriority.decisionBadgeColor }}>
-                {analysisData.plantationPriority.zoneType === 'GREEN_ZONE' ? 'Green Zone' : analysisData.plantationPriority.zoneType === 'RED_ZONE' ? 'Red Zone' : 'Yellow Zone'}
-              </div>
-              <div className="text-[10px] text-[#708477]">
-                Score: {analysisData.plantationPriority.priorityScore} / 1.00
+              <div className="text-[10px] text-emerald-700 font-semibold">
+                {analysisData.campusForestIntelligence?.topContributingTree?.co2StoredTonnes || 0}t CO₂ Stored
               </div>
             </div>
           </div>
@@ -906,6 +963,18 @@ export default function MapAnalysis() {
       <div className="w-full space-y-4 pt-2">
           {/* Module Navigation Tabs */}
           <div className="flex gap-2 p-2 bg-slate-100 border-2 border-slate-200 rounded-2xl overflow-x-auto text-xs shadow-inner">
+            <button
+              type="button"
+              onClick={() => setActiveTab('overview')}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-2 ${
+                activeTab === 'overview'
+                  ? 'bg-[#047857] text-white shadow-md font-black ring-2 ring-emerald-300'
+                  : 'text-slate-800 hover:text-[#022c17] hover:bg-white font-bold'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Campus Forest Story &amp; Insights</span>
+            </button>
             <button
               type="button"
               onClick={() => setActiveTab('recommendations')}
@@ -1003,6 +1072,428 @@ export default function MapAnalysis() {
 
             {!loading && analysisData && (
               <>
+                {/* ── TAB: CAMPUS FOREST STORY & INTUITIVE INSIGHTS ── */}
+                {activeTab === 'overview' && (
+                  <div className="space-y-8 animate-fadeIn">
+                    {/* Header / Intro Banner */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-emerald-950 via-slate-900 to-emerald-950 border border-emerald-500/30 text-white shadow-xl">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[11px] font-black uppercase tracking-wider border border-emerald-400/30 flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                            Intuitive Forest Intelligence
+                          </span>
+                          <span className="text-xs text-slate-300 font-medium">
+                            · {analysisData.areaSummary.name}
+                          </span>
+                        </div>
+                        <h2 className="text-xl sm:text-2xl font-bold font-['Fraunces'] text-white">
+                          Campus Forest Intelligence &amp; Tree Story
+                        </h2>
+                        <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                          Plain-language forestry intelligence for KK Wagh Institute: understanding living tree canopy, rare botanical assets, ecological champions, and why campus trees matter for classroom learning and student wellness.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+                          <div className="text-[10px] uppercase font-bold text-slate-400">Trees in Zone</div>
+                          <div className="text-xl font-bold font-['Fraunces'] text-emerald-400">
+                            {analysisData.treeStatistics.totalRegisteredTrees}
+                          </div>
+                        </div>
+                        <div className="px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+                          <div className="text-[10px] uppercase font-bold text-slate-400">Canopy Shaded</div>
+                          <div className="text-xl font-bold font-['Fraunces'] text-amber-300">
+                            {analysisData.campusForestIntelligence?.canopyCovered?.canopyCoverPercent || 0}%
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4 Spotlight Hero Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                      {/* 1. Canopy Covered Card */}
+                      <div className="relative rounded-2xl bg-white border-2 border-emerald-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-extrabold uppercase tracking-wide flex items-center gap-1.5">
+                              <Sun className="w-3.5 h-3.5 text-amber-600" />
+                              Living Canopy Covered
+                            </span>
+                            <span className="text-xs font-bold text-emerald-700">
+                              {analysisData.campusForestIntelligence?.canopyCovered?.coolingDegrees}
+                            </span>
+                          </div>
+
+                          <div>
+                            <div className="text-3xl font-black font-['Fraunces'] text-[#142e1f]">
+                              {analysisData.campusForestIntelligence?.canopyCovered?.canopyCoverPercent}%
+                              <span className="text-xs font-semibold text-[#708477] ml-1.5">of zone shaded</span>
+                            </div>
+                            <div className="text-xs text-[#2d6a4f] font-bold mt-0.5">
+                              {(analysisData.campusForestIntelligence?.canopyCovered?.totalCanopyAreaSqM || 0).toLocaleString()} m² Living Umbrella
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-[#40534c] leading-relaxed">
+                            {analysisData.campusForestIntelligence?.canopyCovered?.plainLanguageSummary}
+                          </p>
+                        </div>
+
+                        <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-[#708477]">
+                          <span>Shaded Walkway Equivalent:</span>
+                          <strong className="text-[#142e1f]">
+                            ~{(analysisData.campusForestIntelligence?.canopyCovered?.walkwayMeters || 0).toLocaleString()} meters
+                          </strong>
+                        </div>
+                      </div>
+
+                      {/* 2. Most Occurring Tree Card */}
+                      <div className="relative rounded-2xl bg-white border-2 border-blue-200/80 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="px-2.5 py-1 rounded-lg bg-blue-100 text-blue-800 text-[11px] font-extrabold uppercase tracking-wide flex items-center gap-1.5">
+                              <Trees className="w-3.5 h-3.5 text-blue-600" />
+                              Most Occurring Tree
+                            </span>
+                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                              {analysisData.campusForestIntelligence?.mostOccurringTree?.percentage}% of Zone
+                            </span>
+                          </div>
+
+                          <div>
+                            <div className="text-2xl font-black font-['Fraunces'] text-[#142e1f]">
+                              {analysisData.campusForestIntelligence?.mostOccurringTree?.species || 'N/A'}
+                            </div>
+                            <div className="text-xs text-blue-700 font-bold mt-0.5">
+                              {analysisData.campusForestIntelligence?.mostOccurringTree?.count} Trees Registered · {analysisData.campusForestIntelligence?.mostOccurringTree?.category}
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-[#40534c] leading-relaxed">
+                            {analysisData.campusForestIntelligence?.mostOccurringTree?.campusSignificance}
+                          </p>
+                        </div>
+
+                        <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-[#708477]">
+                          <span>Average Canopy Height:</span>
+                          <strong className="text-[#142e1f]">
+                            ~{analysisData.campusForestIntelligence?.mostOccurringTree?.avgHeightM || 18}m Tall
+                          </strong>
+                        </div>
+                      </div>
+
+                      {/* 3. Most Unique Tree Card */}
+                      <div className="relative rounded-2xl bg-gradient-to-b from-amber-50/70 to-white border-2 border-amber-300 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-amber-100/60 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="px-2.5 py-1 rounded-lg bg-amber-200/80 text-amber-900 text-[11px] font-extrabold uppercase tracking-wide flex items-center gap-1.5">
+                              <Award className="w-3.5 h-3.5 text-amber-700" />
+                              Most Unique in Zone
+                            </span>
+                            <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-amber-400/30 text-amber-950 border border-amber-400">
+                              {analysisData.campusForestIntelligence?.mostUniqueTree?.rarityLabel}
+                            </span>
+                          </div>
+
+                          <div>
+                            <div className="text-2xl font-black font-['Fraunces'] text-amber-950 flex items-center justify-between">
+                              <span>{analysisData.campusForestIntelligence?.mostUniqueTree?.species || 'N/A'}</span>
+                            </div>
+                            <div className="text-xs text-amber-800 font-bold mt-0.5">
+                              Tag: {analysisData.campusForestIntelligence?.mostUniqueTree?.id} · ~{analysisData.campusForestIntelligence?.mostUniqueTree?.age} yrs old
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-[#40534c] leading-relaxed">
+                            {analysisData.campusForestIntelligence?.mostUniqueTree?.whyUnique}
+                          </p>
+                        </div>
+
+                        <div className="pt-3 mt-3 border-t border-amber-200/80 flex items-center justify-between">
+                          <div className="text-[11px] text-amber-900 font-medium">
+                            {analysisData.campusForestIntelligence?.mostUniqueTree?.crownDiameter}m Crown Spread
+                          </div>
+                          {analysisData.campusForestIntelligence?.mostUniqueTree && (
+                            <button
+                              type="button"
+                              onClick={() => handleLocateTree(analysisData.campusForestIntelligence.mostUniqueTree)}
+                              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all hover:scale-105"
+                            >
+                              <Target className="w-3.5 h-3.5" />
+                              <span>Locate on Map</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* 4. Ecological Champion Tree Card */}
+                      <div className="relative rounded-2xl bg-gradient-to-b from-emerald-50/80 to-white border-2 border-emerald-400 p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-100/60 rounded-full blur-2xl -mr-6 -mt-6 pointer-events-none" />
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="px-2.5 py-1 rounded-lg bg-emerald-700 text-white text-[11px] font-extrabold uppercase tracking-wide flex items-center gap-1.5">
+                              <Crown className="w-3.5 h-3.5 text-amber-300" />
+                              Contributing Most
+                            </span>
+                            <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300">
+                              Zone Champion
+                            </span>
+                          </div>
+
+                          <div>
+                            <div className="text-2xl font-black font-['Fraunces'] text-[#142e1f]">
+                              {analysisData.campusForestIntelligence?.topContributingTree?.species || 'N/A'}
+                            </div>
+                            <div className="text-xs text-emerald-800 font-bold mt-0.5">
+                              Tag: {analysisData.campusForestIntelligence?.topContributingTree?.id} · {analysisData.campusForestIntelligence?.topContributingTree?.co2StoredKg?.toLocaleString()} kg CO₂ Stored
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-[#40534c] leading-relaxed">
+                            {analysisData.campusForestIntelligence?.topContributingTree?.story}
+                          </p>
+                        </div>
+
+                        <div className="pt-3 mt-3 border-t border-emerald-200 flex items-center justify-between">
+                          <div className="text-[11px] text-emerald-900 font-medium">
+                            {analysisData.campusForestIntelligence?.topContributingTree?.canopyAreaSqM} m² Shade
+                          </div>
+                          {analysisData.campusForestIntelligence?.topContributingTree && (
+                            <button
+                              type="button"
+                              onClick={() => handleLocateTree(analysisData.campusForestIntelligence.topContributingTree)}
+                              className="px-3 py-1.5 rounded-xl bg-[#047857] hover:bg-[#022c17] text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all hover:scale-105"
+                            >
+                              <Target className="w-3.5 h-3.5 text-amber-300" />
+                              <span>Locate Champion</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Section 2: Why Trees Matter on Campus (5 Structured Visual Cards) */}
+                    <div className="space-y-4 pt-4 border-t border-slate-200">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <h3 className="text-lg font-bold font-['Fraunces'] text-[#142e1f] flex items-center gap-2">
+                            <Heart className="w-5 h-5 text-rose-600" />
+                            <span>Why Trees Matter on KK Wagh Campus</span>
+                          </h3>
+                          <p className="text-xs text-[#708477]">
+                            Plain-language campus benefits calculated directly from the {analysisData.treeStatistics.totalRegisteredTrees} living trees in this zone
+                          </p>
+                        </div>
+                        <span className="nature-chip nature-chip-forest self-start sm:self-auto">
+                          5 Core Environmental Pillars
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
+                        {analysisData.campusForestIntelligence?.whyTreesMatter?.map((item) => (
+                          <div
+                            key={item.id}
+                            className="rounded-2xl bg-white border border-slate-200 p-4 shadow-xs flex flex-col justify-between hover:border-emerald-300 hover:shadow-md transition-all space-y-3"
+                          >
+                            <div className="space-y-2.5">
+                              <div className="flex items-center justify-between">
+                                <span className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center font-bold text-sm">
+                                  {item.id === 'cooling' ? '🌡️' : item.id === 'air_quality' ? '💨' : item.id === 'water_sponge' ? '🌧️' : item.id === 'biodiversity' ? '🐦' : '🧠'}
+                                </span>
+                                <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 border border-slate-200">
+                                  {item.badge}
+                                </span>
+                              </div>
+
+                              <div>
+                                <h4 className="text-xs font-black text-[#142e1f] leading-snug">
+                                  {item.title}
+                                </h4>
+                                <div className="text-[11px] font-bold text-[#2d6a4f] mt-0.5">
+                                  {item.metric} · <span className="text-[#708477] font-medium">{item.metricLabel}</span>
+                                </div>
+                              </div>
+
+                              <p className="text-[11px] text-[#40534c] leading-relaxed">
+                                {item.explanation}
+                              </p>
+                            </div>
+
+                            <div className="pt-2 border-t border-slate-100 text-[10px] text-[#2d6a4f] font-semibold bg-emerald-50/60 -mx-4 -mb-4 p-2.5 rounded-b-2xl">
+                              🎓 {item.campusRelevance}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Section 3: All-Tree Campus Forest Ledger (Considering ALL Trees Together) */}
+                    <div className="space-y-4 pt-4 border-t border-slate-200">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <h3 className="text-lg font-bold font-['Fraunces'] text-[#142e1f] flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-[#2d6a4f]" />
+                            <span>All-Tree Campus Forest Ledger (Whole-Zone Analysis)</span>
+                          </h3>
+                          <p className="text-xs text-[#708477]">
+                            Cumulative ecological assets considering all {analysisData.treeStatistics.totalRegisteredTrees} trees together as an interconnected canopy
+                          </p>
+                        </div>
+                        <span className="text-xs font-bold text-[#2d6a4f] bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
+                          Entire Zone Ecosystem
+                        </span>
+                      </div>
+
+                      {/* Aggregate Stat Pods */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center">
+                          <div className="text-[10px] text-[#708477] uppercase font-bold tracking-wider">Living Wood Biomass</div>
+                          <div className="text-xl font-bold font-['Fraunces'] text-[#142e1f] mt-0.5">
+                            {analysisData.campusForestIntelligence?.campusLedger?.totalBiomassTonnes}
+                            <span className="text-xs font-normal text-[#708477] ml-0.5">t</span>
+                          </div>
+                          <div className="text-[10px] text-[#2d6a4f] font-semibold">Total Tree Volume</div>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center">
+                          <div className="text-[10px] text-[#708477] uppercase font-bold tracking-wider">CO₂ Reservoir</div>
+                          <div className="text-xl font-bold font-['Fraunces'] text-emerald-800 mt-0.5">
+                            {analysisData.campusForestIntelligence?.campusLedger?.totalCo2StoredTonnes}
+                            <span className="text-xs font-normal text-[#708477] ml-0.5">t</span>
+                          </div>
+                          <div className="text-[10px] text-[#708477]">Locked in Wood</div>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center">
+                          <div className="text-[10px] text-[#708477] uppercase font-bold tracking-wider">Annual Sequestration</div>
+                          <div className="text-xl font-bold font-['Fraunces'] text-emerald-700 mt-0.5">
+                            {(analysisData.campusForestIntelligence?.campusLedger?.totalAnnualCo2Kg || 0).toLocaleString()}
+                            <span className="text-xs font-normal text-[#708477] ml-0.5">kg/yr</span>
+                          </div>
+                          <div className="text-[10px] text-[#708477]">Ongoing Absorption</div>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center">
+                          <div className="text-[10px] text-[#708477] uppercase tracking-wider">Daily Oxygen Output</div>
+                          <div className="text-xl font-bold font-['Fraunces'] text-teal-800 mt-0.5">
+                            {analysisData.campusForestIntelligence?.campusLedger?.totalDailyOxygenKg}
+                            <span className="text-xs font-normal text-[#708477] ml-0.5">kg/day</span>
+                          </div>
+                          <div className="text-[10px] text-teal-700 font-semibold">
+                            ~{analysisData.campusForestIntelligence?.campusLedger?.totalPeopleOxygenSupplied} People's Air
+                          </div>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center">
+                          <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Rain Infiltrated</div>
+                          <div className="text-xl font-bold font-['Fraunces'] text-blue-800 mt-0.5">
+                            {Math.round((analysisData.campusForestIntelligence?.campusLedger?.totalRainwaterInterceptionLiters || 0) / 1000)}k
+                            <span className="text-xs font-normal text-[#708477] ml-0.5">L/yr</span>
+                          </div>
+                          <div className="text-[10px] text-blue-700 font-semibold">Aquifer Recharge</div>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs text-center">
+                          <div className="text-[10px] text-[#708477] uppercase tracking-wider font-bold">Dust Filtered</div>
+                          <div className="text-xl font-bold font-['Fraunces'] text-amber-800 mt-0.5">
+                            {analysisData.campusForestIntelligence?.campusLedger?.totalAirPollutionRemovedKg}
+                            <span className="text-xs font-normal text-[#708477] ml-0.5">kg/yr</span>
+                          </div>
+                          <div className="text-[10px] text-amber-700 font-semibold">Air Cleansed</div>
+                        </div>
+                      </div>
+
+                      {/* Species Distribution Leaderboard & Maturity Profile (2 Columns) */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
+                        {/* Left: Species Leaderboard */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+                          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <h4 className="text-sm font-bold font-['Fraunces'] text-[#142e1f] flex items-center gap-2">
+                              <Trees className="w-4 h-4 text-[#2d6a4f]" />
+                              <span>Species Composition &amp; Roles</span>
+                            </h4>
+                            <span className="text-[11px] text-[#708477]">
+                              {analysisData.treeStatistics.uniqueSpeciesCount} Species Total
+                            </span>
+                          </div>
+
+                          <div className="space-y-3">
+                            {analysisData.campusForestIntelligence?.campusLedger?.speciesLeaderboard?.map((s) => (
+                              <div key={s.species} className="space-y-1">
+                                <div className="flex items-center justify-between text-xs">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-5 h-5 rounded-md bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-[11px]">
+                                      #{s.rank}
+                                    </span>
+                                    <strong className="text-[#142e1f]">{s.species}</strong>
+                                    <span className="text-[10px] text-[#708477]">({s.category})</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 text-[11px]">
+                                    <strong className="text-[#2d6a4f]">{s.count} trees</strong>
+                                    <span className="text-[#708477]">({s.percentage}%)</span>
+                                  </div>
+                                </div>
+
+                                {/* Horizontal Progress Bar */}
+                                <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-teal-500"
+                                    style={{ width: `${s.percentage}%` }}
+                                  />
+                                </div>
+
+                                <div className="flex items-center justify-between text-[10px] text-[#708477]">
+                                  <span>{s.role}</span>
+                                  <span>{s.totalCo2Kg?.toLocaleString()} kg CO₂</span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Right: Tree Maturity Profile */}
+                        <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+                          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <h4 className="text-sm font-bold font-['Fraunces'] text-[#142e1f] flex items-center gap-2">
+                              <Compass className="w-4 h-4 text-[#2d6a4f]" />
+                              <span>Tree Maturity &amp; Heritage Age Cohorts</span>
+                            </h4>
+                            <span className="text-[11px] text-[#708477]">Ecosystem Age Profile</span>
+                          </div>
+
+                          <div className="space-y-3">
+                            {analysisData.campusForestIntelligence?.campusLedger?.maturityProfile?.map((cohort) => (
+                              <div key={cohort.tier} className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-1.5">
+                                <div className="flex items-center justify-between text-xs">
+                                  <strong className="text-[#142e1f]">{cohort.tier}</strong>
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-bold text-[#2d6a4f]">{cohort.count} trees</span>
+                                    <span className="text-[10px] text-[#708477]">({cohort.percentage}%)</span>
+                                  </div>
+                                </div>
+                                <div className="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                                  <div
+                                    className="h-full rounded-full bg-emerald-700"
+                                    style={{ width: `${cohort.percentage}%` }}
+                                  />
+                                </div>
+                                <p className="text-[11px] text-[#708477]">
+                                  {cohort.description}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* ── TAB: PLANTATION ANALYSIS DASHBOARD ── */}
                 {activeTab === 'recommendations' && (
                   <div className="space-y-4">
