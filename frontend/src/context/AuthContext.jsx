@@ -27,11 +27,20 @@ export function AuthProvider({ children }) {
           setToken(storedToken);
         }
       } catch (err) {
-        // If token expired or invalid, clear session
+        // Only clear session if server explicitly returned 401/403 (invalid token)
         if (!cancelled) {
-          authApi.logout();
-          setUser(null);
-          setToken(null);
+          if (err.response?.status === 401 || err.response?.status === 403) {
+            authApi.logout();
+            setUser(null);
+            setToken(null);
+          } else {
+            // Keep stored profile on network blips so user isn't logged out
+            const stored = authApi.getCurrentUser();
+            if (stored) {
+              setUser(stored);
+              setToken(storedToken);
+            }
+          }
         }
       } finally {
         if (!cancelled) {

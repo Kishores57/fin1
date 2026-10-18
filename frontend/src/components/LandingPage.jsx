@@ -657,9 +657,9 @@ export default function LandingPage({ onEnterApp }) {
     }
   };
 
-  const handleAuthDone = (_user, tab) => {
+  const handleAuthDone = (authedUser, tab) => {
     setShowAuthModal(false);
-    onEnterApp?.(pendingTargetTab || tab || 'register');
+    onEnterApp?.(pendingTargetTab || tab || 'register', authedUser);
   };
 
   const navTo = (targetView) => {

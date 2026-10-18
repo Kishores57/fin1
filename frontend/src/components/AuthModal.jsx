@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Trees,
@@ -36,6 +36,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
   const [name, setName] = useState('');
   const [organization, setOrganization] = useState('');
 
+  // Keep mode synchronized if modal opens with a different tab
+  useEffect(() => {
+    if (isOpen) {
+      setMode(initialTab);
+      setError('');
+      setSuccessMsg('');
+    }
+  }, [isOpen, initialTab]);
+
   if (!isOpen) return null;
 
   const handleQuickLogin = async (roleToUse) => {
@@ -57,9 +66,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
         handleAuthSuccess(authedUser);
         if (onAuthSuccess) onAuthSuccess(authedUser, targetTabAfterAuth);
         onClose();
-      }, 700);
+      }, 500);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Authentication failed. Please check credentials.');
+      const msg =
+        err.response?.data?.detail ||
+        (err.code === 'ERR_NETWORK' || !err.response
+          ? 'Backend server not reachable on port 8000. Please ensure backend is started.'
+          : err.message || 'Authentication failed. Please check credentials.');
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -72,36 +86,43 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
     setLoading(true);
 
     try {
+      const cleanEmail = String(email || '').trim().toLowerCase();
+      if (!cleanEmail) throw new Error('Please enter a valid email address.');
+      if (!password) throw new Error('Please enter your password.');
+
       if (mode === 'login') {
-        const authedUser = await login(email, password);
+        const authedUser = await login(cleanEmail, password);
         setSuccessMsg(`Welcome back, ${authedUser.name}! Entering platform...`);
         setTimeout(() => {
           handleAuthSuccess(authedUser);
           if (onAuthSuccess) onAuthSuccess(authedUser, targetTabAfterAuth);
           onClose();
-        }, 700);
+        }, 500);
       } else {
         // Registration
         if (!name.trim()) throw new Error('Please enter your full name.');
-        if (!email.trim()) throw new Error('Please enter a valid email address.');
         if (password.length < 6) throw new Error('Password must be at least 6 characters.');
 
         const authedUser = await register({
           name: name.trim(),
-          email: email.trim(),
+          email: cleanEmail,
           password,
           role: selectedRole,
           organization: organization.trim(),
         });
-        setSuccessMsg(`Account created for ${authedUser.name} as ${authedUser.role.toUpperCase()}! Redirecting...`);
+        setSuccessMsg(`Account created for ${authedUser.name} as ${authedUser.role.toUpperCase()}! Entering platform...`);
         setTimeout(() => {
           handleAuthSuccess(authedUser);
           if (onAuthSuccess) onAuthSuccess(authedUser, targetTabAfterAuth);
           onClose();
-        }, 700);
+        }, 500);
       }
     } catch (err) {
-      const msg = err.response?.data?.detail || err.message || 'Authentication error. Please try again.';
+      const msg =
+        err.response?.data?.detail ||
+        (err.code === 'ERR_NETWORK' || !err.response
+          ? 'Backend server not reachable on port 8000. Please ensure backend is started.'
+          : err.message || 'Authentication error. Please try again.');
       setError(msg);
     } finally {
       setLoading(false);
@@ -310,34 +331,38 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
             {mode === 'register' && (
               <>
                 <div>
-                  <label className="block text-xs font-extrabold text-[#022c17] mb-1.5">
+                  <label className="block text-xs font-bold text-stone-700 mb-1.5">
                     Full Name <span className="text-red-500">*</span>
                   </label>
-                  <div className="relative">
-                    <User className="w-4 h-4 text-[#059669] absolute left-4 top-1/2 -translate-y-1/2" />
+                  <div className="relative flex items-center">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-emerald-600">
+                      <User className="w-5 h-5" />
+                    </div>
                     <input
                       type="text"
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Dr. Rajesh Patil"
-                      className="w-full pl-12 pr-4 py-3 min-h-[50px] rounded-2xl border-2 border-[#059669] bg-white text-base font-bold text-[#022c17] placeholder:text-slate-500 hover:border-[#047857] focus:outline-none focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 transition-all shadow-xs"
+                      className="w-full pl-11 pr-4 py-3 min-h-[48px] rounded-2xl border-2 border-emerald-600/30 hover:border-emerald-600 focus:border-emerald-600 bg-white text-sm font-semibold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/15 transition-all shadow-xs"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-extrabold text-[#022c17] mb-1.5">
+                  <label className="block text-xs font-bold text-stone-700 mb-1.5">
                     Organization / Academic Department
                   </label>
-                  <div className="relative">
-                    <Building className="w-4 h-4 text-[#059669] absolute left-4 top-1/2 -translate-y-1/2" />
+                  <div className="relative flex items-center">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-emerald-600">
+                      <Building className="w-5 h-5" />
+                    </div>
                     <input
                       type="text"
                       value={organization}
                       onChange={(e) => setOrganization(e.target.value)}
                       placeholder="e.g. KKWIEER Forestry Dept"
-                      className="w-full pl-12 pr-4 py-3 min-h-[50px] rounded-2xl border-2 border-[#059669] bg-white text-base font-bold text-[#022c17] placeholder:text-slate-500 hover:border-[#047857] focus:outline-none focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 transition-all shadow-xs"
+                      className="w-full pl-11 pr-4 py-3 min-h-[48px] rounded-2xl border-2 border-emerald-600/30 hover:border-emerald-600 focus:border-emerald-600 bg-white text-sm font-semibold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/15 transition-all shadow-xs"
                     />
                   </div>
                 </div>
@@ -345,51 +370,57 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
             )}
 
             <div>
-              <label className="block text-xs font-extrabold text-[#022c17] mb-1.5">
+              <label className="block text-xs font-bold text-stone-700 mb-1.5">
                 Email Address <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-[#059669] absolute left-4 top-1/2 -translate-y-1/2" />
+              <div className="relative flex items-center">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-emerald-600">
+                  <Mail className="w-5 h-5" />
+                </div>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={mode === 'login' ? 'admin@vanjeevan.org or user@vanjeevan.org' : 'name@institution.edu'}
-                  className="w-full pl-12 pr-4 py-3 min-h-[50px] rounded-2xl border-2 border-[#059669] bg-white text-base font-bold text-[#022c17] placeholder:text-slate-500 hover:border-[#047857] focus:outline-none focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 transition-all shadow-xs"
+                  className="w-full pl-11 pr-4 py-3 min-h-[48px] rounded-2xl border-2 border-emerald-600/30 hover:border-emerald-600 focus:border-emerald-600 bg-white text-sm font-semibold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/15 transition-all shadow-xs"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1.5">
-                <label className="block text-xs font-extrabold text-[#022c17]">
+                <label className="block text-xs font-bold text-stone-700">
                   Password <span className="text-red-500">*</span>
                 </label>
                 {mode === 'login' && (
-                  <span className="text-xs text-slate-700 font-semibold">
-                    Default: <code className="text-[#022c17] font-extrabold bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md">admin123</code> / <code className="text-[#022c17] font-extrabold bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md">user123</code>
+                  <span className="text-[11px] text-stone-500">
+                    Default: <code className="text-emerald-800 font-bold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">admin123</code> / <code className="text-emerald-800 font-bold bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">user123</code>
                   </span>
                 )}
               </div>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-[#059669] absolute left-4 top-1/2 -translate-y-1/2" />
+              <div className="relative flex items-center">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-emerald-600">
+                  <Lock className="w-5 h-5" />
+                </div>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
-                  className="w-full pl-12 pr-12 py-3 min-h-[50px] rounded-2xl border-2 border-[#059669] bg-white text-base font-bold text-[#022c17] placeholder:text-slate-500 hover:border-[#047857] focus:outline-none focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 transition-all shadow-xs"
+                  className="w-full pl-11 pr-11 py-3 min-h-[48px] rounded-2xl border-2 border-emerald-600/30 hover:border-emerald-600 focus:border-emerald-600 bg-white text-sm font-semibold text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-4 focus:ring-emerald-500/15 transition-all shadow-xs"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#2d6a4f] hover:text-[#064e3b]"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="p-1.5 rounded-lg text-emerald-700 hover:text-emerald-900 hover:bg-emerald-50 transition-colors focus:outline-none cursor-pointer"
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </div>
             </div>
 

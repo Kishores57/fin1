@@ -103,9 +103,10 @@ export default function App() {
   const [pendingTab, setPendingTab]             = useState('register');
   const [selectedPermitId, setSelectedPermitId] = useState(null);
 
-  const enterApp = (tab = 'register') => {
+  const enterApp = (tab = 'register', authedUser = null) => {
     const target = tab === 'calculator' ? 'register' : tab;
-    if (!isAuthenticated && target !== 'permits' && target !== 'map') {
+    const isAuthed = Boolean(authedUser) || isAuthenticated || Boolean(localStorage.getItem('vanjeevan_auth_token'));
+    if (!isAuthed && target !== 'permits' && target !== 'map') {
       setPendingTab(target);
       setShowAuthModal(true);
       return;
