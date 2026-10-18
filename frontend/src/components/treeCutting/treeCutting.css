@@ -1,0 +1,336 @@
+/* ═════════════════════════════════════════════════════════════════
+   VanJeevan · Tree-Cutting Permits & Public Voting Styling
+   Editorial Botanical & Civic Transparency Design System
+   ═════════════════════════════════════════════════════════════════ */
+
+.tc-root {
+  min-height: 80vh;
+  font-family: var(--font-sans);
+  color: var(--color-ink-900);
+}
+
+.tc-header-banner {
+  background: linear-gradient(135deg, #142e1f 0%, #1b3d2b 100%);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -10px rgba(20, 46, 31, 0.3);
+}
+
+.tc-header-banner::before {
+  content: '';
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(149, 213, 178, 0.2) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.tc-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.tc-kpi-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  transition: all 0.2s ease;
+}
+
+.tc-kpi-card:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-2px);
+}
+
+.tc-kpi-num {
+  font-family: var(--font-editorial);
+  font-size: 1.85rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #ffffff;
+}
+
+.tc-kpi-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+
+/* ── Status Pills & Badges ── */
+.tc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.tc-badge-submitted {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.tc-badge-review {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.tc-badge-voting {
+  background: #fef9c3;
+  color: #a16207;
+  border: 1px solid #fef08a;
+}
+
+.tc-badge-approved {
+  background: #d8f3dc;
+  color: #1b4332;
+  border: 1px solid #b7e4c7;
+}
+
+.tc-badge-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.tc-badge-investigation {
+  background: #f3e8ff;
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+
+/* ── Application Cards ── */
+.tc-app-card {
+  background: #ffffff;
+  border: 1px solid rgba(20, 46, 31, 0.09);
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(20, 46, 31, 0.03);
+}
+
+.tc-app-card:hover {
+  border-color: rgba(45, 106, 79, 0.35);
+  box-shadow: 0 8px 24px rgba(20, 46, 31, 0.08);
+  transform: translateY(-2px);
+}
+
+/* ── Progress Bar ── */
+.tc-vote-bar-bg {
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #f3efe6;
+  overflow: hidden;
+  display: flex;
+}
+
+.tc-vote-bar-approve {
+  background: #2d6a4f;
+  transition: width 0.4s ease;
+}
+
+.tc-vote-bar-reject {
+  background: #dc2626;
+  transition: width 0.4s ease;
+}
+
+.tc-vote-bar-abstain {
+  background: #9ca3af;
+  transition: width 0.4s ease;
+}
+
+/* ── Timeline Tracker ── */
+.tc-timeline-step {
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+}
+
+.tc-timeline-dot {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  z-index: 2;
+  transition: all 0.2s ease;
+}
+
+.tc-timeline-dot-done {
+  background: #2d6a4f;
+  color: #ffffff;
+}
+
+.tc-timeline-dot-active {
+  background: #e07a27;
+  color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(224, 122, 39, 0.2);
+}
+
+.tc-timeline-dot-pending {
+  background: #e6dfd1;
+  color: #708477;
+}
+
+.tc-timeline-line {
+  position: absolute;
+  top: 50%;
+  left: 2rem;
+  right: 0;
+  height: 2px;
+  background: #e6dfd1;
+  z-index: 1;
+}
+
+.tc-timeline-line-done {
+  background: #2d6a4f;
+}
+
+/* ── Leaflet Mini Embed ── */
+.tc-mini-map {
+  width: 100%;
+  height: 320px;
+  border-radius: 1rem;
+  overflow: hidden;
+  border: 1px solid rgba(20, 46, 31, 0.12);
+  z-index: 1;
+}
+
+.custom-tree-pin {
+  background: transparent;
+  border: none;
+}
+
+.tc-subnav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.tc-subnav-btn.active {
+  background: #142e1f;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(20, 46, 31, 0.15);
+}
+
+.tc-subnav-btn:not(.active) {
+  background: #ffffff;
+  color: #708477;
+  border-color: rgba(20, 46, 31, 0.1);
+}
+
+.tc-subnav-btn:not(.active):hover {
+  color: #142e1f;
+  background: #f8f6f0;
+  border-color: rgba(20, 46, 31, 0.2);
+}
+
+/* ═════════════════════════════════════════════════════════════════
+   Form Field Enhancements: Sculpted Shapes, Generous Dimensions & Rich Dark Forest Aesthetics
+   ═════════════════════════════════════════════════════════════════ */
+.tc-input,
+.tc-select,
+.tc-root input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]),
+.tc-root select {
+  width: 100%;
+  border-radius: 1.15rem !important;
+  padding: 0.85rem 1.35rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  min-height: 50px !important;
+  color: #022c17 !important;
+  background: #ffffff !important;
+  border: 2px solid #059669 !important;
+  outline: none !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  caret-color: #047857 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.tc-input::placeholder,
+.tc-root input::placeholder {
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+.tc-input:hover,
+.tc-select:hover,
+.tc-root input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]):hover,
+.tc-root select:hover {
+  border-color: #047857 !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(5, 150, 105, 0.16) !important;
+}
+
+.tc-input:focus,
+.tc-select:focus,
+.tc-root input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="submit"]):not([type="button"]):focus,
+.tc-root select:focus {
+  border-color: #047857 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 6px 20px rgba(4, 120, 87, 0.12) !important;
+}
+
+.tc-textarea,
+.tc-root textarea {
+  width: 100%;
+  border-radius: 1.25rem !important;
+  padding: 0.95rem 1.35rem !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  min-height: 110px !important;
+  color: #022c17 !important;
+  background: #ffffff !important;
+  border: 2px solid #059669 !important;
+  outline: none !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  caret-color: #047857 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.tc-textarea::placeholder,
+.tc-root textarea::placeholder {
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+.tc-textarea:focus,
+.tc-root textarea:focus {
+  border-color: #047857 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 6px 20px rgba(4, 120, 87, 0.12) !important;
+}
+
+.tc-root label {
+  color: #022c17 !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.015em !important;
+}

@@ -2,6 +2,7 @@ import express from 'express';
 import db from '../database/connection.js';
 import { CalculatorService } from '../services/calculator.js';
 import { ragService } from '../rag/service.js';
+import { verifyToken, requireRole } from '../middleware/auth.js';
 
 const router = express.Router();
 /** Preferred calculator dropdown order */
@@ -159,6 +160,23 @@ router.get('/history', async (req, res) => {
   } catch (error) {
     console.error('Failed to fetch history:', error);
     res.status(500).json({ detail: `Failed to fetch history: ${error.message}` });
+  }
+});
+
+/**
+ * DELETE /api/history/:id
+ * Admin-only: Deletes a logged tree calculation record.
+ */
+router.delete('/history/:id', verifyToken, requireRole(['admin']), async (req, res) => {
+  try {
+    const existing = await db.get('SELECT id FROM trees WHERE id = ?', [req.params.id]);
+    if (!existing) {
+      return res.status(404).json({ detail: 'Tree record not found.' });
+    }
+    await db.run('DELETE FROM trees WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Tree record deleted successfully.', id: Number(req.params.id) });
+  } catch (error) {
+    res.status(500).json({ detail: `Failed to delete record: ${error.message}` });
   }
 });
 

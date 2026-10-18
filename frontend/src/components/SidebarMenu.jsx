@@ -48,16 +48,16 @@ export const SidebarMenu = ({
       {/* ── SEARCH INPUT BOX ── */}
       <div
         style={{
-          background: 'rgba(15, 23, 42, 0.88)',
+          background: 'linear-gradient(180deg, rgba(8, 30, 20, 0.95) 0%, rgba(6, 24, 16, 0.95) 100%)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          border: '1px solid rgba(52, 211, 153, 0.3)',
-          borderRadius: '16px',
-          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.45), 0 0 20px rgba(52, 211, 153, 0.1)',
-          padding: '0.65rem 0.85rem',
+          border: '1.5px solid rgba(52, 211, 153, 0.45)',
+          borderRadius: '1.15rem',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.45), 0 0 20px rgba(52, 211, 153, 0.15)',
+          padding: '0.82rem 1.15rem',
           display: 'flex',
           alignItems: 'center',
-          gap: '0.6rem',
+          gap: '0.65rem',
           transition: 'all 0.2s ease',
         }}
       >
@@ -92,9 +92,10 @@ export const SidebarMenu = ({
             background: 'transparent',
             border: 'none',
             outline: 'none',
-            color: '#f8fafc',
-            fontSize: '0.88rem',
-            fontWeight: 500,
+            color: '#86efac',
+            fontSize: '0.92rem',
+            fontWeight: 600,
+            caretColor: '#10b981',
           }}
         />
 

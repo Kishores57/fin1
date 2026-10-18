@@ -16,6 +16,84 @@ const API = axios.create({
   },
 });
 
+// Automatically inject JWT authorization token if stored in localStorage
+API.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('vanjeevan_auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+export const authApi = {
+  login: async (email, password) => {
+    const response = await API.post('/auth/login', { email, password });
+    if (response.data?.token) {
+      localStorage.setItem('vanjeevan_auth_token', response.data.token);
+      localStorage.setItem('vanjeevan_auth_user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
+
+  register: async (payload) => {
+    const response = await API.post('/auth/register', payload);
+    if (response.data?.token) {
+      localStorage.setItem('vanjeevan_auth_token', response.data.token);
+      localStorage.setItem('vanjeevan_auth_user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
+
+  getMe: async () => {
+    const response = await API.get('/auth/me');
+    if (response.data?.user) {
+      localStorage.setItem('vanjeevan_auth_user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
+
+  getUsers: async () => {
+    const response = await API.get('/auth/users');
+    return response.data;
+  },
+
+  updateUserRole: async (userId, role) => {
+    const response = await API.patch(`/auth/users/${userId}/role`, { role });
+    return response.data;
+  },
+
+  deleteUser: async (userId) => {
+    const response = await API.delete(`/auth/users/${userId}`);
+    return response.data;
+  },
+
+  getQuickAccounts: async () => {
+    const response = await API.get('/auth/quick-accounts');
+    return response.data;
+  },
+
+  logout: () => {
+    localStorage.removeItem('vanjeevan_auth_token');
+    localStorage.removeItem('vanjeevan_auth_user');
+  },
+
+  getCurrentUser: () => {
+    try {
+      const stored = localStorage.getItem('vanjeevan_auth_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  },
+
+  getToken: () => {
+    return localStorage.getItem('vanjeevan_auth_token');
+  },
+};
+
 export const treeApi = {
   /**
    * Retrieves list of registered tree species constants from database.
@@ -44,6 +122,14 @@ export const treeApi = {
    */
   getHistory: async () => {
     const response = await API.get('/history');
+    return response.data;
+  },
+
+  /**
+   * Admin-only: Deletes an inventory record from history database.
+   */
+  deleteHistory: async (id) => {
+    const response = await API.delete(`/history/${id}`);
     return response.data;
   },
 };
@@ -129,10 +215,140 @@ export const speciesDetectionApi = {
   },
 };
 
+export const mapAnalysisApi = {
+  getZones: async () => {
+    const response = await API.get('/map-analysis/zones');
+    return response.data;
+  },
+
+  getEnvironmentalComparison: async () => {
+    const response = await API.get('/map-analysis/environmental-comparison');
+    return response.data;
+  },
+
+  analyzeArea: async ({ zoneId, geometry, areaName, customWeights }) => {
+    const response = await API.post('/map-analysis/analyze', {
+      zoneId,
+      geometry,
+      areaName,
+      customWeights,
+    });
+    return response.data;
+  },
+
+  simulate: async (payload) => {
+    const response = await API.post('/map-analysis/simulate', payload);
+    return response.data;
+  },
+
+  getRecommendations: async ({ zoneId, geometry, areaName }) => {
+    const response = await API.post('/map-analysis/recommendations', {
+      zoneId,
+      geometry,
+      areaName,
+    });
+    return response.data;
+  },
+};
+
+/**
+ * Transparent Tree-Cutting Permits, Verification & Public Voting API
+ */
+export const treeCuttingApi = {
+  getKpi: async () => {
+    const response = await API.get('/tree-cutting/kpi');
+    return response.data;
+  },
+
+  listApplications: async (params = {}) => {
+    const response = await API.get('/tree-cutting/applications', { params });
+    return response.data;
+  },
+
+  getApplication: async (id) => {
+    const response = await API.get(`/tree-cutting/applications/${id}`);
+    return response.data;
+  },
+
+  submitApplication: async (formData) => {
+    const response = await API.post('/tree-cutting/applications', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  uploadDocument: async (appId, formData) => {
+    const response = await API.post(`/tree-cutting/applications/${appId}/documents`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  verifyDocument: async (appId, docId, payload) => {
+    const response = await API.patch(
+      `/tree-cutting/applications/${appId}/documents/${docId}/verify`,
+      payload
+    );
+    return response.data;
+  },
+
+  getDocumentDownloadUrl: (appId, docId) => {
+    return `${API_BASE_URL}/api/tree-cutting/applications/${appId}/documents/${docId}/download`;
+  },
+
+  castVote: async (appId, payload) => {
+    const response = await API.post(`/tree-cutting/applications/${appId}/vote`, payload);
+    return response.data;
+  },
+
+  getVotes: async (appId) => {
+    const response = await API.get(`/tree-cutting/applications/${appId}/votes`);
+    return response.data;
+  },
+
+  updateStatus: async (appId, payload) => {
+    const response = await API.patch(`/tree-cutting/applications/${appId}/status`, payload);
+    return response.data;
+  },
+
+  recordDecision: async (appId, payload) => {
+    const response = await API.post(`/tree-cutting/applications/${appId}/decision`, payload);
+    return response.data;
+  },
+
+  reportConcern: async (appId, payload) => {
+    const response = await API.post(`/tree-cutting/applications/${appId}/report`, payload);
+    return response.data;
+  },
+
+  updateInvestigation: async (appId, payload) => {
+    const response = await API.post(`/tree-cutting/applications/${appId}/investigate`, payload);
+    return response.data;
+  },
+
+  getAuditTrail: async (appId) => {
+    const response = await API.get(`/tree-cutting/applications/${appId}/audit-trail`);
+    return response.data;
+  },
+
+  getNotifications: async () => {
+    const response = await API.get('/tree-cutting/notifications');
+    return response.data;
+  },
+
+  markNotificationRead: async (id) => {
+    const response = await API.patch(`/tree-cutting/notifications/${id}/read`);
+    return response.data;
+  },
+};
+
 export default {
+  authApi,
   treeApi,
   registeredTreeApi,
   speciesDetectionApi,
+  mapAnalysisApi,
+  treeCuttingApi,
   API_BASE_URL,
   mediaBaseUrl,
 };

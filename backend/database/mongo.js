@@ -17,9 +17,12 @@ export function isMongoReady() {
 export async function connectMongo() {
   const uri = settings.MONGODB_URI;
   if (!uri) {
-    console.warn('MONGODB_URI not set — registered-tree endpoints will return 503.');
+    console.warn('MongoDB configuration: MONGODB_URI is not set — registered-tree endpoints will return 503.');
     return false;
   }
+
+  // Safe check logging (verifies presence without exposing connection string or credentials)
+  console.log('MongoDB configuration detected: MONGODB_URI is set.');
 
   if (isMongoReady()) return true;
   if (connecting) return connecting;

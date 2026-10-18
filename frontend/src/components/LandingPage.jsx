@@ -7,101 +7,169 @@ import {
   Sparkles,
   ArrowRight,
   ArrowLeft,
+  Map,
+  Leaf,
+  BarChart3,
+  Layers,
+  Thermometer,
+  TreePine,
+  Globe,
+  Shield,
+  X,
+  Compass,
+  CheckCircle2,
+  Users,
+  Award,
+  Calendar,
+  Activity,
+  HeartHandshake,
+  FileCheck,
+  Crown,
+  LogOut,
+  LogIn,
+  UserCheck,
 } from 'lucide-react';
-import treeHero from '../assets/tree.jpg';
-import treeCanopy from '../assets/tree2.jpg';
-import beesImg from '../assets/bees.jpg';
+import { API_BASE_URL } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import AuthModal from './AuthModal';
+import AdminConsoleModal from './AdminConsoleModal';
 import './LandingPage.css';
 
-const canopyBio = '/canopy_biodiversity.png';
-const medicinalImg = '/medicinal_apothecary.png';
+/* ─── AUTHENTIC VERIFIED PHOTOGRAPHY ASSETS ────────────────────────── */
+const PHOTO_FOREST_HERO   = 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=2000&q=85'; // Deep misty forest canopy
+const PHOTO_CANOPY_SUN    = 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=1600&q=80'; // Lush green canopy with sunlight
+const PHOTO_AERIAL_FOREST = 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=1600&q=80'; // High-angle forest cover
+const PHOTO_MAJESTIC_TREE = 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=1600&q=80'; // Grand standalone tree in meadow
+const PHOTO_PLANTING_HANDS= 'https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1400&q=80'; // Hands planting sapling in earth
+const PHOTO_NURSERY_SPROUT= 'https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1400&q=80'; // Fresh green sprout emerging
+const PHOTO_WOODLAND_PATH = 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=1600&q=80'; // Sunlit woodland path
+const PHOTO_MISTY_HILLS   = 'https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&fit=crop&w=1600&q=80'; // Misty mountain pine forest
+const PHOTO_SOIL_HOLDING  = 'https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?auto=format&fit=crop&w=1400&q=80'; // Hands cupping rich dark soil
 
-const WHY_TREES = [
-  { icon: '🌍', title: 'Climate Change Mitigation', body: 'Trees cool the planet by storing carbon and moderating local temperatures across cities and farms.' },
-  { icon: '🌬', title: 'Oxygen Production', body: 'Through photosynthesis, trees release the oxygen our communities breathe every day.' },
-  { icon: '🌳', title: 'Carbon Sequestration', body: 'Living biomass locks atmospheric CO₂ into wood, roots, and soil for decades.' },
-  { icon: '🌧', title: 'Rainwater Conservation', body: 'Canopies intercept rainfall, slow runoff, and recharge groundwater beneath cities.' },
-  { icon: '🌿', title: 'Air Purification', body: 'Leaves trap dust and filter pollutants, improving neighbourhood air quality.' },
-  { icon: '🏙', title: 'Urban Heat Island Reduction', body: 'Shade and evapotranspiration cut surface heat on roads, roofs, and plazas.' },
-  { icon: '🐦', title: 'Wildlife Habitat', body: 'Branches, cavities, nectar, and fruit sustain birds, bees, and urban mammals.' },
-  { icon: '💧', title: 'Groundwater Recharge', body: 'Deep root systems channel rainwater underground, replenishing aquifers that millions depend on.' },
-  { icon: '🛡', title: 'Soil Erosion Prevention', body: 'Root networks bind soil on slopes and riverbanks, preventing landslides and sedimentation.' },
-  { icon: '🧠', title: 'Mental Health & Wellbeing', body: 'Green canopy corridors reduce stress, lower blood pressure, and improve cognitive focus in urban dwellers.' },
-];
-
-const BIODIVERSITY = [
-  { icon: '🐦', title: 'Birds', body: 'Crowns offer nesting sites, perches, and seasonal fruit that keep urban birdlife thriving.' },
-  { icon: '🦋', title: 'Butterflies', body: 'Flowering trees supply nectar corridors that sustain butterflies across fragmented cities.' },
-  { icon: '🐝', title: 'Bees', body: 'Bloom periods deliver pollen and nectar that power honeybee and solitary bee colonies.' },
-  { icon: '🐿', title: 'Squirrels', body: 'Canopy cover and seed crops give shelter and forage for arboreal mammals.' },
-  { icon: '🐛', title: 'Insects', body: 'Bark, litter, and flowers host pollinators, decomposers, and the food web beneath birds.' },
-  { icon: '🌱', title: 'Microorganisms', body: 'Root zones and leaf litter feed soils that recycle nutrients and store carbon.' },
-];
-
-const FEATURES = [
-  { icon: '🌿', title: 'AI Species Detection', body: 'Identify and profile trees with structured botanical metadata for every inventory record.' },
-  { icon: '📊', title: 'Climatic Impact Analysis', body: 'Turn measurements into cooling, shade, and climate-service insights for each tree.' },
-  { icon: '🌎', title: 'Carbon Footprint Estimation', body: 'Quantify carbon storage and CO₂ equivalents using allometric science.' },
-  { icon: '🌳', title: 'GIS Tree Mapping', body: 'Place every tree on an interactive Leaflet map with live inventory markers.' },
-  { icon: '🧮', title: 'Biomass Calculator', body: 'Estimate aboveground biomass from GBH, height, and species wood density.' },
-  { icon: '📈', title: 'CO₂ Sequestration Calculator', body: 'Convert biomass into lifetime and annual sequestration metrics.' },
-  { icon: '🤖', title: 'AI Tree Knowledge (RAG + Gemini)', body: 'Retrieve species knowledge and generate lasting climatic narratives.' },
-  { icon: '📍', title: 'Live Tree Inventory', body: 'Register, store, and revisit trees permanently with MongoDB-backed records.' },
-];
-
-const LAWS = [
+/* ─── DATA SECTIONS ────────────────────────────────────────────── */
+const CORE_PILLARS = [
   {
-    title: 'Indian Forest Act, 1927',
-    purpose: 'Consolidates laws relating to forests, transit of forest produce, and duties on timber.',
-    why: 'Creates the legal backbone for classifying reserved, protected, and village forests.',
-    rules: 'Restricts felling, grazing, and removal of forest produce without lawful authority in reserved forests.',
-    penalties: 'Unauthorized felling or removal of forest produce can attract fines and imprisonment under the Act.',
-    link: 'https://www.indiacode.nic.in/handle/123456789/2252',
+    icon: <TreePine className="w-6 h-6 text-emerald-700" />,
+    title: 'Individual Tree Inventory',
+    summary: 'Every mature tree mapped with exact coordinates, species taxonomy, and allometric measurements.',
+    detail: 'Field teams collect GBH, height, crown spread, and health condition. Each tree is permanently recorded in MongoDB with verifiable provenance.',
+    cta: 'Open Tree Inventory',
+    tab: 'register',
+    image: '/stewardship_tree_canopy.jpg',
   },
   {
-    title: 'Forest (Conservation) Act, 1980',
-    purpose: 'Regulates diversion of forest land for non-forest purposes.',
-    why: 'Stops unchecked conversion of forests for industry, mining, or infrastructure without central scrutiny.',
-    rules: 'State governments need prior approval of the Central Government before de-reserving forest land or using it for non-forest use.',
-    penalties: 'Violations can lead to prosecution and restoration directions for illegally diverted forest land.',
-    link: 'https://forestsclearance.nic.in/',
+    icon: <Layers className="w-6 h-6 text-emerald-700" />,
+    title: 'Sentinel-2 Vegetation Assessment',
+    summary: '10m resolution multispectral radiometric imagery quantifying photosynthetic living canopy.',
+    detail: 'Normalized Difference Vegetation Index (NDVI) calculated across study grids, distinguishing healthy vegetation from impervious urban surfaces.',
+    cta: 'View Satellite Analysis',
+    tab: 'analysis',
+    image: '/stewardship_forest_hills.jpg',
+  },
+  {
+    icon: <Compass className="w-6 h-6 text-amber-700" />,
+    title: 'Plantation Location Recommendations',
+    summary: 'Ranked candidate sites for urban afforestation computed using transparent GIS criteria.',
+    detail: 'Evaluates tree clearance distance (minimum 6m spacing), LULC pervious open soil, NDVI deficit, and Landsat surface heat cooling potential.',
+    cta: 'Inspect Recommendations',
+    tab: 'analysis',
+    image: '/stewardship_farmer_planting.jpg',
+  },
+  {
+    icon: <Thermometer className="w-6 h-6 text-amber-700" />,
+    title: 'Thermal & Microclimate Modeling',
+    summary: 'Landsat-9 TIRS-2 surface temperature mapping paired with ERA5 historical weather reanalysis.',
+    detail: 'Identifies urban heat islands and models local cooling benefits generated by canopy shade and plant evapotranspiration.',
+    cta: 'Explore Climate Impact',
+    tab: 'analysis',
+    image: '/stewardship_herbal_apothecary.png',
+  },
+];
+
+const WORKFLOW_STEPS = [
+  {
+    step: '01',
+    title: 'Field Survey & GPS Capture',
+    desc: 'Surveys capture tree species, girth at breast height (GBH), and tree height with meter-level GPS accuracy on campus grounds.',
+  },
+  {
+    step: '02',
+    title: 'Earth Observation Integration',
+    desc: 'Copernicus Sentinel-2 and USGS Landsat-9 imagery calibrate canopy density and surface thermal conditions around inventoried sites.',
+  },
+  {
+    step: '03',
+    title: 'Biomass & Carbon Quantification',
+    desc: 'Validated allometric equations compute aboveground biomass, belowground root mass, carbon storage, and annual CO₂ sequestration.',
+  },
+  {
+    step: '04',
+    title: 'Multi-Criteria Spatial Scoring',
+    desc: 'Geospatial algorithms evaluate open pervious land, tree density deficits, and clearance safety to rank optimal planting locations.',
+  },
+  {
+    step: '05',
+    title: 'Evidence-Based Conservation',
+    desc: 'Automated conservation briefs present legal protection mandates, oxygen values, and ecological reasons before any tree removal is permitted.',
+  },
+];
+
+const SCIENTIFIC_SOURCES = [
+  {
+    title: 'Copernicus Sentinel-2 MSI',
+    agency: 'European Space Agency (ESA)',
+    spec: '10m Spatial Resolution · 13 Bands',
+    purpose: 'Measures live vegetation vigor via Normalized Difference Vegetation Index (NDVI) calibrated from Band 4 (Red) and Band 8 (Near-Infrared).',
+    link: 'https://dataspace.copernicus.eu/',
+  },
+  {
+    title: 'USGS Landsat 9 TIRS-2',
+    agency: 'NASA / USGS',
+    spec: '30m Thermal Resolution · Split Window',
+    purpose: 'Quantifies Land Surface Temperature (LST) in Celsius to track microclimatic heat islands and evaluate urban forest cooling.',
+    link: 'https://earthexplorer.usgs.gov/',
+  },
+  {
+    title: 'NRSC Bhuvan LULC',
+    agency: 'ISRO National Remote Sensing Centre',
+    spec: '1:50,000 Land Use Classification',
+    purpose: 'Identifies pervious open ground suitable for sapling pit excavation vs. paved roads and impervious built structures.',
+    link: 'https://bhuvan.nrsc.gov.in/',
+  },
+  {
+    title: 'ERA5 Climate Reanalysis',
+    agency: 'ECMWF / Open-Meteo API',
+    spec: 'Hourly Atmospheric Records',
+    purpose: 'Supplies baseline air temperature, relative humidity, and solar radiation to contextualize local microclimate conditions.',
+    link: 'https://open-meteo.com/',
+  },
+];
+
+const LEGAL_FRAMEWORKS = [
+  {
+    title: 'Maharashtra (Urban Areas) Protection and Preservation of Trees Act, 1975',
+    jurisdiction: 'State of Maharashtra (Nashik, Mumbai, Pune)',
+    purpose: 'Mandates prior written permission from the designated municipal Tree Authority before felling or trimming any urban tree.',
+    mandate: 'Prescribes mandatory compensatory plantation (1:3 to 1:5 ratio) for any authorized tree removal.',
+    link: 'https://www.maharashtra.gov.in/',
   },
   {
     title: 'Environment (Protection) Act, 1986',
-    purpose: 'Provides an umbrella framework to protect and improve the environment.',
-    why: 'Empowers the government to set standards and regulate activities that harm air, water, land, and living beings.',
-    rules: 'Authorities may restrict industrial operations and mandate safeguards where ecological harm is likely.',
-    penalties: 'Contraventions can result in imprisonment and fines depending on the offence and duration.',
+    jurisdiction: 'Union of India (Central Legislation)',
+    purpose: 'Provides comprehensive framework to protect ecological balance, maintain air quality, and regulate activities causing environmental degradation.',
+    mandate: 'Empowers statutory bodies to halt development activities that eliminate critical urban green corridors without environmental clearance.',
     link: 'https://www.moef.gov.in/',
   },
   {
     title: 'Biological Diversity Act, 2002',
-    purpose: 'Conserves biological diversity and regulates access to biological resources and associated knowledge.',
-    why: 'Protects India’s genetic heritage and traditional knowledge linked to plants and ecosystems.',
-    rules: 'Access to biological resources for research or commercial use often requires approvals through biodiversity authorities.',
-    penalties: 'Unauthorized access or transfer of biological resources can invite penalties under the Act.',
+    jurisdiction: 'National & State Biodiversity Boards',
+    purpose: 'Conservation of biological diversity, sustainable use of its components, and fair equitable sharing of benefits.',
+    mandate: 'Protects native keystone tree species (Neem, Banyan, Peepal) that provide critical nesting habitats for urban biodiversity.',
     link: 'http://nbaindia.org/',
-  },
-  {
-    title: 'Maharashtra (Urban Areas) Protection and Preservation of Trees Act, 1975',
-    purpose: 'Protects and preserves trees in urban areas of Maharashtra, including cities like Nashik and Mumbai.',
-    why: 'Urban canopies need local legal shields against arbitrary felling on streets, campuses, and private plots.',
-    rules: 'Cutting, girdling, or damaging trees in urban areas typically requires permission from the Tree Authority / designated officers.',
-    penalties: 'Illegal felling can invite fines, imprisonment, and obligations to plant compensatory trees as directed.',
-    link: 'https://www.maharashtra.gov.in/',
   },
 ];
 
-function FloatingLeaves() {
-  return (
-    <div className="lp-leaves" aria-hidden="true">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <span key={i} className={`lp-leaf lp-leaf-${i + 1}`} />
-      ))}
-    </div>
-  );
-}
-
+/* ─── HOOK: SCROLL REVEAL ────────────────────────────────────────── */
 function useReveal(deps = []) {
   const ref = useRef(null);
   useEffect(() => {
@@ -115,14 +183,13 @@ function useReveal(deps = []) {
           if (e.isIntersecting) e.target.classList.add('lp-in');
         });
       },
-      { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
     );
     nodes.forEach((n) => io.observe(n));
-    // Show above-the-fold immediately
     requestAnimationFrame(() => {
       nodes.forEach((n) => {
         const rect = n.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.9) n.classList.add('lp-in');
+        if (rect.top < window.innerHeight * 0.94) n.classList.add('lp-in');
       });
     });
     return () => io.disconnect();
@@ -131,406 +198,943 @@ function useReveal(deps = []) {
   return ref;
 }
 
-function LandingNav({ view, scrolled, onHome, onNav, onEnter }) {
-  const solid = scrolled || view !== 'home';
-  return (
-    <nav className={`lp-nav ${solid ? 'lp-nav-solid' : ''}`}>
-      <div className="lp-nav-inner">
-        <button type="button" className="lp-brand" onClick={onHome}>
-          <Trees className="w-6 h-6" />
-          <span>VanJeevan</span>
-        </button>
-        <div className="lp-nav-links">
-          <button type="button" className={view === 'home' ? 'active' : ''} onClick={() => onNav('home', 'why')}>
-            Why Trees
-          </button>
-          <button type="button" className={view === 'home' ? '' : ''} onClick={() => onNav('home', 'bees')}>
-            Bees
-          </button>
-          <button
-            type="button"
-            className={view === 'biodiversity' ? 'active' : ''}
-            onClick={() => onNav('biodiversity')}
-          >
-            Biodiversity
-          </button>
-          <button type="button" className={view === 'laws' ? 'active' : ''} onClick={() => onNav('laws')}>
-            Laws
-          </button>
-          <button type="button" onClick={() => onNav('home', 'features')}>
-            AI Features
-          </button>
-        </div>
-        <button type="button" className="lp-nav-cta" onClick={onEnter}>
-          Enter Platform
-        </button>
-      </div>
-    </nav>
-  );
-}
-
-function BiodiversityPage({ onBack }) {
-  return (
-    <div className="lp-subpage lp-bio-section">
-      <div className="lp-container lp-subpage-body">
-        <button type="button" className="lp-back-link" onClick={onBack}>
-          <ArrowLeft className="w-4 h-4" /> Back to home
-        </button>
-        <div className="lp-bio-grid">
-          {BIODIVERSITY.map((item, i) => (
-            <article key={item.title} className="lp-bio-card lp-reveal" style={{ transitionDelay: `${i * 40}ms` }}>
-              <span>{item.icon}</span>
-              <h3>{item.title}</h3>
-              <p>{item.body}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function LawsPage({ onBack }) {
-  const [openLaw, setOpenLaw] = useState(null);
-  return (
-    <div className="lp-subpage lp-laws-section">
-      <div className="lp-laws-side" style={{ backgroundImage: `url(${medicinalImg})` }} aria-hidden="true" />
-      <div className="lp-container lp-subpage-body lp-laws-wrap">
-        <button type="button" className="lp-back-link lp-back-link-light" onClick={onBack}>
-          <ArrowLeft className="w-4 h-4" /> Back to home
-        </button>
-        <div className="lp-section-head lp-section-head-light lp-reveal">
-          <h2>Know the Laws Before Cutting a Tree</h2>
-          <p>Before species detection and inventory, understand the legal duty to protect trees.</p>
-        </div>
-        <div className="lp-laws-list">
-          {LAWS.map((law, idx) => {
-            const open = openLaw === idx;
-            return (
-              <div key={law.title} className={`lp-law-card lp-reveal ${open ? 'open' : ''}`}>
-                <button type="button" className="lp-law-toggle" onClick={() => setOpenLaw(open ? null : idx)}>
-                  <span>{law.title}</span>
-                  <ChevronDown className={`lp-chevron ${open ? 'rot' : ''}`} />
-                </button>
-                {open && (
-                  <div className="lp-law-body">
-                    <p><strong>Purpose:</strong> {law.purpose}</p>
-                    <p><strong>Why it exists:</strong> {law.why}</p>
-                    <p><strong>Key rules:</strong> {law.rules}</p>
-                    <p><strong>Penalties:</strong> {law.penalties}</p>
-                    {law.link && (
-                      <a href={law.link} target="_blank" rel="noreferrer" className="lp-law-link">
-                        Official resource <ExternalLink className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-        <p className="lp-law-footer lp-reveal">
-          Protecting trees is not only an environmental responsibility but also a legal responsibility.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-export default function LandingPage({ onEnterApp }) {
-  const [view, setView] = useState('home'); // home | biodiversity | laws
-  const [scrolled, setScrolled] = useState(false);
-  const [parallax, setParallax] = useState(0);
-  const [activeWhy, setActiveWhy] = useState(0);
-  const [openLaw, setOpenLaw] = useState(null);
-  const rootRef = useReveal([view]);
+/* ─── GIS MAP PREVIEW (Embedded Leaflet with Real Data) ──────────── */
+function GisMapPreview() {
+  const mapRef = useRef(null);
+  const instanceRef = useRef(null);
 
   useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 40);
-      setParallax(Math.min(window.scrollY * 0.35, 180));
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+    if (!mapRef.current || instanceRef.current || !window.L) return;
+
+    const map = window.L.map(mapRef.current, {
+      zoomControl: true,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+      attributionControl: false,
+    }).setView([20.0131, 73.8213], 16);
+
+    window.L.tileLayer(
+      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+      { maxZoom: 22, maxNativeZoom: 19 }
+    ).addTo(map);
+
+    // Fetch verified trees
+    fetch(`${API_BASE_URL}/api/epicollect/trees`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((trees) => {
+        (trees || []).slice(0, 80).forEach((t) => {
+          if (!t.lat || !t.lng) return;
+          window.L.circleMarker([t.lat, t.lng], {
+            radius: 6.5,
+            fillColor: '#2d6a4f',
+            color: '#ffffff',
+            weight: 2,
+            fillOpacity: 0.9,
+          })
+            .addTo(map)
+            .bindPopup(`<strong style="font-family:'Plus Jakarta Sans',sans-serif;color:#142e1f;">${t.species || 'Inventoried Tree'}</strong><br/><span style="font-size:11px;color:#708477;">KK Wagh Campus Survey</span>`);
+        });
+      })
+      .catch(() => {});
+
+    instanceRef.current = map;
+    setTimeout(() => map.invalidateSize(), 200);
   }, []);
 
+  return <div ref={mapRef} className="w-full h-[460px] rounded-2xl overflow-hidden shadow-inner border border-[rgba(20,46,31,0.12)]" />;
+}
+
+/* ─── SUBPAGE: WHO WE ARE (Inspired by Trees.org) ────────────────── */
+function WhoWeArePage({ onBack, onEnterApp }) {
+  return (
+    <div className="lp-subpage">
+      {/* Editorial Hero */}
+      <section
+        className="lp-subpage-hero"
+        style={{ backgroundImage: `url(${PHOTO_CANOPY_SUN})` }}
+      >
+        <div className="lp-subpage-hero-overlay" />
+        <div className="lp-container relative z-10">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-2 text-white/80 hover:text-white font-semibold text-sm mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Home
+          </button>
+          <span className="nature-chip bg-white/20 text-white border-white/30 backdrop-blur-md mb-3">
+            About Our Mission
+          </span>
+          <h1 className="text-white text-4xl sm:text-5xl lg:text-6xl font-bold max-w-3xl leading-tight">
+            Restoring Urban Canopy Through Geographic Truth.
+          </h1>
+          <p className="text-white/85 text-lg max-w-2xl mt-4">
+            We unite field botanical inventory with European and American Earth observation satellites
+            to protect every standing tree and guide intelligent campus afforestation.
+          </p>
+        </div>
+      </section>
+
+      {/* Editorial Body */}
+      <section className="lp-subpage-body">
+        <div className="lp-container space-y-16">
+          {/* Approach Grid */}
+          <div className="lp-editorial-grid">
+            <div>
+              <span className="lp-section-kicker">Our Approach</span>
+              <h2 className="lp-section-title">Evidence-Based Environmental Stewardship</h2>
+              <p className="text-base text-[#44594c] leading-relaxed mb-6">
+                Tree conservation cannot rely on guesswork. Every development proposal, road widening, or infrastructure project
+                demands empirical data: the biomass of the trees at risk, the metric tons of carbon stored in their wood,
+                and the microclimate cooling loss that their felling would cause.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-[#d8f3dc] text-[#2d6a4f] shrink-0 mt-0.5">
+                    <FileCheck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-[#142e1f] text-base">Verified Field Inventories</h4>
+                    <p className="text-sm text-[#44594c]">Every specimen cataloged with DBH, height, and coordinates verified on the ground.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-[#d8f3dc] text-[#2d6a4f] shrink-0 mt-0.5">
+                    <Globe className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-[#142e1f] text-base">Multi-Sensor Space Intelligence</h4>
+                    <p className="text-sm text-[#44594c]">Copernicus Sentinel-2 MSI and USGS Landsat-9 radiometric sensors continuously calibrate canopy health.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-[#d8f3dc] text-[#2d6a4f] shrink-0 mt-0.5">
+                    <Shield className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-[#142e1f] text-base">Legal Protection Integration</h4>
+                    <p className="text-sm text-[#44594c]">Direct statutory alignment with the Maharashtra Urban Tree Act to defend trees against unlawful removal.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="lp-photo-frame h-[440px]">
+              <img src={PHOTO_SOIL_HOLDING} alt="Hands holding rich fertile soil" />
+              <div className="lp-photo-caption">Healthy living soil and root structures are the foundation of all climate resilience.</div>
+            </div>
+          </div>
+
+          {/* Impact Metrics Banner */}
+          <div className="bg-[#142e1f] text-white rounded-3xl p-8 sm:p-12 relative overflow-hidden">
+            <div className="relative z-10 max-w-3xl">
+              <span className="text-xs uppercase tracking-wider text-[#74c69d] font-bold">Institutional Impact</span>
+              <h3 className="text-3xl sm:text-4xl font-bold text-white mt-2 mb-4">
+                Built at K.K. Wagh Institute of Engineering Education &amp; Research
+              </h3>
+              <p className="text-white/80 text-base leading-relaxed mb-8">
+                Created to pioneer a reproducible blueprint for university campuses and urban municipalities
+                across India. Turning environmental science from academic theory into live operational GIS decision-making.
+              </p>
+              <button
+                type="button"
+                onClick={() => onEnterApp('map')}
+                className="btn-harvest-gold"
+              >
+                <span>Explore Live Campus Map</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* ─── SUBPAGE: CONSERVATION & WHY TREES (Inspired by Why Farmers) ── */
+function ConservationStoryPage({ onBack, onEnterApp }) {
+  return (
+    <div className="lp-subpage">
+      <section
+        className="lp-subpage-hero"
+        style={{ backgroundImage: `url(${PHOTO_WOODLAND_PATH})` }}
+      >
+        <div className="lp-subpage-hero-overlay" />
+        <div className="lp-container relative z-10">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-2 text-white/80 hover:text-white font-semibold text-sm mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Home
+          </button>
+          <span className="nature-chip bg-white/20 text-white border-white/30 backdrop-blur-md mb-3">
+            Conservation Narrative
+          </span>
+          <h1 className="text-white text-4xl sm:text-5xl lg:text-6xl font-bold max-w-3xl leading-tight">
+            Why Every Single Tree Demands Our Protection.
+          </h1>
+          <p className="text-white/85 text-lg max-w-2xl mt-4">
+            Trees are not decorative landscaping; they are living infrastructure that purifies the air we breathe,
+            intercepts stormwater, and cools our warming cities.
+          </p>
+        </div>
+      </section>
+
+      <section className="lp-subpage-body">
+        <div className="lp-container space-y-16">
+          {/* Narrative Section 1 */}
+          <div className="lp-editorial-grid">
+            <div className="lp-photo-frame h-[420px]">
+              <img src={PHOTO_NURSERY_SPROUT} alt="Young seedling growing in nursery" />
+              <div className="lp-photo-caption">A newly planted sapling takes 15–20 years to match the canopy and cooling of one mature tree.</div>
+            </div>
+            <div>
+              <span className="lp-section-kicker">The Time Equation</span>
+              <h2 className="lp-section-title">A 30-Year Tree Cannot Be Replaced by a Sapling Tomorrow</h2>
+              <p className="text-base text-[#44594c] leading-relaxed mb-4">
+                When a mature tree is felled for construction with a promise to "plant five new saplings," the immediate result is an ecological void.
+                A mature 25-year-old Rain Tree or Neem provides over 200 m² of shade canopy and absorbs tens of kilograms of atmospheric carbon annually.
+              </p>
+              <p className="text-base text-[#44594c] leading-relaxed">
+                By maintaining a comprehensive GIS inventory, our platform equips campus authorities with the exact numerical justification
+                needed to modify building blueprints, route pathways around root protection zones, and preserve living giants.
+              </p>
+            </div>
+          </div>
+
+          {/* Legal Framework Cards */}
+          <div>
+            <span className="lp-section-kicker">Statutory Shields</span>
+            <h2 className="lp-section-title mb-6">Tree Protection Acts &amp; Legal Mandates</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {LEGAL_FRAMEWORKS.map((law) => (
+                <div key={law.title} className="nature-card p-6 flex flex-col justify-between">
+                  <div>
+                    <span className="text-xs font-bold uppercase tracking-wider text-[#2d6a4f]">{law.jurisdiction}</span>
+                    <h3 className="text-lg font-bold text-[#142e1f] mt-2 mb-3">{law.title}</h3>
+                    <p className="text-sm text-[#44594c] mb-3">{law.purpose}</p>
+                    <p className="text-xs text-[#708477] bg-[#f3efe6] p-3 rounded-lg border border-[rgba(20,46,31,0.06)]">
+                      <strong>Mandate:</strong> {law.mandate}
+                    </p>
+                  </div>
+                  <a
+                    href={law.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2d6a4f] hover:text-[#142e1f] mt-4"
+                  >
+                    <span>Read Statutory Details</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Action CTA */}
+          <div className="bg-[#f3efe6] border border-[#e6dfd1] rounded-3xl p-8 sm:p-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div>
+              <h3 className="text-2xl font-bold text-[#142e1f]">Evaluate a Tree Under Threat</h3>
+              <p className="text-sm text-[#44594c] mt-1">Run an AI conservation analysis to generate an official printable Do-Not-Cut report.</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => onEnterApp('register')}
+              className="btn-forest-primary shrink-0"
+            >
+              <span>Launch Conservation Tool</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* ─── SUBPAGE: CARBON & SATELLITE INTELLIGENCE (Inspired by Carbon Markets) ── */
+function CarbonIntelligencePage({ onBack, onEnterApp }) {
+  return (
+    <div className="lp-subpage">
+      <section
+        className="lp-subpage-hero"
+        style={{ backgroundImage: `url(${PHOTO_AERIAL_FOREST})` }}
+      >
+        <div className="lp-subpage-hero-overlay" />
+        <div className="lp-container relative z-10">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-2 text-white/80 hover:text-white font-semibold text-sm mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Back to Home
+          </button>
+          <span className="nature-chip bg-white/20 text-white border-white/30 backdrop-blur-md mb-3">
+            Data-Driven Carbon Analytics
+          </span>
+          <h1 className="text-white text-4xl sm:text-5xl lg:text-6xl font-bold max-w-3xl leading-tight">
+            Scientific Carbon Accounting &amp; Earth Observation.
+          </h1>
+          <p className="text-white/85 text-lg max-w-2xl mt-4">
+            Transparent biomass allometry, multi-spectral satellite reflectance, and thermal infrared tracking
+            for verifiable urban environmental accounting.
+          </p>
+        </div>
+      </section>
+
+      <section className="lp-subpage-body">
+        <div className="lp-container space-y-16">
+          {/* Process Timeline */}
+          <div>
+            <span className="lp-section-kicker">Methodological Workflow</span>
+            <h2 className="lp-section-title mb-8">How We Measure, Map, and Verify Impact</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {WORKFLOW_STEPS.map((ws) => (
+                <div key={ws.step} className="lp-timeline-card">
+                  <div className="lp-timeline-step">Step {ws.step}</div>
+                  <h4>{ws.title}</h4>
+                  <p>{ws.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Scientific Earth Observation Providers */}
+          <div>
+            <span className="lp-section-kicker">Open Earth Observation</span>
+            <h2 className="lp-section-title mb-6">Scientific Data Sources Integrated</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              {SCIENTIFIC_SOURCES.map((src) => (
+                <div key={src.title} className="nature-card p-6 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-[#2d6a4f] uppercase tracking-wider">{src.agency}</span>
+                      <span className="text-[11px] font-semibold text-[#708477] bg-[#f3efe6] px-2 py-0.5 rounded-full">{src.spec}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-[#142e1f] mb-2">{src.title}</h3>
+                    <p className="text-sm text-[#44594c]">{src.purpose}</p>
+                  </div>
+                  <a
+                    href={src.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2d6a4f] hover:text-[#142e1f] mt-4"
+                  >
+                    <span>View Data Provider</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Allometric Science Banner */}
+          <div className="bg-[#142e1f] text-white rounded-3xl p-8 sm:p-10">
+            <h3 className="text-2xl font-bold text-white mb-2">Allometric Biomass Equations</h3>
+            <p className="text-sm text-white/80 max-w-2xl leading-relaxed mb-6">
+              Our backend calculates dry weight biomass from measured diameter at breast height (DBH) and total height
+              using published forestry formulas calibrated per species wood density (Chave et al.). Carbon storage is modeled
+              at 47.5% of total dry biomass, converted to CO₂ equivalents by multiplying by 3.67.
+            </p>
+            <button
+              type="button"
+              onClick={() => onEnterApp('analysis')}
+              className="btn-harvest-gold"
+            >
+              <span>Explore Spatial Analytics</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/* ─── MAIN LANDING PAGE COMPONENT ────────────────────────────────── */
+export default function LandingPage({ onEnterApp }) {
+  const { user, isAdmin, isAuthenticated, logout } = useAuth();
+  const [view, setView]               = useState('home'); // home, who_we_are, conservation, carbon
+  const [scrolled, setScrolled]       = useState(false);
+  const [menuOpen, setMenuOpen]       = useState(false);
+  const [stats, setStats]             = useState({ trees: null, species: null });
+  const [showAuthModal, setShowAuthModal]         = useState(false);
+  const [showAdminConsole, setShowAdminConsole]   = useState(false);
+  const [authMode, setAuthMode]                   = useState('login');
+  const [pendingTargetTab, setPendingTargetTab]   = useState('register');
+  const rootRef = useReveal([view]);
+
+  // Track window scroll for transparent-to-solid nav transition
   useEffect(() => {
-    if (view !== 'home') return undefined;
-    const id = setInterval(() => {
-      setActiveWhy((i) => (i + 1) % WHY_TREES.length);
-    }, 3200);
-    return () => clearInterval(id);
-  }, [view]);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
+  // Fetch verified stats from backend
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [view]);
+    Promise.allSettled([
+      fetch(`${API_BASE_URL}/api/epicollect/trees`).then((r) => r.ok ? r.json() : []),
+      fetch(`${API_BASE_URL}/api/registered-trees`).then((r) => r.ok ? r.json() : []),
+    ]).then(([epicRes, mongoRes]) => {
+      const epic  = epicRes.status  === 'fulfilled' ? (epicRes.value  || []) : [];
+      const mongo = mongoRes.status === 'fulfilled' ? (mongoRes.value || []) : [];
+      const all   = [...epic, ...mongo];
+      if (all.length > 0) {
+        const speciesSet = new Set(all.map((t) => t.species || t.treeName).filter(Boolean));
+        setStats({ trees: all.length, species: speciesSet.size });
+      }
+    });
+  }, []);
 
-  const go = (tab) => onEnterApp?.(tab || 'calculator');
-
-  const goHome = () => {
-    setView('home');
-    setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+  const goTab = (tab = 'register') => {
+    if (isAuthenticated) {
+      onEnterApp?.(tab);
+    } else {
+      setPendingTargetTab(tab);
+      setAuthMode('login');
+      setShowAuthModal(true);
+    }
   };
 
-  const onNav = (nextView, sectionId) => {
-    if (nextView === 'biodiversity' || nextView === 'laws') {
-      setView(nextView);
-      return;
-    }
-    setView('home');
-    if (sectionId) {
-      setTimeout(() => {
-        document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 80);
-    } else {
-      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
-    }
+  const handleAuthDone = (_user, tab) => {
+    setShowAuthModal(false);
+    onEnterApp?.(pendingTargetTab || tab || 'register');
+  };
+
+  const navTo = (targetView) => {
+    setView(targetView);
+    setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="lp-root" ref={rootRef}>
-      <LandingNav
-        view={view}
-        scrolled={scrolled}
-        onHome={goHome}
-        onNav={onNav}
-        onEnter={() => go('calculator')}
-      />
-
-      {view === 'biodiversity' && <BiodiversityPage onBack={goHome} />}
-      {view === 'laws' && <LawsPage onBack={goHome} />}
-
-      {view === 'home' && (
-        <>
-          <header className="lp-hero">
-            <div className="lp-hero-media" aria-hidden="true">
-              <img
-                src={treeHero}
-                alt=""
-                className="lp-hero-photo"
-                style={{ transform: `translateY(${parallax * 0.45}px) scale(1.08)` }}
-              />
-              <div className="lp-hero-overlay" />
-              <FloatingLeaves />
+      {/* ─── NAVIGATION BAR (Inspired by Trees for the Future) ─── */}
+      <nav className={`lp-nav ${scrolled || view !== 'home' ? 'lp-nav-solid' : 'lp-nav-transparent'}`}>
+        <div className="lp-nav-inner">
+          <button type="button" className="lp-brand" onClick={() => navTo('home')}>
+            <div className="lp-brand-badge">
+              <Trees className="w-5 h-5" />
             </div>
-            <div className="lp-hero-content lp-reveal">
-              <p className="lp-brand-mark">VanJeevan · AI GIS Tree Inventory</p>
-              <h1>
-                Every Tree Matters.
-                <br />
-                <em>Every Tree Has a Story.</em>
-              </h1>
-              <p className="lp-hero-sub">
-                AI Powered GIS Tree Inventory, Species Detection, Climatic Impact Analysis and Urban Biodiversity Monitoring.
-              </p>
-              <div className="lp-hero-ctas">
-                <button type="button" className="lp-btn-primary" onClick={() => go('calculator')}>
-                  🌳 Detect Tree Species
+            <span>VanJeevan</span>
+          </button>
+
+          {/* Desktop Links */}
+          <div className="lp-nav-links">
+            <button
+              type="button"
+              className={view === 'home' ? 'active' : ''}
+              onClick={() => navTo('home')}
+            >
+              Home
+            </button>
+            <button
+              type="button"
+              className={view === 'who_we_are' ? 'active' : ''}
+              onClick={() => navTo('who_we_are')}
+            >
+              Who We Are
+            </button>
+            <button
+              type="button"
+              className={view === 'conservation' ? 'active' : ''}
+              onClick={() => navTo('conservation')}
+            >
+              Why Trees Matter
+            </button>
+            <button
+              type="button"
+              className={view === 'carbon' ? 'active' : ''}
+              onClick={() => navTo('carbon')}
+            >
+              Carbon &amp; Satellites
+            </button>
+            <button
+              type="button"
+              onClick={() => goTab('map')}
+            >
+              GIS Live Map
+            </button>
+            <button
+              type="button"
+              onClick={() => goTab('permits')}
+              className="text-[#95d5b2] font-semibold"
+            >
+              Cutting Permits &amp; Voting
+            </button>
+          </div>
+
+          {/* CTA & Mobile Controls */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {!isAuthenticated ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAuthMode('login');
+                    setShowAuthModal(true);
+                  }}
+                  className="px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs font-bold text-white hover:text-white bg-white/10 hover:bg-white/20 border border-white/25 transition-all backdrop-blur-sm inline-flex items-center gap-1.5 shadow-sm"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-[#95d5b2]" />
+                  <span>Sign In</span>
                 </button>
-                <button type="button" className="lp-btn-secondary" onClick={() => go('map')}>
-                  📍 Explore Tree Map
-                </button>
-              </div>
-            </div>
-            <a href="#why" className="lp-scroll-hint" aria-label="Scroll">
-              <ChevronDown />
-            </a>
-          </header>
-
-          <section id="why" className="lp-section lp-why-section">
-            <div className="lp-why-bg" style={{ backgroundImage: `url(${treeCanopy})` }} aria-hidden="true" />
-            <div className="lp-why-veil" aria-hidden="true" />
-            <div className="lp-container">
-              <div className="lp-section-head lp-section-head-on-photo lp-reveal">
-                <h2>Why Trees Matter</h2>
-                <p>Living infrastructure that cools cities, cleans air, and shelters life.</p>
-              </div>
-              <div className="lp-why-spotlight lp-reveal">
-                <div className="lp-why-spotlight-icon">{WHY_TREES[activeWhy].icon}</div>
-                <div>
-                  <h3>{WHY_TREES[activeWhy].title}</h3>
-                  <p>{WHY_TREES[activeWhy].body}</p>
-                </div>
-              </div>
-              <div className="lp-why-grid">
-                {WHY_TREES.map((item, i) => (
-                  <button
-                    type="button"
-                    key={item.title}
-                    className={`lp-why-card lp-reveal ${activeWhy === i ? 'active' : ''}`}
-                    onMouseEnter={() => setActiveWhy(i)}
-                    onFocus={() => setActiveWhy(i)}
-                    onClick={() => setActiveWhy(i)}
-                  >
-                    <span className="lp-why-icon">{item.icon}</span>
-                    <h3>{item.title}</h3>
-                    <p>{item.body}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section id="bees" className="lp-section lp-bees-section">
-            <div className="lp-container lp-bees-layout">
-              <div className="lp-bees-copy lp-reveal">
-                <p className="lp-amber-label">Pollinators · Food · Forests</p>
-                <h2>🐝 The Tiny Guardians of Life</h2>
-                <blockquote className="lp-bees-quote">
-                  <p>
-                    &ldquo;If the bee disappeared off the face of the Earth, humanity would have only four years left to live…&rdquo;
-                  </p>
-                  <cite>— Commonly attributed to Albert Einstein</cite>
-                </blockquote>
-                <p className="lp-bees-lead">
-                  🌼 Bees pollinate more than <strong>75%</strong> of the world&apos;s flowering plants and support
-                  ecosystems that sustain forests, wildlife, and human food systems. Every tree planted creates a
-                  healthier habitat for pollinators and strengthens our planet&apos;s future.
-                </p>
-                <ul>
-                  <li>Bees pollinate nearly one-third of the world&apos;s food crops.</li>
-                  <li>Trees provide nectar, pollen, and habitat that keep pollinators alive.</li>
-                  <li>Without bees, biodiversity declines and harvests become fragile.</li>
-                  <li>Protecting flowering trees protects pollinators—and our food future.</li>
-                </ul>
-                <button type="button" className="lp-btn-honey" onClick={() => go('calculator')}>
-                  Protect trees with AI analysis
+                <button
+                  type="button"
+                  className="lp-nav-cta hidden sm:inline-flex"
+                  onClick={() => goTab('register')}
+                >
+                  <span>Enter Platform</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
-              </div>
-              <div className="lp-bees-visual lp-reveal">
-                <div className="lp-bees-frame">
-                  <img src={beesImg} alt="Honeybees on honeycomb" className="lp-bees-photo" />
-                  <div className="lp-bees-caption">Every flowering tree is a living pantry for bees.</div>
-                </div>
-                <div className="lp-bees-stats">
-                  <div className="lp-bees-stat">
-                    <strong>75%+</strong>
-                    <span>Flowering plants need pollinators</span>
-                  </div>
-                  <div className="lp-bees-stat">
-                    <strong>1/3</strong>
-                    <span>Of food crops depend on bees</span>
-                  </div>
-                  <div className="lp-bees-stat">
-                    <strong>Trees</strong>
-                    <span>Build nectar &amp; nesting habitat</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section id="features" className="lp-section lp-feat-section">
-            <div className="lp-container">
-              <div className="lp-section-head lp-reveal">
-                <h2>Our AI Features</h2>
-                <p>Science-backed tools for inventory, climate impact, and living maps.</p>
-              </div>
-              <div className="lp-feat-grid">
-                {FEATURES.map((f, i) => (
-                  <article key={f.title} className="lp-feat-card lp-reveal" style={{ transitionDelay: `${i * 35}ms` }}>
-                    <div className="lp-feat-icon">{f.icon}</div>
-                    <h3>{f.title}</h3>
-                    <p>{f.body}</p>
-                    <span className="lp-feat-glow" aria-hidden="true" />
-                  </article>
-                ))}
-              </div>
-              <div className="lp-cta-band lp-reveal">
-                <div>
-                  <Sparkles className="w-5 h-5" style={{ color: '#3d8b63' }} />
-                  <h3>Ready to inventory your first tree?</h3>
-                  <p>Run climatic analysis, learn why not to cut, and save trees to the live map.</p>
-                </div>
-                <div className="lp-hero-ctas">
-                  <button type="button" className="lp-btn-primary dark-text" onClick={() => go('calculator')}>
-                    🌳 Detect Tree Species
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAdminConsole(true)}
+                    className="px-3 py-1.5 rounded-full text-xs font-bold text-amber-300 bg-amber-500/20 border border-amber-500/40 hover:bg-amber-500/30 transition-all flex items-center gap-1.5 shadow-sm"
+                  >
+                    <Crown className="w-3.5 h-3.5 text-amber-400" />
+                    <span className="hidden md:inline">Admin Console</span>
                   </button>
-                  <button type="button" className="lp-btn-ghost" onClick={() => go('map')}>
-                    <MapPin className="w-4 h-4" />
-                    Explore Tree Map
-                  </button>
+                )}
+                {/* User capsule */}
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 text-white text-xs backdrop-blur-sm">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
+                      isAdmin ? 'bg-amber-400 text-stone-900' : 'bg-emerald-400 text-stone-900'
+                    }`}
+                  >
+                    {user?.name?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <span className="font-semibold hidden lg:inline max-w-[120px] truncate">{user?.name}</span>
+                  <span
+                    className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
+                      isAdmin ? 'bg-amber-400/30 text-amber-300' : 'bg-emerald-400/30 text-emerald-200'
+                    }`}
+                  >
+                    {isAdmin ? 'ADMIN' : 'USER'}
+                  </span>
                 </div>
+                <button
+                  type="button"
+                  className="lp-nav-cta hidden sm:inline-flex"
+                  onClick={() => goTab('register')}
+                >
+                  <span>Enter Platform</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={logout}
+                  title="Sign out of VanJeevan"
+                  className="p-2 rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-all"
+                  aria-label="Sign out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
               </div>
+            )}
+            <button
+              type="button"
+              className="lp-nav-hamburger"
+              onClick={() => setMenuOpen(true)}
+              aria-label="Open Navigation Menu"
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Mobile Drawer */}
+      {menuOpen && (
+        <div className="lp-mobile-menu">
+          <button
+            type="button"
+            className="lp-mobile-close"
+            onClick={() => setMenuOpen(false)}
+          >
+            <X className="w-8 h-8" />
+          </button>
+
+          {/* User Status in mobile drawer */}
+          {isAuthenticated ? (
+            <div className="mb-4 p-4 rounded-2xl bg-white/10 border border-white/15 text-white">
+              <div className="flex items-center justify-between mb-1">
+                <span className="font-bold text-sm">{user?.name}</span>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    isAdmin ? 'bg-amber-400 text-stone-900' : 'bg-emerald-400 text-stone-900'
+                  }`}
+                >
+                  {isAdmin ? 'ADMINISTRATOR' : 'FIELD RESEARCHER'}
+                </span>
+              </div>
+              <p className="text-xs text-white/70">{user?.email}</p>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setShowAdminConsole(true);
+                  }}
+                  className="mt-3 w-full py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center justify-center gap-1.5"
+                >
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>Open Admin Console</span>
+                </button>
+              )}
             </div>
-          </section>
-
-
-          {/* ── BIODIVERSITY (inline on home) ── */}
-          <section id="biodiversity" className="lp-section lp-bio-section" style={{ paddingTop: '5rem', paddingBottom: '5rem', background: 'rgba(4,12,6,0.97)' }}>
-            <div className="lp-container">
-              <div className="lp-section-head" style={{ marginBottom: '2rem' }}>
-                <h2 style={{ color: '#7ee8a2', fontSize: 'clamp(1.6rem,3.5vw,2.4rem)' }}>Urban Biodiversity</h2>
-                <p style={{ color: 'rgba(230,255,235,0.85)' }}>Trees are keystones — every species they shelter matters.</p>
-              </div>
-              <div className="lp-bio-grid">
-                {BIODIVERSITY.map((item) => (
-                  <article key={item.title} className="lp-bio-card" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(126,232,162,0.2)' }}>
-                    <span style={{ fontSize: '2rem' }}>{item.icon}</span>
-                    <h3 style={{ color: '#e8ffe8', marginTop: '0.5rem' }}>{item.title}</h3>
-                    <p style={{ color: 'rgba(220,255,225,0.82)', fontSize: '0.9rem' }}>{item.body}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </section>
-
-
-          {/* ── LAWS (inline on home) ── */}
-          <section id="laws" className="lp-section" style={{ background: 'rgba(3,9,5,0.98)', paddingTop: '4rem', paddingBottom: '5rem' }}>
-            <div className="lp-container" style={{ maxWidth: '860px' }}>
-              <div className="lp-section-head" style={{ marginBottom: '2rem' }}>
-                <h2 style={{ fontSize: 'clamp(1.5rem,3.5vw,2.2rem)', color: '#7ee8a2' }}>🌿 Tree Protection Laws</h2>
-                <p style={{ color: 'rgba(220,255,225,0.85)' }}>Know your rights and responsibilities when it comes to trees in India.</p>
-              </div>
-              <div className="lp-laws-list">
-                {LAWS.map((law, idx) => {
-                  const open = openLaw === idx;
-                  return (
-                    <div key={law.title} className={`lp-law-card ${open ? 'open' : ''}`} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(126,232,162,0.18)' }}>
-                      <button
-                        type="button"
-                        className="lp-law-toggle"
-                        onClick={() => setOpenLaw(open ? null : idx)}
-                        aria-expanded={open}
-                      >
-                        <span>{law.title}</span>
-                        <ChevronDown className={`lp-chevron ${open ? 'rot' : ''}`} />
-                      </button>
-                      {open && (
-                        <div className="lp-law-body">
-                          <p><strong>Purpose:</strong> {law.purpose}</p>
-                          <p><strong>Why it matters:</strong> {law.why}</p>
-                          <p><strong>Key rules:</strong> {law.rules}</p>
-                          <p><strong>Penalties:</strong> {law.penalties}</p>
-                          <a href={law.link} target="_blank" rel="noreferrer" className="lp-law-link">
-                            Read full text <ExternalLink className="w-3 h-3" />
-                          </a>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </section>
-
-          <footer className="lp-footer">
-            <div className="lp-container lp-footer-inner">
-              <div className="lp-brand">
-                <Trees className="w-5 h-5" />
-                <span>VanJeevan</span>
-              </div>
-              <p>AI-Powered GIS Tree Inventory & Climatic Impact Analysis System</p>
-              <button type="button" className="lp-nav-cta" onClick={() => go('calculator')}>
-                Launch App
+          ) : (
+            <div className="mb-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false);
+                  setAuthMode('login');
+                  setShowAuthModal(true);
+                }}
+                className="w-full py-2.5 rounded-xl font-bold text-xs bg-white text-[#142e1f] flex items-center justify-center gap-2 mb-2"
+              >
+                <LogIn className="w-4 h-4 text-[#2d6a4f]" />
+                <span>Sign In / Register</span>
               </button>
+            </div>
+          )}
+
+          <button type="button" onClick={() => navTo('home')}>Home</button>
+          <button type="button" onClick={() => navTo('who_we_are')}>Who We Are</button>
+          <button type="button" onClick={() => navTo('conservation')}>Why Trees Matter</button>
+          <button type="button" onClick={() => navTo('carbon')}>Carbon &amp; Satellites</button>
+          <button type="button" onClick={() => { setMenuOpen(false); goTab('map'); }}>GIS Live Map</button>
+          <button type="button" onClick={() => { setMenuOpen(false); goTab('permits'); }}>Cutting Permits &amp; Voting</button>
+          <button
+            type="button"
+            className="btn-harvest-gold mt-4"
+            onClick={() => { setMenuOpen(false); goTab('register'); }}
+          >
+            Enter Platform →
+          </button>
+          {isAuthenticated && (
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                logout();
+              }}
+              className="mt-3 text-xs text-red-300 hover:text-red-200 flex items-center justify-center gap-1.5 py-2"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* ─── SUBPAGE ROUTING ─── */}
+      {view === 'who_we_are' && (
+        <WhoWeArePage onBack={() => navTo('home')} onEnterApp={goTab} />
+      )}
+      {view === 'conservation' && (
+        <ConservationStoryPage onBack={() => navTo('home')} onEnterApp={goTab} />
+      )}
+      {view === 'carbon' && (
+        <CarbonIntelligencePage onBack={() => navTo('home')} onEnterApp={goTab} />
+      )}
+
+      {/* ─── HOMEPAGE VIEW (Full Trees for the Future structure) ─── */}
+      {view === 'home' && (
+        <>
+          {/* ════ HERO: Large Real Misty Forest ════ */}
+          <header
+            className="lp-hero"
+            style={{ backgroundImage: `url(${PHOTO_FOREST_HERO})` }}
+          >
+            <div className="lp-hero-overlay" />
+            <div className="lp-container lp-hero-content lp-reveal">
+              <span className="lp-hero-kicker">
+                <Trees className="w-4 h-4" />
+                VanJeevan · GIS Tree Conservation Platform
+              </span>
+              <h1 className="lp-hero-title">
+                Mapping Every Tree.
+                <br />
+                <em>Preserving Every Leaf.</em>
+              </h1>
+              <p className="lp-hero-sub">
+                An intelligent geospatial platform combining field tree inventories with Copernicus Sentinel-2
+                and USGS Landsat-9 satellite observations for sustainable infrastructure and urban forest stewardship.
+              </p>
+              <div className="lp-hero-ctas">
+                <button
+                  type="button"
+                  className="btn-forest-primary"
+                  onClick={() => goTab('map')}
+                >
+                  <Map className="w-4 h-4" />
+                  <span>Explore Interactive GIS Map</span>
+                </button>
+                <button
+                  type="button"
+                  className="btn-forest-secondary text-white border-white/60 hover:bg-white/10 hover:text-white"
+                  onClick={() => goTab('analysis')}
+                >
+                  <BarChart3 className="w-4 h-4" />
+                  <span>Plantation Location Analysis</span>
+                </button>
+              </div>
+
+              {/* Verified Stat Strip */}
+              {stats.trees !== null && (
+                <div className="lp-hero-stats">
+                  <div className="lp-hero-stat">
+                    <strong>{stats.trees.toLocaleString()}</strong>
+                    <span>Registered Trees</span>
+                  </div>
+                  <div className="lp-hero-stat">
+                    <strong>{stats.species}</strong>
+                    <span>Unique Species</span>
+                  </div>
+                  <div className="lp-hero-stat">
+                    <strong>10m MSI</strong>
+                    <span>Sentinel-2 NDVI</span>
+                  </div>
+                  <div className="lp-hero-stat">
+                    <strong>30m TIRS</strong>
+                    <span>Landsat Thermal</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </header>
+
+          {/* ════ SECTION 1: EDITORIAL PHOTOGRAPHIC STORYTELLING ════ */}
+          <section className="py-24 bg-[#fbf9f4]">
+            <div className="lp-container">
+              <div className="lp-editorial-grid">
+                <div className="lp-reveal">
+                  <span className="lp-section-kicker">Our Mission &amp; Purpose</span>
+                  <h2 className="lp-section-title">
+                    Technology &amp; Nature Working as One.
+                  </h2>
+                  <p className="text-base text-[#44594c] leading-relaxed mb-6">
+                    Rapid urban expansion often views mature trees as obstacles rather than irreplaceable ecological assets.
+                    VanJeevan provides planners, researchers, and campus administrators with geographic truth:
+                    pinpointing where trees stand, quantifying their carbon vaults, and identifying the most suitable locations to plant new ones.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={() => navTo('who_we_are')}
+                      className="btn-forest-primary"
+                    >
+                      <span>Read Who We Are</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => navTo('conservation')}
+                      className="btn-forest-secondary"
+                    >
+                      <span>Why Trees Matter</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="lp-photo-frame h-[460px] lp-reveal">
+                  <img src={PHOTO_CANOPY_SUN} alt="Lush green tree canopy with sunlight filtering through" />
+                  <div className="lp-photo-caption">
+                    Overhead canopy cools ambient air by up to 3.5°C through shade and evapotranspiration.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ════ SECTION 2: CORE PLATFORM CAPABILITIES ════ */}
+          <section className="py-24 bg-[#f3efe6]">
+            <div className="lp-container">
+              <div className="lp-section-head text-center max-w-2xl mx-auto lp-reveal">
+                <span className="lp-section-kicker">GIS Platform Capabilities</span>
+                <h2 className="lp-section-title">Engineered for Urban Forest Stewardship</h2>
+                <p className="lp-section-desc mx-auto">
+                  From mobile-responsive field data collection to multi-criteria geospatial site scoring.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {CORE_PILLARS.map((p, i) => (
+                  <article
+                    key={p.title}
+                    className="lp-impact-card lp-reveal bg-white border-2 border-slate-200/90 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-xl transition-all"
+                    style={{ transitionDelay: `${i * 60}ms` }}
+                  >
+                    <div>
+                      {/* Big Square Image Frame */}
+                      <div className="w-full aspect-square rounded-2xl overflow-hidden mb-6 relative group shadow-sm border border-slate-200 bg-slate-100">
+                        <img
+                          src={p.image}
+                          alt={p.title}
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                      </div>
+                      <div className="flex items-center gap-2 mb-2">
+                        {p.icon}
+                        <span className="text-xs font-bold uppercase text-[#059669] tracking-wider">Module {i + 1}</span>
+                      </div>
+                      <h3 className="text-2xl font-bold text-[#022c17] font-['Fraunces'] mb-2">{p.title}</h3>
+                      <p className="text-sm font-semibold text-[#142e1f]/80 mb-2">{p.summary}</p>
+                      <p className="text-xs text-[#44594c] leading-relaxed mb-6">{p.detail}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => goTab(p.tab)}
+                      className="btn-forest-secondary w-full"
+                    >
+                      <span>{p.cta}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </article>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ════ SECTION 3: INTERACTIVE GIS CARTOGRAPHY PREVIEW ════ */}
+          <section className="py-24 bg-[#fbf9f4]">
+            <div className="lp-container">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 lp-reveal">
+                <div>
+                  <span className="lp-section-kicker">Interactive Geospatial Map</span>
+                  <h2 className="lp-section-title">Live Campus Tree Inventory</h2>
+                  <p className="lp-section-desc">
+                    Explore registered specimens mapped in real-time across the K.K. Wagh Engineering campus.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => goTab('map')}
+                  className="btn-forest-primary shrink-0"
+                >
+                  <Map className="w-4 h-4" />
+                  <span>Launch Full GIS Workspace</span>
+                </button>
+              </div>
+
+              <div className="lp-reveal">
+                <GisMapPreview />
+              </div>
+            </div>
+          </section>
+
+          {/* ════ SECTION 4: PLANTATION RECOMMENDATIONS HIGHLIGHT ════ */}
+          <section className="py-24 bg-[#142e1f] text-white">
+            <div className="lp-container">
+              <div className="lp-editorial-grid items-center">
+                <div className="lp-photo-frame h-[440px] lp-reveal">
+                  <img src={PHOTO_PLANTING_HANDS} alt="Hands planting tree sapling into fresh soil" />
+                  <div className="lp-photo-caption">
+                    Optimal candidate plantation sites calculated from tree distances, open soil, and heat deficits.
+                  </div>
+                </div>
+                <div className="lp-reveal">
+                  <span className="text-xs uppercase font-bold text-[#74c69d] tracking-wider">
+                    New Geospatial Feature
+                  </span>
+                  <h2 className="text-white text-3xl sm:text-4xl lg:text-5xl font-bold mt-2 mb-4 leading-tight">
+                    Map-Based Tree Plantation Recommendations
+                  </h2>
+                  <p className="text-white/80 text-base leading-relaxed mb-6">
+                    Our multi-criteria spatial algorithm screens study zones for open pervious soil (NRSC LULC),
+                    checks tree-to-tree root clearance (minimum 6m spacing), calculates Sentinel-2 NDVI canopy deficit,
+                    and pairs optimal spots with native drought-tolerant species (Neem, Rain Tree, Ashoka, Banyan).
+                  </p>
+                  <div className="space-y-3 mb-8 text-sm">
+                    <div className="flex items-center gap-3">
+                      <span className="w-3 h-3 rounded-full bg-[#ef4444]" />
+                      <span><strong>Red Markers:</strong> High-priority investigation sites with high cooling need &amp; open soil</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-3 h-3 rounded-full bg-[#f59e0b]" />
+                      <span><strong>Orange Markers:</strong> Moderate priority infill opportunities</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="w-3 h-3 rounded-full bg-[#10b981]" />
+                      <span><strong>Green Markers:</strong> Potential candidate spots</span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => goTab('analysis')}
+                    className="btn-harvest-gold"
+                  >
+                    <span>View Plantation Dashboard</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ════ SECTION 5: CALL TO ACTION FOOTER ════ */}
+          <footer className="lp-footer">
+            <div className="lp-container">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+                {/* Brand Col */}
+                <div className="md:col-span-2">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Trees className="w-6 h-6 text-[#74c69d]" />
+                    <span className="font-bold text-xl font-['Fraunces'] text-white">VanJeevan</span>
+                  </div>
+                  <p className="text-sm text-white/70 max-w-sm leading-relaxed mb-4">
+                    AI-Powered GIS Tree Inventory &amp; Climate Impact System.
+                    Evidence-based tree protection, biomass allometry, and sustainable campus planning.
+                  </p>
+                  <p className="text-xs text-[#74c69d]">
+                    🌿 Every registered tree is a living landmark protected for future generations.
+                  </p>
+                </div>
+
+                {/* Explore Links */}
+                <div>
+                  <h4>Platform Workspace</h4>
+                  <button type="button" onClick={() => goTab('register')}>Tree Registration</button>
+                  <button type="button" onClick={() => goTab('map')}>Live GIS Map</button>
+                  <button type="button" onClick={() => goTab('analysis')}>Plantation Dashboard</button>
+                  <button type="button" onClick={() => goTab('permits')}>Cutting Permits &amp; Voting</button>
+                  <button type="button" onClick={() => goTab('history')}>Inventory Records</button>
+                </div>
+
+                {/* Editorial Pages */}
+                <div>
+                  <h4>Editorial Stories</h4>
+                  <button type="button" onClick={() => navTo('who_we_are')}>Who We Are</button>
+                  <button type="button" onClick={() => navTo('conservation')}>Why Trees Matter</button>
+                  <button type="button" onClick={() => navTo('carbon')}>Carbon &amp; Satellites</button>
+                </div>
+              </div>
+
+              <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-white/50">
+                <span>© 2025 VanJeevan · K.K. Wagh Institute of Engineering Education &amp; Research, Nashik</span>
+                <span>Satellite Data: Copernicus EU · USGS · ISRO NRSC</span>
+              </div>
             </div>
           </footer>
         </>
       )}
+
+      {/* Role-Based Authentication Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={handleAuthDone}
+        initialTab={authMode}
+      />
+
+      {/* Administrator Governance Console */}
+      <AdminConsoleModal
+        isOpen={showAdminConsole}
+        onClose={() => setShowAdminConsole(false)}
+      />
     </div>
   );
 }

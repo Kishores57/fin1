@@ -343,29 +343,36 @@ export default function ConserveTreePage({ result, onBack, onSaved, onError }) {
           <MapPin className="w-4 h-4 text-emerald-400" />
           Confirm GPS then save to MongoDB
         </h3>
-        <label className="text-xs text-slate-400 block space-y-1">
-          <span>Tree name</span>
+        <label className="text-xs font-bold text-emerald-400 block space-y-1.5">
+          <span className="text-emerald-300">Tree Name</span>
           <input
-            className="w-full rounded-xl bg-slate-950/60 border border-slate-800 px-3 py-2 text-slate-200"
+            className="w-full rounded-2xl bg-gradient-to-b from-[#082216]/95 to-[#051a10]/95 border-[1.5px] border-emerald-600/50 hover:border-emerald-400 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/20 px-4 py-3 text-sm font-semibold text-emerald-200 placeholder:text-emerald-700/60 transition-all outline-none shadow-inner"
             value={treeName}
             onChange={(e) => setTreeName(e.target.value)}
+            placeholder="e.g. North Campus Banyan"
           />
         </label>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <label className="text-xs text-slate-400 space-y-1">
-            <span>Latitude *</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="text-xs font-bold text-emerald-400 space-y-1.5 block">
+            <span className="text-emerald-300">Latitude *</span>
             <input
-              className={`w-full rounded-xl bg-slate-950/60 border px-3 py-2 text-slate-200 ${gpsOk ? 'border-slate-800' : 'border-red-500/50'}`}
+              className={`w-full rounded-2xl bg-gradient-to-b from-[#082216]/95 to-[#051a10]/95 border-[1.5px] px-4 py-3 text-sm font-semibold text-emerald-200 placeholder:text-emerald-700/60 font-mono transition-all outline-none shadow-inner ${
+                gpsOk ? 'border-emerald-600/50 hover:border-emerald-400 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/20' : 'border-red-500/60'
+              }`}
               value={latitude}
               onChange={(e) => setLatitude(e.target.value)}
+              placeholder="e.g. 20.0135"
             />
           </label>
-          <label className="text-xs text-slate-400 space-y-1">
-            <span>Longitude *</span>
+          <label className="text-xs font-bold text-emerald-400 space-y-1.5 block">
+            <span className="text-emerald-300">Longitude *</span>
             <input
-              className={`w-full rounded-xl bg-slate-950/60 border px-3 py-2 text-slate-200 ${gpsOk ? 'border-slate-800' : 'border-red-500/50'}`}
+              className={`w-full rounded-2xl bg-gradient-to-b from-[#082216]/95 to-[#051a10]/95 border-[1.5px] px-4 py-3 text-sm font-semibold text-emerald-200 placeholder:text-emerald-700/60 font-mono transition-all outline-none shadow-inner ${
+                gpsOk ? 'border-emerald-600/50 hover:border-emerald-400 focus:border-emerald-300 focus:ring-4 focus:ring-emerald-500/20' : 'border-red-500/60'
+              }`}
               value={longitude}
               onChange={(e) => setLongitude(e.target.value)}
+              placeholder="e.g. 73.8213"
             />
           </label>
         </div>

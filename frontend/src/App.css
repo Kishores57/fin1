@@ -1,164 +1,252 @@
 /* ═══════════════════════════════════════════════════════
-   App-wide Theme — Forest Glassmorphism
-   Matches the LandingPage transparent/blurry vibe
+   VanJeevan · App Shell & Navigation
+   Nature-Inspired Editorial Theme (Trees for the Future)
+   Warm sand backdrop, forest-green accents, real photography.
    ═══════════════════════════════════════════════════════ */
 
-/* Fixed forest background that shows through all tabs */
-.app-forest-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  background-color: #111c14;
-}
-
-.app-forest-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: var(--app-bg-image);
-  background-size: cover;
-  background-position: center 30%;
-  opacity: 0.55;
-  filter: saturate(1.1) brightness(0.75);
-}
-
-.app-forest-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(10, 20, 12, 0.72) 0%, rgba(10, 20, 12, 0.45) 40%, rgba(10, 20, 12, 0.75) 100%),
-    radial-gradient(ellipse at 30% 20%, rgba(61, 139, 99, 0.12) 0%, transparent 55%),
-    radial-gradient(ellipse at 70% 80%, rgba(167, 201, 87, 0.07) 0%, transparent 55%);
-}
-
-/* ── App shell ── */
+/* ── App Shell Root ── */
 .app-shell {
-  position: relative;
   min-height: 100vh;
-  font-family: 'Sora', 'Inter', system-ui, sans-serif;
-  color: #f0f7ec;
-  overflow-x: hidden;
+  background-color: var(--color-sand-100);
+  color: var(--color-ink-900);
+  font-family: var(--font-sans);
+  position: relative;
 }
 
-/* ── Floating glow orbs ── */
-.app-orb {
-  position: fixed;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: -1;
-  animation: orb-pulse 10s infinite ease-in-out;
+/* ── Top Atmospheric Photo Banner ── */
+.app-top-banner {
+  height: 220px;
+  position: relative;
+  background-size: cover;
+  background-position: center 38%;
+  overflow: hidden;
 }
 
-@keyframes orb-pulse {
-  0%, 100% { opacity: 0.35; transform: scale(1); }
-  50% { opacity: 0.55; transform: scale(1.08); }
+.app-top-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(13, 31, 21, 0.45) 0%,
+    rgba(13, 31, 21, 0.78) 70%,
+    var(--color-sand-100) 100%
+  );
 }
 
-/* ── Header ── */
-.app-header {
-  background: rgba(14, 25, 16, 0.55);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(167, 201, 87, 0.18);
-  border-radius: 1.5rem;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
-  transition: background 0.3s ease;
+.app-top-banner-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
 
-.app-header:hover {
-  background: rgba(14, 25, 16, 0.68);
+.app-top-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.25rem 0.75rem;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 9999px;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  width: fit-content;
 }
 
-/* ── Tab nav buttons ── */
-.app-tab-btn {
+.app-top-title {
+  font-family: var(--font-editorial);
+  font-size: clamp(1.6rem, 3.2vw, 2.3rem);
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  line-height: 1.15;
+}
+
+.app-top-sub {
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.88rem;
+  margin-top: 0.25rem;
+}
+
+/* ── Sticky Nature Navigation Bar ── */
+.app-header-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(253, 252, 249, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: 0 4px 18px -2px rgba(20, 46, 31, 0.04);
+  transition: all 0.25s ease;
+}
+
+.app-nav-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.app-brand-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.75rem;
+  background: var(--color-forest-600);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25);
+}
+
+.app-brand-name {
+  font-family: var(--font-editorial);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-forest-950);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.app-brand-tagline {
+  font-size: 0.7rem;
+  color: var(--color-ink-400);
+  font-weight: 500;
+}
+
+/* ── Navigation Tabs ── */
+.app-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: var(--color-sand-200);
+  padding: 0.3rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-light);
+}
+
+.app-nav-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  padding: 0.55rem 1.05rem;
-  border-radius: 999px;
-  font-size: 0.88rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
   font-weight: 600;
-  cursor: pointer;
-  border: 1px solid transparent;
-  transition: all 0.2s ease;
-  font-family: 'Sora', sans-serif;
-  color: rgba(240, 247, 236, 0.7);
+  color: var(--color-ink-600);
   background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
-.app-tab-btn:hover {
-  color: #f0f7ec;
-  background: rgba(167, 201, 87, 0.1);
-  border-color: rgba(167, 201, 87, 0.3);
+.app-nav-btn:hover {
+  color: var(--color-forest-950);
 }
 
-.app-tab-btn.active {
-  background: rgba(167, 201, 87, 0.18);
-  color: #c8e694;
-  border-color: rgba(167, 201, 87, 0.45);
-  box-shadow: 0 0 16px rgba(167, 201, 87, 0.15);
+.app-nav-btn.active {
+  background: #ffffff;
+  color: var(--color-forest-700);
+  box-shadow: 0 2px 8px rgba(20, 46, 31, 0.08);
+  font-weight: 700;
 }
 
-/* ── Content panels — override glass-panel with nature glassmorphism ── */
-.app-content-wrap .glass-panel {
-  background: rgba(12, 22, 14, 0.45) !important;
-  backdrop-filter: blur(18px) !important;
-  -webkit-backdrop-filter: blur(18px) !important;
-  border: 1px solid rgba(167, 201, 87, 0.15) !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25) !important;
+/* ── Summary Stats Strip ── */
+.app-stat-card {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: 1.15rem;
+  padding: 1.2rem;
+  box-shadow: 0 2px 12px rgba(20, 46, 31, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.app-content-wrap .glass-card {
-  background: rgba(12, 22, 14, 0.38) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border: 1px solid rgba(167, 201, 87, 0.12) !important;
+.app-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(20, 46, 31, 0.08);
+  border-color: var(--border-forest);
 }
 
-.app-content-wrap .glass-input {
-  background: rgba(8, 16, 10, 0.55) !important;
-  border-color: rgba(167, 201, 87, 0.2) !important;
-  color: #dff0d4 !important;
+.app-stat-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
 }
 
-.app-content-wrap .glass-input:focus {
-  border-color: rgba(167, 201, 87, 0.55) !important;
-  box-shadow: 0 0 0 3px rgba(167, 201, 87, 0.1) !important;
+.app-stat-value {
+  font-family: var(--font-editorial);
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
 }
 
-/* ── Table inside app-content-wrap ── */
-.app-content-wrap table thead tr {
-  background: rgba(8, 16, 10, 0.6) !important;
+.app-stat-sub {
+  font-size: 0.75rem;
+  color: var(--color-ink-400);
+  margin-top: 0.25rem;
 }
 
-/* ── Error banner ── */
+/* ── Error Banner ── */
 .app-error-banner {
-  background: rgba(120, 20, 20, 0.45);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: #fef2f2;
+  border: 1px solid #fecaca;
   border-radius: 1rem;
+  color: #991b1b;
 }
 
-/* ── Map wrapper — no extra border ── */
-.app-map-wrap {
-  border-radius: 1.25rem;
-  overflow: hidden;
-  border: 1px solid rgba(167, 201, 87, 0.15);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+/* ── Section Title Strip ── */
+.app-page-header {
+  margin-bottom: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
 }
 
-/* ── Scrollbar ── */
-::-webkit-scrollbar-track {
-  background: rgba(8, 16, 10, 0.4) !important;
+.app-page-heading {
+  font-family: var(--font-editorial);
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  color: var(--color-forest-950);
 }
 
-::-webkit-scrollbar-thumb {
-  background: rgba(61, 139, 99, 0.5) !important;
-  border-radius: 99px;
+.app-page-description {
+  font-size: 0.88rem;
+  color: var(--color-ink-600);
+  max-width: 48rem;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(167, 201, 87, 0.55) !important;
+/* Responsive */
+@media (max-width: 900px) {
+  .app-nav-tabs {
+    overflow-x: auto;
+    max-width: 100%;
+    border-radius: 1rem;
+  }
 }

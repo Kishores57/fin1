@@ -81,8 +81,8 @@ export default function CalculatorForm({ onResult, onError }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-          <Trees className="w-4 h-4 text-emerald-500" />
+        <label className="block text-sm font-semibold text-emerald-300 mb-2 flex items-center gap-2">
+          <Trees className="w-4 h-4 text-emerald-400" />
           Tree Species
         </label>
         <select
@@ -91,20 +91,20 @@ export default function CalculatorForm({ onResult, onError }) {
           className="w-full glass-input cursor-pointer"
         >
           {Array.isArray(speciesList) && speciesList.map((sp) => (
-            <option key={sp.id} value={sp.name} className="bg-slate-900 text-slate-100">
+            <option key={sp.id} value={sp.name} className="bg-emerald-950 text-emerald-200">
               {sp.name}
             </option>
           ))}
           {(!Array.isArray(speciesList) || speciesList.length === 0) && (
-            <option value="" className="bg-slate-900 text-slate-100">Loading species...</option>
+            <option value="" className="bg-emerald-950 text-emerald-200">Loading species...</option>
           )}
         </select>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-            <Hash className="w-4 h-4 text-emerald-500" />
+          <label className="block text-sm font-semibold text-emerald-300 mb-2 flex items-center gap-2">
+            <Hash className="w-4 h-4 text-emerald-400" />
             Girth at Breast Height (GBH in cm)
           </label>
           <input
@@ -119,8 +119,8 @@ export default function CalculatorForm({ onResult, onError }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2 flex items-center gap-2">
-            <Ruler className="w-4 h-4 text-emerald-500" />
+          <label className="block text-sm font-semibold text-emerald-300 mb-2 flex items-center gap-2">
+            <Ruler className="w-4 h-4 text-emerald-400" />
             Tree Height (H in meters)
           </label>
           <input
@@ -135,11 +135,11 @@ export default function CalculatorForm({ onResult, onError }) {
         </div>
       </div>
 
-      <div className="border-t border-slate-800/80 pt-6">
+      <div className="border-t border-emerald-900/60 pt-6">
         <div className="flex justify-between items-center mb-4">
-          <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-emerald-500" />
-            GIS Geolocation Coordinates <span className="text-xs text-slate-500">(Optional)</span>
+          <label className="text-sm font-semibold text-emerald-300 flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-emerald-400" />
+            GIS Geolocation Coordinates <span className="text-xs text-emerald-500/70">(Optional)</span>
           </label>
           <button
             type="button"
