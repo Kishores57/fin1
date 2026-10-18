@@ -3,6 +3,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+// Reloaded with updated Epicollect credentials
 import { settings } from './config.js';
 import { initDb } from './database/initDb.js';
 import { connectMongo } from './database/mongo.js';

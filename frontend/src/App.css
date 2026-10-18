@@ -243,10 +243,35 @@
 }
 
 /* Responsive */
-@media (max-width: 900px) {
+.app-nav-tabs {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.app-nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 1240px) {
+  .app-nav-container {
+    flex-wrap: wrap;
+    padding: 0.65rem 1.25rem;
+    gap: 0.85rem;
+  }
   .app-nav-tabs {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
     overflow-x: auto;
-    max-width: 100%;
-    border-radius: 1rem;
+    padding: 0.35rem 0.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-brand-tagline {
+    display: none;
+  }
+  .app-nav-btn {
+    padding: 0.45rem 0.75rem;
+    font-size: 0.8rem;
   }
 }

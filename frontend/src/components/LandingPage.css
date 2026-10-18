@@ -58,14 +58,30 @@
 
 /* ─── SCROLL REVEAL ─── */
 .lp-reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.lp-reveal.lp-in {
   opacity: 1;
   transform: translateY(0);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.js-reveal .lp-reveal:not(.lp-in) {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.lp-reveal.lp-in,
+.js-reveal .lp-reveal.lp-in {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-reveal,
+  .js-reveal .lp-reveal:not(.lp-in) {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* ─── STICKY HEADER NAVIGATION ─── */

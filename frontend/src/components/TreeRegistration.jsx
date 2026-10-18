@@ -21,6 +21,7 @@ import { treeApi, registeredTreeApi, mediaBaseUrl, speciesDetectionApi } from '.
 import ResultCard from './ResultCard';
 import ConserveTreePage from './ConserveTreePage';
 import { mapRegisteredTreeToCalculatorResult } from '../utils/mapTreeToCalculatorResult';
+import L, { createTileLayer } from '../utils/mapConfig';
 
 const HEALTH_OPTIONS = ['Healthy', 'Fair', 'Stressed', 'Damaged', 'Dead'];
 
@@ -249,6 +250,10 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
   const [detailsTree, setDetailsTree] = useState(null);
   const [focusAnalysis, setFocusAnalysis] = useState(false);
   const calculatorRef = useRef(null);
+  const mapRef = useRef(null);
+  const mapInstance = useRef(null);
+  const markerRef = useRef(null);
+  const registeredLayer = useRef(null);
 
   // Species detection state
   const [detectionImage, setDetectionImage] = useState(null);
@@ -408,6 +413,134 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
     void sp;
   }, [form.species]);
 
+  const placeMarker = useCallback((lat, lng) => {
+    // eslint-disable-next-line no-undef
+    const L = window.L;
+    if (!mapInstance.current || !L) return;
+    if (markerRef.current) {
+      markerRef.current.setLatLng([lat, lng]);
+    } else {
+      markerRef.current = L.marker([lat, lng], { draggable: true }).addTo(mapInstance.current);
+      markerRef.current.on('dragend', () => {
+        const p = markerRef.current.getLatLng();
+        setForm((f) => ({ ...f, latitude: String(p.lat.toFixed(6)), longitude: String(p.lng.toFixed(6)) }));
+        setGpsHint('');
+      });
+    }
+    mapInstance.current.setView([lat, lng], Math.max(mapInstance.current.getZoom(), 16));
+  }, []);
+
+  const renderRegisteredMarkers = useCallback(() => {
+    // eslint-disable-next-line no-undef
+    const L = window.L;
+    if (!mapInstance.current || !L) return;
+    if (registeredLayer.current) {
+      registeredLayer.current.clearLayers();
+    } else {
+      registeredLayer.current = L.layerGroup().addTo(mapInstance.current);
+    }
+
+    trees.forEach((tree) => {
+      if (!hasValidGps(tree.latitude, tree.longitude)) return;
+      const m = L.marker([tree.latitude, tree.longitude], {
+        icon: L.divIcon({
+          className: '',
+          html: `<div style="width:14px;height:14px;border-radius:50%;background:#10b981;border:2px solid #ecfdf5;box-shadow:0 0 0 3px rgba(16,185,129,.35)"></div>`,
+          iconSize: [14, 14],
+          iconAnchor: [7, 7],
+        }),
+      });
+      const dateAdded = tree.createdAt ? new Date(tree.createdAt).toLocaleDateString() : '—';
+      m.bindPopup(`
+        <div style="min-width:200px;font-family:system-ui;font-size:12px">
+          <strong>${tree.treeName || tree.species}</strong><br/>
+          Species: ${tree.species}<br/>
+          Scientific: ${tree.scientificName || '—'}<br/>
+          Age: ${tree.age ?? '—'} yr<br/>
+          Height: ${tree.height ?? '—'} m<br/>
+          DBH: ${tree.dbh ?? '—'} cm<br/>
+          Lat: ${tree.latitude}<br/>
+          Lng: ${tree.longitude}<br/>
+          Health: ${tree.healthStatus || '—'}<br/>
+          Date Added: ${dateAdded}<br/>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+            <button data-act="details" data-id="${tree._id}" style="padding:4px 8px;border-radius:6px;border:0;background:#0f766e;color:#fff;cursor:pointer">View Details</button>
+            <button data-act="analysis" data-id="${tree._id}" style="padding:4px 8px;border-radius:6px;border:0;background:#4f46e5;color:#fff;cursor:pointer">Analysis</button>
+            <button data-act="delete" data-id="${tree._id}" style="padding:4px 8px;border-radius:6px;border:0;background:#b91c1c;color:#fff;cursor:pointer">Delete</button>
+          </div>
+        </div>
+      `);
+      m.on('popupopen', () => {
+        const el = m.getPopup().getElement();
+        if (!el) return;
+        el.querySelectorAll('button[data-act]').forEach((btn) => {
+          btn.onclick = async () => {
+            const id = btn.getAttribute('data-id');
+            const act = btn.getAttribute('data-act');
+            const found = trees.find((t) => String(t._id) === String(id));
+            if (!found) return;
+            if (act === 'delete') {
+              if (!window.confirm('Are you sure you want to delete this tree?')) return;
+              try {
+                await registeredTreeApi.remove(id);
+                setTrees((prev) => prev.filter((t) => String(t._id) !== String(id)));
+                m.closePopup();
+              } catch (e) {
+                alert(e.response?.data?.detail || e.message);
+              }
+              return;
+            }
+            setFocusAnalysis(act === 'analysis');
+            setDetailsTree(found);
+          };
+        });
+      });
+      m.addTo(registeredLayer.current);
+    });
+  }, [trees]);
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstance.current) return;
+
+    mapInstance.current = L.map(mapRef.current, {
+      center: [20.0131, 73.8213],
+      zoom: 14,
+      scrollWheelZoom: true,
+    });
+
+    createTileLayer().addTo(mapInstance.current);
+
+    mapInstance.current.on('click', (e) => {
+      const { lat, lng } = e.latlng;
+      setForm((f) => ({
+        ...f,
+        latitude: String(lat.toFixed(6)),
+        longitude: String(lng.toFixed(6)),
+      }));
+      setGpsHint('');
+      placeMarker(lat, lng);
+    });
+
+    const handleResize = () => {
+      if (mapInstance.current) mapInstance.current.invalidateSize();
+    };
+    window.addEventListener('resize', handleResize);
+    setTimeout(handleResize, 100);
+    setTimeout(handleResize, 350);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [placeMarker]);
+
+
+  useEffect(() => {
+    renderRegisteredMarkers();
+  }, [renderRegisteredMarkers]);
+
+  useEffect(() => {
+    if (gpsValid) placeMarker(Number(form.latitude), Number(form.longitude));
+  }, [form.latitude, form.longitude, gpsValid, placeMarker]);
   const handleDeviceGps = () => {
     if (!navigator.geolocation) {
       setGpsHint('Geolocation is not supported on this device.');
@@ -419,6 +552,7 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
         const lng = pos.coords.longitude.toFixed(6);
         setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
         setGpsHint('');
+        placeMarker(Number(lat), Number(lng));
       },
       () => setGpsHint('Unable to read device location. Please manually enter coordinates.'),
       { enableHighAccuracy: true, timeout: 12000 }
@@ -921,6 +1055,22 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
                   placeholder="e.g. 73.821300"
                 />
               </label>
+            </div>
+
+            {/* Interactive Location Picker Map Canvas */}
+            <div className="space-y-1.5 pt-1">
+              <div className="flex items-center justify-between text-xs font-extrabold text-[#022c17]">
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#059669]" />
+                  Interactive Map Pinpoint
+                </span>
+                <span className="text-[11px] font-semibold text-slate-500">
+                  Click map or drag marker to set GPS
+                </span>
+              </div>
+              <div className="rounded-2xl overflow-hidden border-2 border-[#059669]/40 shadow-xs h-56 bg-slate-900 relative">
+                <div ref={mapRef} className="w-full h-full" style={{ minHeight: '220px' }} />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PrintReportButton } from './TreeReportPrint';
 import { API_BASE_URL } from '../services/api';
 
@@ -27,14 +27,18 @@ const BOTANICAL = {
 };
 
 export function normalizeTree(raw) {
-  if (!raw) return null;
-  const species = raw.species_name || raw.species || raw.treeName || 'Unknown';
+  if (!raw || typeof raw !== 'object') return null;
+  const species = raw.species_name || raw.species || raw.treeName || raw.commonName || 'Tree';
   const age = Number(raw.age ?? raw.estimatedAge ?? 10) || 10;
 
   let co2 = Number(raw.co2 ?? raw.co2_sequestered ?? 0);
+  if (!Number.isFinite(co2)) co2 = 0;
   let biomass = Number(raw.biomass ?? 0);
+  if (!Number.isFinite(biomass)) biomass = 0;
   let carbon = Number(raw.carbon ?? 0);
+  if (!Number.isFinite(carbon)) carbon = 0;
   let oxygen = Number(raw.oxygen ?? 0);
+  if (!Number.isFinite(oxygen)) oxygen = 0;
 
   if (biomass > 0) {
     if (!carbon) carbon = biomass * 0.47;
@@ -51,11 +55,44 @@ export function normalizeTree(raw) {
     oxygen = co2 * 0.727;
   }
 
-  const height = raw.height ?? null;
-  const dbh = raw.dbh ?? (raw.gbh ? (Number(raw.gbh) / Math.PI).toFixed(1) : null);
+  const height = raw.height != null ? Number(raw.height) : null;
+  const dbh = raw.dbh != null ? Number(raw.dbh) : (raw.gbh ? Number((Number(raw.gbh) / Math.PI).toFixed(1)) : null);
   const girth = raw.gbh ?? raw.girth ?? raw.circumference ?? null;
   const lat = raw.lat ?? raw.latitude ?? null;
   const lng = raw.lng ?? raw.longitude ?? null;
+
+  // Extract clean string image name/url from string or nested object
+  const extractImg = (v) => {
+    if (!v) return null;
+    if (typeof v === 'string') return v.trim() || null;
+    if (typeof v === 'object') {
+      return v.url || v.tree || v.leaf || v.bark || v.name || v.src || null;
+    }
+    return null;
+  };
+
+  const leafImage =
+    extractImg(raw.leafImage) ||
+    extractImg(raw.leaf_photo) ||
+    extractImg(raw.leaf_image) ||
+    extractImg(raw.images?.leaf) ||
+    extractImg(raw.photo) ||
+    null;
+
+  const barkImage =
+    extractImg(raw.barkImage) ||
+    extractImg(raw.bark_photo) ||
+    extractImg(raw.bark_image) ||
+    extractImg(raw.images?.bark) ||
+    null;
+
+  const fullImage =
+    extractImg(raw.fullImage) ||
+    extractImg(raw.height_photo) ||
+    extractImg(raw.height_image) ||
+    extractImg(raw.images?.tree) ||
+    extractImg(raw.photo) ||
+    null;
 
   return {
     ...raw,
@@ -76,11 +113,11 @@ export function normalizeTree(raw) {
     longitude: lng,
     scientificName: raw.scientific_name || raw.scientificName || BOTANICAL[species] || 'Tropical Flora',
     health: raw.health || raw.healthStatus || 'Healthy',
-    habitat: raw.habitat || null,
+    habitat: typeof raw.habitat === 'string' ? raw.habitat : (raw.habitat_support?.description || null),
     treeId: raw.treeId || raw._id || raw.id || null,
-    leafImage: raw.leaf_image || raw.leafImage || raw.leaf_photo || raw.photo || null,
-    barkImage: raw.bark_image || raw.barkImage || raw.bark_photo || null,
-    fullImage: raw.height_image || raw.heightImage || raw.height_photo || raw.fullImage || null,
+    leafImage,
+    barkImage,
+    fullImage,
     source: raw.source || (raw.species_name ? 'calculator' : 'map'),
   };
 }
@@ -110,8 +147,24 @@ export function normalizeForPrint(raw) {
 
 function resolveImg(val) {
   if (!val) return null;
-  if (val.startsWith('data:') || val.startsWith('http') || val.startsWith('/')) return val;
-  return `${API_BASE_URL}/api/epicollect/media?name=${val}`;
+  const str =
+    typeof val === 'string'
+      ? val
+      : typeof val === 'object'
+        ? (val.url || val.tree || val.leaf || val.bark || val.name || val.src || '')
+        : String(val);
+  if (!str || typeof str !== 'string') return null;
+  const trimmed = str.trim();
+  if (!trimmed) return null;
+  if (
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('http://') ||
+    trimmed.startsWith('https://') ||
+    trimmed.startsWith('/')
+  ) {
+    return trimmed;
+  }
+  return `${API_BASE_URL}/api/epicollect/media?name=${encodeURIComponent(trimmed)}`;
 }
 
 const TABS = [
@@ -187,8 +240,8 @@ function ConservationBanner({ text }) {
 }
 
 function TabContent({ tabKey, tree }) {
-  const co2Km = ((tree.co2 || 0) / 0.12).toFixed(0);
-  const o2Days = ((tree.oxygen || 0) / 0.84).toFixed(0);
+  const co2Km = (Number(tree.co2 || 0) / 0.12).toFixed(0);
+  const o2Days = (Number(tree.oxygen || 0) / 0.84).toFixed(0);
 
   switch (tabKey) {
     case 'oxygen':
@@ -196,9 +249,9 @@ function TabContent({ tabKey, tree }) {
         <div>
           <Section title="Key Metrics" color="#22d3ee">
             <InfoCards items={[
-              { label: 'Oxygen Released', value: `${(tree.oxygen || 0).toFixed(2)} kg`, sub: 'Lifetime total output' },
+              { label: 'Oxygen Released', value: `${Number(tree.oxygen || 0).toFixed(2)} kg`, sub: 'Lifetime total output' },
               { label: 'Supports Breathing', value: `${o2Days} days`, sub: 'For one adult human' },
-              { label: 'Annual Rate', value: `${((tree.oxygen || 0) / Math.max(1, tree.age)).toFixed(1)} kg/yr`, sub: 'Average yearly production' },
+              { label: 'Annual Rate', value: `${(Number(tree.oxygen || 0) / Math.max(1, Number(tree.age || 1))).toFixed(1)} kg/yr`, sub: 'Average yearly production' },
             ]} />
           </Section>
           <Section title="Biochemical Foundation" color="#94a3b8">
@@ -216,15 +269,15 @@ function TabContent({ tabKey, tree }) {
         <div>
           <Section title="Key Metrics" color="#34d399">
             <InfoCards items={[
-              { label: 'CO2 Sequestered', value: `${(tree.co2 || 0).toFixed(2)} kg`, sub: 'Lifetime total trapped' },
-              { label: 'Carbon Stored', value: `${(tree.carbon || 0).toFixed(2)} kg`, sub: '~47% of total dry biomass' },
+              { label: 'CO2 Sequestered', value: `${Number(tree.co2 || 0).toFixed(2)} kg`, sub: 'Lifetime total trapped' },
+              { label: 'Carbon Stored', value: `${Number(tree.carbon || 0).toFixed(2)} kg`, sub: '~47% of total dry biomass' },
               { label: 'Car Km Offset', value: `${co2Km} km`, sub: 'Equivalent vehicle emission offset' },
             ]} />
           </Section>
           <Section title="Sequestration Science" color="#94a3b8">
             <p style={{ color: '#cbd5e1', fontSize: '0.88rem', lineHeight: 1.7 }}>
               Atmospheric CO₂ has a molecular weight of 44 vs carbon's 12 (ratio <strong style={{ color: '#34d399' }}>44/12 ≈ 3.67</strong>).
-              This tree's carbon store locks away {(tree.co2 || 0).toFixed(1)} kg of atmospheric greenhouse gases into dense cellulose, hemicellulose, and lignin — the structural polymer that forms trunk wood and root systems.
+              This tree's carbon store locks away {Number(tree.co2 || 0).toFixed(1)} kg of atmospheric greenhouse gases into dense cellulose, hemicellulose, and lignin — the structural polymer that forms trunk wood and root systems.
             </p>
           </Section>
           <ConservationBanner text="If cut and incinerated or decomposed, all stored carbon oxidizes back into atmospheric CO₂ within months, wiping out decades of natural climate service." />
@@ -236,9 +289,9 @@ function TabContent({ tabKey, tree }) {
         <div>
           <Section title="Key Metrics" color="#fbbf24">
             <InfoCards items={[
-              { label: 'Aboveground Biomass', value: `${(tree.biomass || 0).toFixed(2)} kg`, sub: 'Total dry wood weight' },
-              { label: 'Root Biomass (IPCC)', value: `${((tree.biomass || 0) * 0.26).toFixed(2)} kg`, sub: 'Below-ground root system' },
-              { label: 'Total Biological Mass', value: `${((tree.biomass || 0) * 1.26).toFixed(2)} kg`, sub: 'Combined structural weight' },
+              { label: 'Aboveground Biomass', value: `${Number(tree.biomass || 0).toFixed(2)} kg`, sub: 'Total dry wood weight' },
+              { label: 'Root Biomass (IPCC)', value: `${(Number(tree.biomass || 0) * 0.26).toFixed(2)} kg`, sub: 'Below-ground root system' },
+              { label: 'Total Biological Mass', value: `${(Number(tree.biomass || 0) * 1.26).toFixed(2)} kg`, sub: 'Combined structural weight' },
             ]} />
           </Section>
           <Section title="Allometric Equation" color="#94a3b8">
@@ -502,35 +555,109 @@ function TabContent({ tabKey, tree }) {
   }
 }
 
-// ── Photo Card Component: Clean & Blank when missing ───────────────────────
-function PhotoSlot({ src, label, accentColor }) {
+const BOTANICAL_SPECIES_PHOTOS = {
+  'Ashok Tree': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80',
+  },
+  'Ashoka': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80',
+  },
+  'Palm Tree': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+  },
+  'Child Palm': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
+  },
+  'Chinese Palm': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
+  },
+  'Rain Tree': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
+  },
+  'Coconut Tree': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=800&q=80',
+  },
+  'Guava Tree': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80',
+  },
+  'Neem': {
+    leaf: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
+  },
+  'Banyan': {
+    leaf: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+  },
+  'Mango': {
+    leaf: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80',
+  },
+  'Peepal': {
+    leaf: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
+  },
+  'Moringa': {
+    leaf: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
+  },
+};
+
+const DEFAULT_BOTANICAL = {
+  leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
+  bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
+  tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
+};
+
+// ── Photo Card Component: Permanent visibility with robust fallback ────────
+function PhotoSlot({ src, label, accentColor, species = 'Ashok Tree', part = 'leaf' }) {
   const [lightbox, setLightbox] = useState(false);
 
-  // If user does not have added image, keep place clean, blank & understated
-  if (!src) {
-    return (
-      <div style={{
-        borderRadius: 14,
-        border: '1px dashed rgba(255, 255, 255, 0.09)',
-        background: 'rgba(255, 255, 255, 0.015)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 110,
-        padding: '0.75rem',
-        color: '#475569',
-        textAlign: 'center',
-      }}>
-        <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#475569', marginBottom: 2 }}>
-          {label}
-        </div>
-        <div style={{ fontSize: '0.66rem', color: '#334155', fontStyle: 'italic' }}>
-          Not Uploaded
-        </div>
-      </div>
-    );
-  }
+  const getFallback = () => {
+    const pack = BOTANICAL_SPECIES_PHOTOS[species] || DEFAULT_BOTANICAL;
+    return pack[part] || pack.tree || DEFAULT_BOTANICAL[part] || DEFAULT_BOTANICAL.tree;
+  };
+
+  const initialSrc = src || getFallback();
+  const [currentSrc, setCurrentSrc] = useState(initialSrc);
+  const [triedFallback, setTriedFallback] = useState(!src);
+
+  useEffect(() => {
+    if (src) {
+      setCurrentSrc(src);
+      setTriedFallback(false);
+    } else {
+      setCurrentSrc(getFallback());
+      setTriedFallback(true);
+    }
+  }, [src, species, part]);
+
+  const handleError = () => {
+    if (!triedFallback) {
+      setTriedFallback(true);
+      setCurrentSrc(getFallback());
+    }
+  };
 
   return (
     <>
@@ -550,10 +677,13 @@ function PhotoSlot({ src, label, accentColor }) {
         onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
         onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
       >
-        <div style={{ height: 115, overflow: 'hidden', background: '#020617' }}>
+        <div style={{ height: 115, overflow: 'hidden', background: '#020617', position: 'relative' }}>
           <img
-            src={src}
+            src={currentSrc}
             alt={label}
+            onError={handleError}
+            referrerPolicy="no-referrer"
+            loading="lazy"
             style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           />
         </div>
@@ -590,8 +720,10 @@ function PhotoSlot({ src, label, accentColor }) {
           }}
         >
           <img
-            src={src}
+            src={currentSrc}
             alt={label}
+            onError={handleError}
+            referrerPolicy="no-referrer"
             style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: 14, boxShadow: '0 0 50px rgba(0,0,0,0.8)' }}
           />
         </div>
@@ -600,12 +732,33 @@ function PhotoSlot({ src, label, accentColor }) {
   );
 }
 
+
 // ── Main Unified Report Component ──────────────────────────────────────────
 export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive', onPrint }) {
   const tree = normalizeTree(rawTree);
   const [activeTab, setActiveTab] = useState('oxygen');
 
-  if (!tree) return null;
+  if (!tree) {
+    return (
+      <div style={{
+        padding: '2.5rem 1.5rem',
+        textAlign: 'center',
+        background: 'rgba(15, 23, 42, 0.6)',
+        borderRadius: 16,
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        color: '#94a3b8',
+        margin: '1rem 0',
+      }}>
+        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🌳</div>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: '0.4rem' }}>
+          Tree Report Unavailable
+        </h3>
+        <p style={{ fontSize: '0.84rem', color: '#64748b' }}>
+          The selected tree record could not be loaded or parsed.
+        </p>
+      </div>
+    );
+  }
 
   const isPrint = mode === 'print';
   const leafSrc = resolveImg(tree.leafImage);
@@ -657,10 +810,10 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
             {[
-              { label: 'Age', val: `${tree.age} yrs` },
-              { label: 'CO2 Stored', val: `${(tree.co2 || 0).toFixed(0)} kg` },
-              { label: 'O2 Released', val: `${(tree.oxygen || 0).toFixed(0)} kg` },
-              { label: 'Biomass', val: `${(tree.biomass || 0).toFixed(0)} kg` },
+              { label: 'Age', val: `${Number(tree.age || 0)} yrs` },
+              { label: 'CO2 Stored', val: `${Number(tree.co2 || 0).toFixed(0)} kg` },
+              { label: 'O2 Released', val: `${Number(tree.oxygen || 0).toFixed(0)} kg` },
+              { label: 'Biomass', val: `${Number(tree.biomass || 0).toFixed(0)} kg` },
             ].map((m) => (
               <div key={m.label} style={{
                 background: 'rgba(15, 23, 42, 0.75)',
@@ -686,13 +839,14 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
           </div>
         </div>
 
-        {/* ── PHOTO ROW: When bark/tree missing, keep spots blank; only leaf shown ── */}
+        {/* ── PHOTO ROW: Resilient field photos with permanent botanical fallback ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
-          <PhotoSlot src={leafSrc} label="Leaf / Foliage" accentColor="#34d399" />
-          <PhotoSlot src={barkSrc} label="Trunk / Bark" accentColor="#fbbf24" />
-          <PhotoSlot src={fullSrc} label="Entire Tree" accentColor="#60a5fa" />
+          <PhotoSlot src={leafSrc} label="Leaf / Foliage" accentColor="#34d399" species={tree.species} part="leaf" />
+          <PhotoSlot src={barkSrc} label="Trunk / Bark" accentColor="#fbbf24" species={tree.species} part="bark" />
+          <PhotoSlot src={fullSrc} label="Entire Tree" accentColor="#60a5fa" species={tree.species} part="tree" />
         </div>
       </div>
+
 
       {/* ── SMALL HEADINGS IN VISUALLY IMPELLING SHAPES & COLOURS ── */}
       {!isPrint && (

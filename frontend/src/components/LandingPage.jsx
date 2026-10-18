@@ -33,6 +33,7 @@ import { API_BASE_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
 import AdminConsoleModal from './AdminConsoleModal';
+import L, { createTileLayer } from '../utils/mapConfig';
 import './LandingPage.css';
 
 /* ─── AUTHENTIC VERIFIED PHOTOGRAPHY ASSETS ────────────────────────── */
@@ -175,24 +176,40 @@ function useReveal(deps = []) {
   useEffect(() => {
     const el = ref.current;
     if (!el) return undefined;
+    el.classList.add('js-reveal');
     const nodes = el.querySelectorAll('.lp-reveal');
-    nodes.forEach((n) => n.classList.remove('lp-in'));
+
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
-          if (e.isIntersecting) e.target.classList.add('lp-in');
+          if (e.isIntersecting) {
+            e.target.classList.add('lp-in');
+            io.unobserve(e.target);
+          }
         });
       },
-      { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.04, rootMargin: '0px 0px 120px 0px' }
     );
     nodes.forEach((n) => io.observe(n));
-    requestAnimationFrame(() => {
+
+    const revealNear = () => {
       nodes.forEach((n) => {
         const rect = n.getBoundingClientRect();
-        if (rect.top < window.innerHeight * 0.94) n.classList.add('lp-in');
+        if (rect.top < window.innerHeight + 150) {
+          n.classList.add('lp-in');
+          io.unobserve(n);
+        }
       });
-    });
-    return () => io.disconnect();
+    };
+    revealNear();
+    const t1 = setTimeout(revealNear, 100);
+    const t2 = setTimeout(revealNear, 400);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      io.disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
   return ref;
@@ -204,9 +221,9 @@ function GisMapPreview() {
   const instanceRef = useRef(null);
 
   useEffect(() => {
-    if (!mapRef.current || instanceRef.current || !window.L) return;
+    if (!mapRef.current || instanceRef.current) return;
 
-    const map = window.L.map(mapRef.current, {
+    const map = L.map(mapRef.current, {
       zoomControl: true,
       scrollWheelZoom: false,
       doubleClickZoom: false,
@@ -214,18 +231,15 @@ function GisMapPreview() {
       attributionControl: false,
     }).setView([20.0131, 73.8213], 16);
 
-    window.L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-      { maxZoom: 22, maxNativeZoom: 19 }
-    ).addTo(map);
+    createTileLayer({ maxZoom: 22, maxNativeZoom: 19 }).addTo(map);
 
     // Fetch verified trees
     fetch(`${API_BASE_URL}/api/epicollect/trees`)
-      .then((r) => r.ok ? r.json() : [])
+      .then((r) => (r.ok ? r.json() : []))
       .then((trees) => {
         (trees || []).slice(0, 80).forEach((t) => {
           if (!t.lat || !t.lng) return;
-          window.L.circleMarker([t.lat, t.lng], {
+          L.circleMarker([t.lat, t.lng], {
             radius: 6.5,
             fillColor: '#2d6a4f',
             color: '#ffffff',
@@ -233,13 +247,22 @@ function GisMapPreview() {
             fillOpacity: 0.9,
           })
             .addTo(map)
-            .bindPopup(`<strong style="font-family:'Plus Jakarta Sans',sans-serif;color:#142e1f;">${t.species || 'Inventoried Tree'}</strong><br/><span style="font-size:11px;color:#708477;">KK Wagh Campus Survey</span>`);
+            .bindPopup(
+              `<strong style="font-family:'Plus Jakarta Sans',sans-serif;color:#142e1f;">${t.species || 'Inventoried Tree'}</strong><br/><span style="font-size:11px;color:#708477;">KK Wagh Campus Survey</span>`
+            );
         });
       })
       .catch(() => {});
 
     instanceRef.current = map;
-    setTimeout(() => map.invalidateSize(), 200);
+    const handleResize = () => map.invalidateSize();
+    window.addEventListener('resize', handleResize);
+    setTimeout(handleResize, 150);
+    setTimeout(handleResize, 450);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   return <div ref={mapRef} className="w-full h-[460px] rounded-2xl overflow-hidden shadow-inner border border-[rgba(20,46,31,0.12)]" />;

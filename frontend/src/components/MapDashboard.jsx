@@ -4,6 +4,7 @@ import { generateEcologicalInsight } from '../services/aiService';
 import SidebarMenu from './SidebarMenu';
 import { API_BASE_URL } from '../services/api';
 import UnifiedTreeReport from './UnifiedTreeReport';
+import L, { createTileLayer } from '../utils/mapConfig';
 
 // --- UTILS & CALCULATIONS ---
 const GROWTH_FACTORS = {
@@ -211,7 +212,6 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
     if (!mapRef.current) return;
 
     if (!mapInstance.current) {
-      // eslint-disable-next-line no-undef
       mapInstance.current = L.map(mapRef.current, {
         zoomControl:      false,
         scrollWheelZoom:  true,
@@ -222,26 +222,23 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
         minZoom:          3,
       }).setView([20.013100, 73.821316], 17);
 
-      // eslint-disable-next-line no-undef
       L.control.zoom({ position: 'topright' }).addTo(mapInstance.current);
 
-      // eslint-disable-next-line no-undef
-      L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-        { attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 22, maxNativeZoom: 19 }
-      ).addTo(mapInstance.current);
+      createTileLayer().addTo(mapInstance.current);
 
       mapInstance.current.on('zoomend', handleZoom);
     }
 
     if (mapInstanceRef) mapInstanceRef.current = mapInstance.current;
 
-    // Force size recalculation to ensure map is fully loaded and scrollable/interactive
-    setTimeout(() => {
-      if (mapInstance.current) {
-        mapInstance.current.invalidateSize();
-      }
-    }, 100);
+    // Force size recalculations to guarantee map tiles render with 0 blank/gray spots
+    const handleResize = () => {
+      if (mapInstance.current) mapInstance.current.invalidateSize();
+    };
+    window.addEventListener('resize', handleResize);
+    setTimeout(handleResize, 100);
+    setTimeout(handleResize, 400);
+
     updateDots();
     updateHighlightRing();
 
@@ -258,7 +255,7 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
     }
   }, [trees, highlightedTreeId]);
 
-  return <div ref={mapRef} className="fullscreen-map" style={{ height: 'calc(100vh - 120px)', width: '100%', position: 'relative', zIndex: 1, borderRadius: '24px' }}></div>;
+  return <div ref={mapRef} className="fullscreen-map" style={{ height: '72vh', minHeight: '580px', width: '100%', position: 'relative', zIndex: 1, borderRadius: '24px' }}></div>;
 };
 
 // --- MAP TREE FORM MODAL ---
@@ -421,6 +418,52 @@ const BOTANICAL_NAMES = {
   Peepal: 'Ficus religiosa',
 };
 
+// --- ERROR BOUNDARY FOR REPORT RENDERING ---
+class ReportErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('ReportErrorBoundary caught rendering error:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '2.5rem 1.5rem', textAlign: 'center', color: '#f87171' }}>
+          <div style={{ fontSize: '2.5rem', marginBottom: '0.6rem' }}>🌳</div>
+          <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fca5a5', marginBottom: '0.5rem' }}>
+            Unable to Display Tree Report
+          </h3>
+          <p style={{ fontSize: '0.84rem', color: '#cbd5e1', marginBottom: '1.25rem', maxWidth: '460px', margin: '0 auto 1.25rem' }}>
+            {this.state.error?.message || 'An unexpected rendering error occurred while generating this tree report.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => this.setState({ hasError: false, error: null })}
+            style={{
+              background: 'rgba(52, 211, 153, 0.2)',
+              border: '1px solid rgba(52, 211, 153, 0.4)',
+              color: '#34d399',
+              padding: '0.5rem 1.25rem',
+              borderRadius: '10px',
+              cursor: 'pointer',
+              fontWeight: 700,
+              fontSize: '0.82rem',
+            }}
+          >
+            Retry Report
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // --- AI INSIGHT MODAL (UNIFIED REPORT) ---
 const AiInsightModal = ({ tree, onClose, onDeleteMongoTree }) => {
   if (!tree) return null;
@@ -489,7 +532,9 @@ const AiInsightModal = ({ tree, onClose, onDeleteMongoTree }) => {
           ✕
         </button>
 
-        <UnifiedTreeReport tree={tree} mode="interactive" />
+        <ReportErrorBoundary>
+          <UnifiedTreeReport tree={tree} mode="interactive" />
+        </ReportErrorBoundary>
 
         {/* Delete option for MongoDB registered trees */}
         {tree.mongoId && onDeleteMongoTree && (
@@ -565,10 +610,19 @@ export const MapDashboard = ({ refreshKey = 0, onViewAnalysis }) => {
               impact: 'High',
               lat: t.latitude,
               lng: t.longitude,
+              leaf_photo: t.images?.leaf || null,
+              bark_photo: t.images?.bark || null,
+              height_photo: t.images?.tree || null,
+              leafImage: t.images?.leaf || null,
+              barkImage: t.images?.bark || null,
+              fullImage: t.images?.tree || null,
+              photo: t.images?.leaf || t.images?.tree || t.images?.bark || null,
+              images: t.images,
               source: 'mongo',
               createdAt: t.createdAt,
               raw: t,
             }));
+
           }
         } catch (mongoErr) {
           console.warn('Mongo registered trees unavailable:', mongoErr);
@@ -602,7 +656,7 @@ export const MapDashboard = ({ refreshKey = 0, onViewAnalysis }) => {
   };
 
   return (
-    <div className="relative w-full" style={{ minHeight: 'calc(100vh - 120px)' }}>
+    <div className="relative w-full">
       {/* Map loading spinner */}
       {loadingTrees && (
         <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm z-[999] flex flex-col items-center justify-center text-center">

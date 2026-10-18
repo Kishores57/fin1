@@ -483,3 +483,17 @@ textarea:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-forest-600);
 }
+
+/* Leaflet Map Styling and Fixes */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 10;
+  font-family: inherit;
+  background-color: #0b1329 !important;
+}
+
+.fullscreen-map {
+  width: 100%;
+  min-height: 480px;
+}
