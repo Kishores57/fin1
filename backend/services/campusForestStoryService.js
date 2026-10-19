@@ -199,6 +199,7 @@ export function computeCampusForestStory(treesInside, areaSqM, allTrees = []) {
       0.0673 * Math.pow(traits.woodDensity * Math.pow(dbh, 2) * height, 0.976)
     );
     const carbonKg = Math.round(biomassKg * 0.475);
+    const co2Kg = Math.round(carbonKg * 3.67);
     // Allometric annual sequestration rate (calibrated with i-Tree urban standards: 18-65 kg/yr for mature trees)
     const annualCo2Kg = Math.max(18, Math.min(65, Math.round(co2Kg / Math.max(15, Math.min(age, 45)))));
     const annualOxygenKg = Math.round(annualCo2Kg * 0.727);

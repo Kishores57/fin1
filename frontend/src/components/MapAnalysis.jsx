@@ -30,8 +30,12 @@ import {
   BarChart3,
   Wind,
   Droplets,
+  Database,
+  Search,
+  Filter,
 } from 'lucide-react';
 import { mapAnalysisApi, API_BASE_URL } from '../services/api';
+import UnifiedTreeReport from './UnifiedTreeReport';
 
 const BASEMAP_TILES = {
   dark: {
@@ -64,17 +68,25 @@ export default function MapAnalysis() {
   const lulcLayerRef = useRef(null);
   const recommendationsLayerRef = useRef(null);
   const calloutsLayerRef = useRef(null);
+  const epicollectLayerRef = useRef(null);
 
   // State
   const [zones, setZones] = useState([]);
   const [selectedZoneId, setSelectedZoneId] = useState('');
-  const [activeTab, setActiveTab] = useState('overview'); // overview, recommendations, distribution, green_zone, priority, climate, planning, report
+  const [activeTab, setActiveTab] = useState('overview'); // overview, recommendations, distribution, green_zone, priority, climate, planning, report, epicollect
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Epicollect Data State
+  const [epicollectTrees, setEpicollectTrees] = useState([]);
+  const [showEpicollect, setShowEpicollect] = useState(true);
+  const [epicollectFilter, setEpicollectFilter] = useState('ALL');
+  const [epicollectSearch, setEpicollectSearch] = useState('');
+  const [selectedEpicollectTree, setSelectedEpicollectTree] = useState(null);
+
   // Map Display Controls (Full-Width Cinematic Showcase)
-  const [mapTheme, setMapTheme] = useState('dark'); // 'dark' | 'voyager' | 'satellite'
+  const [mapTheme, setMapTheme] = useState('satellite'); // Default to satellite view for high fidelity
   const [isMapExpanded, setIsMapExpanded] = useState(false);
   const [currentCoords, setCurrentCoords] = useState({ lat: 20.0135, lng: 73.8213 });
 
@@ -93,12 +105,13 @@ export default function MapAnalysis() {
   const [simulationResult, setSimulationResult] = useState(null);
   const [simulating, setSimulating] = useState(false);
 
-  // 1. Load Predefined Zones
+  // 1. Load Predefined Zones & Epicollect Trees
   useEffect(() => {
-    async function loadZones() {
+    let cancelled = false;
+    async function loadInitialData() {
       try {
         const res = await mapAnalysisApi.getZones();
-        if (res && res.zones) {
+        if (res && res.zones && !cancelled) {
           setZones(res.zones);
           if (res.zones.length > 0) {
             setSelectedZoneId(res.zones[0].id);
@@ -106,10 +119,24 @@ export default function MapAnalysis() {
         }
       } catch (err) {
         console.error('Failed to load study zones:', err);
-        setError('Failed to load predefined study zones.');
+        if (!cancelled) setError('Failed to load predefined study zones.');
+      }
+
+      // Fetch live Epicollect field trees
+      try {
+        const epicRes = await fetch(`${API_BASE_URL}/api/epicollect/trees`);
+        if (epicRes.ok && !cancelled) {
+          const list = await epicRes.json();
+          if (Array.isArray(list)) {
+            setEpicollectTrees(list);
+          }
+        }
+      } catch (epicErr) {
+        console.warn('Failed to fetch Epicollect trees for MapAnalysis:', epicErr);
       }
     }
-    loadZones();
+    loadInitialData();
+    return () => { cancelled = true; };
   }, []);
 
   // 2. Initialize Leaflet Map
@@ -127,7 +154,7 @@ export default function MapAnalysis() {
       window.L.control.zoom({ position: 'topright' }).addTo(map);
 
       // Initial Basemap
-      const cfg = BASEMAP_TILES[mapTheme] || BASEMAP_TILES.dark;
+      const cfg = BASEMAP_TILES[mapTheme] || BASEMAP_TILES.satellite;
       tileLayerRef.current = window.L.tileLayer(cfg.url, {
         attribution: cfg.attribution,
         maxZoom: 22,
@@ -141,6 +168,7 @@ export default function MapAnalysis() {
       lulcLayerRef.current = window.L.layerGroup().addTo(map);
       recommendationsLayerRef.current = window.L.layerGroup().addTo(map);
       calloutsLayerRef.current = window.L.layerGroup().addTo(map);
+      epicollectLayerRef.current = window.L.layerGroup().addTo(map);
 
       // Live Mouse Telemetry
       map.on('mousemove', (e) => {
@@ -174,6 +202,155 @@ export default function MapAnalysis() {
     }).addTo(mapInstance.current);
     tileLayerRef.current.bringToBack();
   }, [mapTheme]);
+
+  // ── Render Epicollect Field Survey Trees Layer ──
+  useEffect(() => {
+    if (!mapInstance.current || !epicollectLayerRef.current || !window.L) return;
+    const L = window.L;
+    epicollectLayerRef.current.clearLayers();
+
+    if (!showEpicollect || !epicollectTrees.length) return;
+
+    const filtered = epicollectTrees.filter((tree) => {
+      if (!tree.lat || !tree.lng) return false;
+      if (epicollectFilter !== 'ALL' && tree.species !== epicollectFilter) return false;
+      if (epicollectSearch) {
+        const q = epicollectSearch.toLowerCase();
+        const matchesSpecies = (tree.species || '').toLowerCase().includes(q);
+        const matchesId = String(tree.id).includes(q) || `epic-${tree.id}`.includes(q);
+        if (!matchesSpecies && !matchesId) return false;
+      }
+      return true;
+    });
+
+    const zoom = mapInstance.current.getZoom();
+    const baseSize = Math.max(16, Math.min(34, 12 + (zoom - 12) * 2.2));
+
+    filtered.forEach((tree) => {
+      const isPalm = ['Palm Tree', 'Child Palm', 'Chinese Palm', 'Coconut Tree'].includes(tree.species);
+      const color = tree.impact === 'Critical' ? '#EF4444' : tree.impact === 'High' ? '#F59E0B' : '#10B981';
+
+      const svgContent = isPalm
+        ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22C11.5 17 11 12 12 9" />
+            <path d="M12 9c-2.5-1.5-5-1-7 1" />
+            <path d="M12 9c2.5-1.5 5-1 7 1" />
+            <path d="M12 9c-3-2.5-4-5.5-2-7.5" />
+            <path d="M12 9c3-2.5 4-5.5 2-7.5" />
+           </svg>`
+        : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22v-8" />
+            <path d="M9 14H8a4 4 0 0 1-4-4 6 6 0 0 1 12 0 4 4 0 0 1-4 4h-1z" />
+            <path d="M12 2v2" />
+           </svg>`;
+
+      const iconHtml = `
+        <div class="tree-marker-container" style="width: ${baseSize}px; height: ${baseSize}px; color: ${color}; cursor: pointer;" title="Epicollect #${tree.id} - ${tree.species}">
+          <div class="tree-marker-icon" style="background-color: ${color}; box-shadow: 0 2px 8px rgba(0,0,0,0.4);">
+            ${svgContent}
+          </div>
+        </div>
+      `;
+
+      const icon = L.divIcon({
+        className: 'custom-tree-icon-wrapper',
+        html: iconHtml,
+        iconSize: [baseSize, baseSize],
+        iconAnchor: [baseSize / 2, baseSize / 2],
+      });
+
+      const marker = L.marker([tree.lat, tree.lng], { icon });
+
+      const photoName = tree.bark_photo || tree.leaf_photo || tree.height_photo;
+      const photoUrl = photoName
+        ? `${API_BASE_URL}/api/epicollect/media?type=photo&name=${encodeURIComponent(photoName)}`
+        : null;
+
+      marker.bindPopup(`
+        <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12px; line-height: 1.45; color: #0f172a; min-width: 210px; max-width: 250px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: ${color};"></span>
+              <strong style="color: #047857; font-size: 13px;">${tree.species}</strong>
+            </div>
+            <span style="font-size: 10px; font-weight: 700; background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px;">EPIC-${tree.id}</span>
+          </div>
+
+          ${photoUrl ? `
+            <div style="width: 100%; height: 110px; border-radius: 8px; overflow: hidden; margin-bottom: 6px; background: #f1f5f9;">
+              <img src="${photoUrl}" alt="${tree.species}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'" />
+            </div>
+          ` : ''}
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11px; margin-bottom: 6px;">
+            <div><strong>GBH:</strong> ${tree.circumference || tree.gbh || 'N/A'} cm</div>
+            <div><strong>Height:</strong> ${tree.height || 'N/A'} m</div>
+            <div><strong>Est. Age:</strong> ~${tree.age || 1} yrs</div>
+            <div><strong>CO₂ Abs:</strong> ${(tree.co2 || 0).toLocaleString()} kg</div>
+          </div>
+          <div style="font-size: 10px; color: #64748b; margin-bottom: 4px;">
+            <strong>Habitat:</strong> ${tree.habitat || 'Campus canopy'}
+          </div>
+          <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #0369a1; font-weight: 700; padding-top: 4px; border-top: 1px dashed #e2e8f0;">
+            <span>📍 Epicollect Verified</span>
+            <span style="color: ${color}; text-transform: uppercase;">${tree.impact || 'Normal'}</span>
+          </div>
+        </div>
+      `, { maxWidth: 270 });
+
+      epicollectLayerRef.current.addLayer(marker);
+    });
+  }, [epicollectTrees, showEpicollect, epicollectFilter, epicollectSearch]);
+
+  const handleLocateEpicollectTree = (tree) => {
+    if (!mapInstance.current || !tree || !tree.lat || !tree.lng) return;
+
+    if (!showEpicollect) {
+      setShowEpicollect(true);
+    }
+
+    if (mapContainerRef.current) {
+      mapContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    mapInstance.current.flyTo([tree.lat, tree.lng], 19, {
+      animate: true,
+      duration: 1.2,
+    });
+
+    setTimeout(() => {
+      if (epicollectLayerRef.current) {
+        epicollectLayerRef.current.eachLayer((layer) => {
+          if (layer.getLatLng) {
+            const pos = layer.getLatLng();
+            if (
+              Math.abs(pos.lat - tree.lat) < 0.0001 &&
+              Math.abs(pos.lng - tree.lng) < 0.0001
+            ) {
+              layer.openPopup();
+            }
+          }
+        });
+      }
+
+      if (window.L && calloutsLayerRef.current) {
+        calloutsLayerRef.current.clearLayers();
+        const pulseCircle = window.L.circleMarker([tree.lat, tree.lng], {
+          radius: 24,
+          color: '#38bdf8',
+          fillColor: '#38bdf8',
+          fillOpacity: 0.35,
+          weight: 3,
+        }).addTo(calloutsLayerRef.current);
+
+        setTimeout(() => {
+          if (calloutsLayerRef.current) {
+            calloutsLayerRef.current.removeLayer(pulseCircle);
+          }
+        }, 5500);
+      }
+    }, 1250);
+  };
 
   // Recalculate Leaflet size on expand/collapse
   useEffect(() => {
@@ -764,6 +941,15 @@ export default function MapAnalysis() {
               <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
                 <input
                   type="checkbox"
+                  checked={showEpicollect}
+                  onChange={(e) => setShowEpicollect(e.target.checked)}
+                  className="accent-emerald-500 rounded"
+                />
+                <span className="font-semibold text-emerald-400">Epicollect Field Trees ({epicollectTrees.length || 291})</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer text-slate-300 hover:text-white">
+                <input
+                  type="checkbox"
                   checked={showTrees}
                   onChange={(e) => setShowTrees(e.target.checked)}
                   className="accent-emerald-500 rounded"
@@ -1053,18 +1239,30 @@ export default function MapAnalysis() {
             >
               Area Report
             </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('epicollect')}
+              className={`px-4 py-2.5 rounded-xl font-bold text-xs whitespace-nowrap transition-all flex items-center gap-1.5 ${
+                activeTab === 'epicollect'
+                  ? 'bg-[#047857] text-white shadow-md font-black ring-2 ring-emerald-300'
+                  : 'text-slate-800 hover:text-[#022c17] hover:bg-white font-bold'
+              }`}
+            >
+              <Database className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Epicollect Survey ({epicollectTrees.length || 291})</span>
+            </button>
           </div>
 
           {/* Panel Content */}
           <div className="nature-card p-6 min-h-[440px]">
-            {loading && (
+            {loading && activeTab !== 'epicollect' && (
               <div className="flex flex-col items-center justify-center py-20 text-[#708477] space-y-3">
                 <div className="w-8 h-8 border-2 border-[#2d6a4f] border-t-transparent rounded-full animate-spin" />
                 <span className="text-xs font-semibold">Computing multi-criteria spatial analysis...</span>
               </div>
             )}
 
-            {!loading && !analysisData && (
+            {!loading && !analysisData && activeTab !== 'epicollect' && (
               <div className="text-center py-20 text-[#708477] text-xs">
                 Select an area above to view spatial analytics.
               </div>
@@ -2093,8 +2291,196 @@ export default function MapAnalysis() {
                 )}
               </>
             )}
+
+            {/* ── TAB 7: EPICOLLECT VERIFIED FIELD SURVEY ── */}
+            {activeTab === 'epicollect' && (
+              <div className="space-y-6">
+                {/* Header Banner */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-emerald-950 via-slate-900 to-teal-950 border border-emerald-500/30 text-white shadow-xl">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[11px] font-black uppercase tracking-wider border border-emerald-400/30 flex items-center gap-1.5">
+                        <Database className="w-3.5 h-3.5 text-emerald-300" />
+                        Epicollect5 Ground Truth
+                      </span>
+                      <span className="text-xs text-slate-300 font-medium">
+                        · Live Field Database
+                      </span>
+                    </div>
+                    <h2 className="text-xl sm:text-2xl font-bold font-['Fraunces'] text-white">
+                      Epicollect Verified Field Survey Trees
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                      291 inventoried trees across K.K. Wagh Institute campus. Each specimen is geolocated, cataloged with GBH, estimated age, lifetime carbon capture, and photographic evidence.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+                      <div className="text-[10px] uppercase font-bold text-slate-400">Total Trees</div>
+                      <div className="text-xl font-bold font-['Fraunces'] text-emerald-400">
+                        {epicollectTrees.length || 291}
+                      </div>
+                    </div>
+                    <div className="px-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-center">
+                      <div className="text-[10px] uppercase font-bold text-slate-400">Total CO₂ Stored</div>
+                      <div className="text-xl font-bold font-['Fraunces'] text-amber-300">
+                        {(epicollectTrees.reduce((acc, t) => acc + (t.co2 || 0), 0) / 1000).toFixed(1)}t
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Search & Filter Toolbar */}
+                <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between bg-slate-50 border border-slate-200 p-3 rounded-2xl">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="Search species or tree ID (e.g. Neem, Banyan, 42)..."
+                      value={epicollectSearch}
+                      onChange={(e) => setEpicollectSearch(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 text-xs rounded-xl bg-white border border-slate-200 text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+                    <span className="text-[11px] font-bold text-slate-500 shrink-0">Filter:</span>
+                    {['ALL', 'Rain Tree', 'Neem', 'Banyan', 'Peepal', 'Chinese Palm', 'Ashok Tree'].map((sp) => (
+                      <button
+                        key={sp}
+                        type="button"
+                        onClick={() => setEpicollectFilter(sp)}
+                        className={`px-3 py-1.5 rounded-xl text-[11px] font-bold shrink-0 transition-all ${
+                          epicollectFilter === sp
+                            ? 'bg-emerald-700 text-white shadow-sm'
+                            : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-100'
+                        }`}
+                      >
+                        {sp}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tree Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[620px] overflow-y-auto pr-1">
+                  {epicollectTrees
+                    .filter((tree) => {
+                      if (epicollectFilter !== 'ALL' && tree.species !== epicollectFilter) return false;
+                      if (epicollectSearch) {
+                        const q = epicollectSearch.toLowerCase();
+                        const matchesSpecies = (tree.species || '').toLowerCase().includes(q);
+                        const matchesId = String(tree.id).includes(q) || `epic-${tree.id}`.includes(q);
+                        if (!matchesSpecies && !matchesId) return false;
+                      }
+                      return true;
+                    })
+                    .slice(0, 60)
+                    .map((tree) => {
+                      const photoName = tree.bark_photo || tree.leaf_photo || tree.height_photo;
+                      const photoUrl = photoName
+                        ? `${API_BASE_URL}/api/epicollect/media?type=photo&name=${encodeURIComponent(photoName)}`
+                        : null;
+                      const color = tree.impact === 'Critical' ? '#EF4444' : tree.impact === 'High' ? '#F59E0B' : '#10B981';
+
+                      return (
+                        <div
+                          key={tree.id}
+                          className="bg-white border-2 border-slate-200 rounded-2xl p-4 shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded bg-slate-100 text-slate-700">
+                                EPIC-{tree.id}
+                              </span>
+                              <span
+                                className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded"
+                                style={{
+                                  backgroundColor: `${color}20`,
+                                  color: color,
+                                }}
+                              >
+                                {tree.impact || 'Normal'}
+                              </span>
+                            </div>
+
+                            {photoUrl ? (
+                              <div className="w-full h-32 rounded-xl overflow-hidden bg-slate-100 mb-3 border border-slate-200">
+                                <img
+                                  src={photoUrl}
+                                  alt={tree.species}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                  onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                                />
+                              </div>
+                            ) : (
+                              <div className="w-full h-32 rounded-xl bg-emerald-50/50 flex flex-col items-center justify-center text-emerald-700 mb-3 border border-emerald-100">
+                                <Trees className="w-8 h-8 opacity-40 mb-1" />
+                                <span className="text-[11px] font-bold opacity-60">Verified GPS Stand</span>
+                              </div>
+                            )}
+
+                            <h4 className="font-bold text-[#142e1f] text-sm font-['Fraunces'] mb-1">
+                              {tree.species}
+                            </h4>
+                            <div className="grid grid-cols-2 gap-1 text-[11px] text-[#44594c] mb-3">
+                              <div>GBH: <strong>{tree.circumference || tree.gbh || 'N/A'} cm</strong></div>
+                              <div>Height: <strong>{tree.height || 'N/A'} m</strong></div>
+                              <div>Age: <strong>~{tree.age || 1} yrs</strong></div>
+                              <div>CO₂: <strong>{(tree.co2 || 0).toLocaleString()} kg</strong></div>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 pt-2 border-t border-slate-100">
+                            <button
+                              type="button"
+                              onClick={() => handleLocateEpicollectTree(tree)}
+                              className="flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold bg-emerald-700 text-white hover:bg-emerald-800 transition-colors flex items-center justify-center gap-1 shadow-xs"
+                            >
+                              <MapPin className="w-3 h-3" />
+                              <span>Locate Map</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setSelectedEpicollectTree(tree)}
+                              className="py-1.5 px-2.5 rounded-xl text-[11px] font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors"
+                              title="View Full Report"
+                            >
+                              Report
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              </div>
+            )}
           </div>
         </div>
+
+      {/* Interactive UnifiedTreeReport modal when clicking any Epicollect tree */}
+      {selectedEpicollectTree && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          onClick={() => setSelectedEpicollectTree(null)}
+        >
+          <div
+            className="bg-slate-900 border border-slate-700/80 rounded-3xl max-w-4xl w-full max-h-[92vh] overflow-y-auto relative p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedEpicollectTree(null)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all z-10"
+            >
+              ✕
+            </button>
+            <UnifiedTreeReport tree={selectedEpicollectTree} mode="interactive" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

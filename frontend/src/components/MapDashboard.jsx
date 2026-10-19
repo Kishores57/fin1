@@ -4,7 +4,7 @@ import { generateEcologicalInsight } from '../services/aiService';
 import SidebarMenu from './SidebarMenu';
 import { API_BASE_URL } from '../services/api';
 import UnifiedTreeReport from './UnifiedTreeReport';
-import L, { createTileLayer } from '../utils/mapConfig';
+import L, { createTileLayer, BASEMAP_TILES } from '../utils/mapConfig';
 
 // --- UTILS & CALCULATIONS ---
 const GROWTH_FACTORS = {
@@ -69,6 +69,8 @@ const Icon = ({ name, size = 22, className = '' }) => {
 const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeId }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
+  const tileLayerRef = useRef(null);
+  const [mapTheme, setMapTheme] = useState('satellite'); // 'satellite' | 'voyager' | 'dark'
   const dotMarkersRef = useRef({});      // CircleMarkers keyed by tree.id
   const highlightRingRef = useRef(null); // extra pulsing ring for highlighted tree
   const hasFittedRef = useRef(false);
@@ -208,6 +210,21 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
     });
   };
 
+  // Switch basemap tiles dynamically when user clicks Satellite, Light, or Dark Slate
+  useEffect(() => {
+    if (!mapInstance.current) return;
+    if (tileLayerRef.current) {
+      mapInstance.current.removeLayer(tileLayerRef.current);
+    }
+    const cfg = BASEMAP_TILES[mapTheme] || BASEMAP_TILES.satellite;
+    tileLayerRef.current = L.tileLayer(cfg.url, {
+      attribution: cfg.attribution,
+      maxZoom: 22,
+      maxNativeZoom: cfg.maxNativeZoom || 18,
+    }).addTo(mapInstance.current);
+    tileLayerRef.current.bringToBack();
+  }, [mapTheme]);
+
   useEffect(() => {
     if (!mapRef.current) return;
 
@@ -224,7 +241,12 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
 
       L.control.zoom({ position: 'topright' }).addTo(mapInstance.current);
 
-      createTileLayer().addTo(mapInstance.current);
+      const cfg = BASEMAP_TILES[mapTheme] || BASEMAP_TILES.satellite;
+      tileLayerRef.current = L.tileLayer(cfg.url, {
+        attribution: cfg.attribution,
+        maxZoom: 22,
+        maxNativeZoom: cfg.maxNativeZoom || 18,
+      }).addTo(mapInstance.current);
 
       mapInstance.current.on('zoomend', handleZoom);
     }
@@ -255,7 +277,55 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
     }
   }, [trees, highlightedTreeId]);
 
-  return <div ref={mapRef} className="fullscreen-map" style={{ height: '72vh', minHeight: '580px', width: '100%', position: 'relative', zIndex: 1, borderRadius: '24px' }}></div>;
+  return (
+    <div style={{ position: 'relative', width: '100%', height: '72vh', minHeight: '580px', borderRadius: '24px', overflow: 'hidden' }}>
+      {/* Floating Basemap Switcher Pod (Matches Map Analysis exactly) */}
+      <div style={{
+        position: 'absolute',
+        top: '16px',
+        left: '16px',
+        zIndex: 500,
+        pointerEvents: 'auto',
+      }}>
+        <div style={{
+          background: 'rgba(11, 25, 38, 0.90)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          border: '1px solid rgba(255, 255, 255, 0.18)',
+          borderRadius: '16px',
+          padding: '4px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        }}>
+          {Object.entries(BASEMAP_TILES).map(([key, item]) => (
+            <button
+              key={key}
+              type="button"
+              onClick={() => setMapTheme(key)}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '12px',
+                fontSize: '11px',
+                fontWeight: 700,
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                background: mapTheme === key ? '#10b981' : 'transparent',
+                color: mapTheme === key ? '#ffffff' : '#94a3b8',
+                boxShadow: mapTheme === key ? '0 2px 8px rgba(16, 185, 129, 0.4)' : 'none',
+              }}
+            >
+              {item.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div ref={mapRef} className="fullscreen-map" style={{ height: '100%', width: '100%', position: 'relative', zIndex: 1 }}></div>
+    </div>
+  );
 };
 
 // --- MAP TREE FORM MODAL ---

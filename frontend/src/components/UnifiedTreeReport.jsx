@@ -567,19 +567,19 @@ const BOTANICAL_SPECIES_PHOTOS = {
     tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80',
   },
   'Palm Tree': {
-    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    leaf: 'https://images.unsplash.com/photo-1488470015861-8bb1317353ef?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1727702765180-bbec16280977?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1573261289561-d584b9e07feb?auto=format&fit=crop&w=800&q=80',
   },
   'Child Palm': {
-    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
+    leaf: 'https://images.unsplash.com/photo-1488470015861-8bb1317353ef?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1639969267655-fdde49bab5ff?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1573261289561-d584b9e07feb?auto=format&fit=crop&w=800&q=80',
   },
   'Chinese Palm': {
-    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
+    leaf: 'https://images.unsplash.com/photo-1488470015861-8bb1317353ef?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1727702765180-bbec16280977?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1573261289561-d584b9e07feb?auto=format&fit=crop&w=800&q=80',
   },
   'Rain Tree': {
     leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
@@ -587,9 +587,9 @@ const BOTANICAL_SPECIES_PHOTOS = {
     tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
   },
   'Coconut Tree': {
-    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=800&q=80',
+    leaf: 'https://images.unsplash.com/photo-1488470015861-8bb1317353ef?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1727702765180-bbec16280977?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1573261289561-d584b9e07feb?auto=format&fit=crop&w=800&q=80',
   },
   'Guava Tree': {
     leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
@@ -602,9 +602,9 @@ const BOTANICAL_SPECIES_PHOTOS = {
     tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
   },
   'Banyan': {
-    leaf: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    leaf: 'https://images.unsplash.com/photo-1580133318324-f2f76d987dd8?auto=format&fit=crop&w=800&q=80',
+    bark: 'https://images.unsplash.com/photo-1772831133001-b10fbc22c3dc?auto=format&fit=crop&w=800&q=80',
+    tree: 'https://images.unsplash.com/photo-1750286709198-1a1c391b438d?auto=format&fit=crop&w=800&q=80',
   },
   'Mango': {
     leaf: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=800&q=80',
@@ -612,7 +612,7 @@ const BOTANICAL_SPECIES_PHOTOS = {
     tree: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80',
   },
   'Peepal': {
-    leaf: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80',
+    leaf: 'https://images.unsplash.com/photo-1580133318324-f2f76d987dd8?auto=format&fit=crop&w=800&q=80',
     bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
     tree: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
   },

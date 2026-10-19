@@ -21,6 +21,27 @@ if (typeof window !== 'undefined') {
 export const DEFAULT_MAP_CENTER = [20.0131, 73.8213]; // Nashik, Maharashtra
 export const DEFAULT_MAP_ZOOM = 16;
 
+export const BASEMAP_TILES = {
+  satellite: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri, Earthstar Geographics (Satellite)',
+    name: 'Satellite Earth',
+    maxNativeZoom: 18,
+  },
+  voyager: {
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors',
+    name: 'Standard Light',
+    maxNativeZoom: 19,
+  },
+  dark: {
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri &mdash; Esri World Dark Gray Canvas',
+    name: 'Dark Slate',
+    maxNativeZoom: 16,
+  },
+};
+
 /**
  * Creates and returns a Leaflet TileLayer with support for:
  * 1. Custom VITE_MAP_TILE_URL and VITE_OSM_API_KEY

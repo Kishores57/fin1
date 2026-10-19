@@ -4,6 +4,23 @@
  */
 export const STUDY_ZONES = [
   {
+    id: 'zone-kkwagh-full-campus',
+    name: 'KK Wagh College Campus (Entire Institute Extent)',
+    description: 'Comprehensive boundary of K.K. Wagh Institute of Engineering Education & Research (KKWIEER), Nashik with 290+ surveyed trees.',
+    boundary: {
+      type: 'Polygon',
+      coordinates: [
+        [
+          [73.8198, 20.0123],
+          [73.8228, 20.0123],
+          [73.8228, 20.0147],
+          [73.8198, 20.0147],
+          [73.8198, 20.0123]
+        ]
+      ]
+    }
+  },
+  {
     id: 'zone-kkwagh-polytechnic-hostel',
     name: 'KK Wagh North Campus (Polytechnic & Hostel Grove)',
     description: 'Northern campus quadrant bordering Saraswati Nagar road, girl hostels and polytechnic lawns with mature shade trees.',
@@ -50,23 +67,6 @@ export const STUDY_ZONES = [
           [73.8226, 20.0130],
           [73.8200, 20.0130],
           [73.8200, 20.0124]
-        ]
-      ]
-    }
-  },
-  {
-    id: 'zone-kkwagh-full-campus',
-    name: 'KK Wagh College Campus (Entire Institute Extent)',
-    description: 'Comprehensive boundary of K.K. Wagh Institute of Engineering Education & Research (KKWIEER), Nashik.',
-    boundary: {
-      type: 'Polygon',
-      coordinates: [
-        [
-          [73.8198, 20.0123],
-          [73.8228, 20.0123],
-          [73.8228, 20.0147],
-          [73.8198, 20.0147],
-          [73.8198, 20.0123]
         ]
       ]
     }

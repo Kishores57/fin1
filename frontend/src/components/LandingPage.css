@@ -50,6 +50,18 @@
   line-height: 1.16;
 }
 
+.lp-root h1.text-white,
+.lp-root h2.text-white,
+.lp-root h3.text-white,
+.lp-root h4.text-white,
+.lp-root .text-white h1,
+.lp-root .text-white h2,
+.lp-root .text-white h3,
+.lp-root .text-white h4,
+.lp-root .lp-hero-title {
+  color: #ffffff !important;
+}
+
 .lp-container {
   width: min(1200px, calc(100% - 3rem));
   margin: 0 auto;
@@ -1049,23 +1061,71 @@
   line-height: 1.5;
 }
 
-/* ─── SUBPAGES (Who We Are, Why Farmers/Conservation, Carbon Markets) ─── */
+/* ─── SUBPAGES (Who We Are, Why Trees Matter, Carbon & Satellites) ─── */
 .lp-subpage-hero {
   position: relative;
-  min-height: 48vh;
+  min-height: 45vh;
   display: flex;
   align-items: flex-end;
-  padding: 8rem 0 4rem;
+  padding: 8.5rem 0 4rem;
   background-size: cover;
   background-position: center 35%;
+  background-color: #031c10;
   color: #ffffff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 .lp-subpage-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(13, 31, 21, 0.5) 0%, rgba(13, 31, 21, 0.88) 100%);
+  background: linear-gradient(
+    180deg,
+    rgba(3, 24, 14, 0.88) 0%,
+    rgba(2, 18, 10, 0.94) 60%,
+    rgba(1, 13, 7, 0.98) 100%
+  );
   z-index: 1;
+}
+
+.lp-subpage-hero h1 {
+  color: #ffffff !important;
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45) !important;
+}
+
+.lp-subpage-hero p {
+  color: #d1fae5 !important;
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.6;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.lp-subpage-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.875rem;
+  margin-bottom: 1.25rem;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.lp-subpage-back:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateX(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .lp-subpage-body {
