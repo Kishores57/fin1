@@ -7,20 +7,25 @@ import { verifyToken, requireRole } from '../middleware/auth.js';
 const router = express.Router();
 /** Preferred calculator dropdown order */
 const CALCULATOR_SPECIES_ORDER = [
+  'Ashoka',
+  'Banyan',
+  'Mango',
+  'Neem',
+  'Peepal',
+  'Rain Tree',
+  'Rubber',
   'Bamboo',
   'Christmas',
   'Palm (Bottle Palm)',
   'Coconut',
-  'Ashoka',
   'Tej Patta',
   'Badam',
-  'Rain Tree',
   'Silver Oak',
-  'Mango',
   'Supari',
   'Ad',
   'Bel',
 ];
+
 
 /**
  * GET /api/species

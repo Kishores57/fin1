@@ -26,19 +26,155 @@ const BOTANICAL = {
   'Oak': 'Quercus sp.',
 };
 
+const DEFAULT_FALLBACKS = {
+  leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+  bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+  tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+};
+
+const SPECIES_PHOTOS = {
+  'Ashok Tree': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80',
+  },
+  'Ashoka': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80',
+  },
+  'Neem': {
+    leaf: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+  },
+  'Banyan': {
+    leaf: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  },
+  'Mango': {
+    leaf: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=600&q=80',
+  },
+  'Peepal': {
+    leaf: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+  },
+  'Palm Tree': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  },
+  'Child Palm': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+  },
+  'Chinese Palm': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+  },
+  'Palm (Bottle Palm)': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  },
+  'Rain Tree': {
+    leaf: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+  },
+  'Coconut Tree': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  },
+  'Coconut': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  },
+  'Bamboo Tree': {
+    leaf: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80',
+  },
+  'Bamboo': {
+    leaf: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80',
+  },
+  'Guava Tree': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=600&q=80',
+  },
+  'Badam': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+  },
+  'Bel': {
+    leaf: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80',
+  },
+  'Tej Patta': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+  },
+  'Silver Oak': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80',
+  },
+  'Christmas': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+  },
+  'Supari': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  },
+  'Moringa': {
+    leaf: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+  },
+};
+
+function getSpeciesFallbacks(species) {
+  if (!species) return DEFAULT_FALLBACKS;
+  const exact = SPECIES_PHOTOS[species];
+  if (exact) return exact;
+  const key = Object.keys(SPECIES_PHOTOS).find(
+    (k) =>
+      k.toLowerCase() === species.toLowerCase() ||
+      species.toLowerCase().includes(k.toLowerCase()) ||
+      k.toLowerCase().includes(species.toLowerCase())
+  );
+  if (key && SPECIES_PHOTOS[key]) {
+    return SPECIES_PHOTOS[key];
+  }
+  return DEFAULT_FALLBACKS;
+}
+
 export function normalizeTree(raw) {
-  if (!raw || typeof raw !== 'object') return null;
-  const species = raw.species_name || raw.species || raw.treeName || raw.commonName || 'Tree';
+  if (!raw) return null;
+  const species = raw.species_name || raw.species || raw.treeName || 'Unknown';
   const age = Number(raw.age ?? raw.estimatedAge ?? 10) || 10;
 
   let co2 = Number(raw.co2 ?? raw.co2_sequestered ?? 0);
-  if (!Number.isFinite(co2)) co2 = 0;
   let biomass = Number(raw.biomass ?? 0);
-  if (!Number.isFinite(biomass)) biomass = 0;
   let carbon = Number(raw.carbon ?? 0);
-  if (!Number.isFinite(carbon)) carbon = 0;
   let oxygen = Number(raw.oxygen ?? 0);
-  if (!Number.isFinite(oxygen)) oxygen = 0;
 
   if (biomass > 0) {
     if (!carbon) carbon = biomass * 0.47;
@@ -55,44 +191,11 @@ export function normalizeTree(raw) {
     oxygen = co2 * 0.727;
   }
 
-  const height = raw.height != null ? Number(raw.height) : null;
-  const dbh = raw.dbh != null ? Number(raw.dbh) : (raw.gbh ? Number((Number(raw.gbh) / Math.PI).toFixed(1)) : null);
+  const height = raw.height ?? null;
+  const dbh = raw.dbh ?? (raw.gbh ? (Number(raw.gbh) / Math.PI).toFixed(1) : null);
   const girth = raw.gbh ?? raw.girth ?? raw.circumference ?? null;
   const lat = raw.lat ?? raw.latitude ?? null;
   const lng = raw.lng ?? raw.longitude ?? null;
-
-  // Extract clean string image name/url from string or nested object
-  const extractImg = (v) => {
-    if (!v) return null;
-    if (typeof v === 'string') return v.trim() || null;
-    if (typeof v === 'object') {
-      return v.url || v.tree || v.leaf || v.bark || v.name || v.src || null;
-    }
-    return null;
-  };
-
-  const leafImage =
-    extractImg(raw.leafImage) ||
-    extractImg(raw.leaf_photo) ||
-    extractImg(raw.leaf_image) ||
-    extractImg(raw.images?.leaf) ||
-    extractImg(raw.photo) ||
-    null;
-
-  const barkImage =
-    extractImg(raw.barkImage) ||
-    extractImg(raw.bark_photo) ||
-    extractImg(raw.bark_image) ||
-    extractImg(raw.images?.bark) ||
-    null;
-
-  const fullImage =
-    extractImg(raw.fullImage) ||
-    extractImg(raw.height_photo) ||
-    extractImg(raw.height_image) ||
-    extractImg(raw.images?.tree) ||
-    extractImg(raw.photo) ||
-    null;
 
   return {
     ...raw,
@@ -113,11 +216,32 @@ export function normalizeTree(raw) {
     longitude: lng,
     scientificName: raw.scientific_name || raw.scientificName || BOTANICAL[species] || 'Tropical Flora',
     health: raw.health || raw.healthStatus || 'Healthy',
-    habitat: typeof raw.habitat === 'string' ? raw.habitat : (raw.habitat_support?.description || null),
+    habitat: raw.habitat || null,
     treeId: raw.treeId || raw._id || raw.id || null,
-    leafImage,
-    barkImage,
-    fullImage,
+    leafImage:
+      raw.leafImage ||
+      raw.leaf_image ||
+      raw.leaf_photo ||
+      (raw.images && raw.images.leaf) ||
+      (raw.raw && raw.raw.images && raw.raw.images.leaf) ||
+      (!raw.barkImage && !raw.fullImage && !raw.bark_photo && !raw.height_photo ? raw.photo : null) ||
+      null,
+    barkImage:
+      raw.barkImage ||
+      raw.bark_image ||
+      raw.bark_photo ||
+      (raw.images && raw.images.bark) ||
+      (raw.raw && raw.raw.images && raw.raw.images.bark) ||
+      null,
+    fullImage:
+      raw.fullImage ||
+      raw.heightImage ||
+      raw.height_image ||
+      raw.height_photo ||
+      (raw.images && raw.images.tree) ||
+      (raw.raw && raw.raw.images && raw.raw.images.tree) ||
+      (raw.photo && raw.photo !== raw.leafImage && raw.photo !== raw.barkImage ? raw.photo : null) ||
+      null,
     source: raw.source || (raw.species_name ? 'calculator' : 'map'),
   };
 }
@@ -145,26 +269,753 @@ export function normalizeForPrint(raw) {
   };
 }
 
-function resolveImg(val) {
+function isEpicollectGuid(val) {
+  if (!val || typeof val !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_\d+\.(jpg|jpeg|png)$/i.test(val.trim());
+}
+
+function resolveImg(val, species = null, type = 'tree') {
   if (!val) return null;
-  const str =
-    typeof val === 'string'
-      ? val
-      : typeof val === 'object'
-        ? (val.url || val.tree || val.leaf || val.bark || val.name || val.src || '')
-        : String(val);
-  if (!str || typeof str !== 'string') return null;
-  const trimmed = str.trim();
-  if (!trimmed) return null;
-  if (
-    trimmed.startsWith('data:') ||
-    trimmed.startsWith('http://') ||
-    trimmed.startsWith('https://') ||
-    trimmed.startsWith('/')
-  ) {
-    return trimmed;
+  if (typeof val !== 'string') return null;
+  if (val.startsWith('data:') || val.startsWith('blob:')) return val;
+  if (val.startsWith('http://') || val.startsWith('https://')) return val;
+
+  // If this is an Epicollect survey GUID photo, request direct from live Epicollect API endpoint
+  if (isEpicollectGuid(val)) {
+    const base = API_BASE_URL || (typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:8000');
+    return `${base}/api/epicollect/media?name=${encodeURIComponent(val)}`;
   }
-  return `${API_BASE_URL}/api/epicollect/media?name=${encodeURIComponent(trimmed)}`;
+
+  // User-uploaded photos from TreeRegistration (/api/registered-trees/uploads/...)
+  const base = API_BASE_URL || (typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:8000');
+  if (val.startsWith('/')) {
+    return `${base}${val}`;
+  }
+  return `${base}/api/registered-trees/uploads/${encodeURIComponent(val)}`;
+}
+
+// ── Photo Card Component: Reliable with Automatic Species Botanical Fallback ──
+function PhotoSlot({ src, fallbackSrc, label, accentColor }) {
+  const [currentSrc, setCurrentSrc] = useState(src || fallbackSrc);
+  const [hasError, setHasError] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
+
+  useEffect(() => {
+    setCurrentSrc(src || fallbackSrc);
+    setHasError(false);
+  }, [src, fallbackSrc]);
+
+  const handleImgError = () => {
+    if (fallbackSrc && currentSrc !== fallbackSrc) {
+      setCurrentSrc(fallbackSrc);
+    } else {
+      setHasError(true);
+    }
+  };
+
+  const isUserUpload = Boolean(
+    src &&
+    (src.startsWith('blob:') || src.startsWith('data:') || src.includes('/uploads/'))
+  );
+  const isFallback = Boolean(!src || (currentSrc === fallbackSrc && currentSrc));
+
+  const effectiveSrc = !hasError && currentSrc ? currentSrc : fallbackSrc;
+
+  if (!effectiveSrc) {
+    return (
+      <div style={{
+        borderRadius: 14,
+        border: '1px dashed rgba(255, 255, 255, 0.1)',
+        background: 'rgba(255, 255, 255, 0.02)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 120,
+        padding: '0.75rem',
+        color: '#64748b',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#94a3b8', marginBottom: 2 }}>
+          {label}
+        </div>
+        <div style={{ fontSize: '0.66rem', color: '#64748b', fontStyle: 'italic' }}>
+          Not Available
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div
+        onClick={() => setLightbox(true)}
+        style={{
+          borderRadius: 14,
+          overflow: 'hidden',
+          border: `1px solid ${accentColor}55`,
+          background: 'rgba(15, 23, 42, 0.8)',
+          display: 'flex',
+          flexDirection: 'column',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          boxShadow: `0 4px 18px ${accentColor}18`,
+          position: 'relative',
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
+        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
+      >
+        <div style={{ height: 120, overflow: 'hidden', background: '#020617', position: 'relative' }}>
+          <img
+            src={effectiveSrc}
+            alt={label}
+            onError={handleImgError}
+            referrerPolicy="no-referrer"
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+          {isUserUpload && (
+            <span style={{
+              position: 'absolute',
+              top: 6,
+              right: 6,
+              background: '#059669',
+              color: '#ffffff',
+              fontSize: '0.6rem',
+              fontWeight: 800,
+              padding: '2px 7px',
+              borderRadius: 999,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.5)',
+            }}>
+              ✓ Uploaded
+            </span>
+          )}
+          {isFallback && !isUserUpload && (
+            <span style={{
+              position: 'absolute',
+              top: 6,
+              right: 6,
+              background: 'rgba(15, 23, 42, 0.85)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: '#94a3b8',
+              fontSize: '0.58rem',
+              fontWeight: 700,
+              padding: '2px 6px',
+              borderRadius: 999,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+            }}>
+              Species Ref
+            </span>
+          )}
+        </div>
+        <div style={{
+          fontSize: '0.72rem',
+          fontWeight: 700,
+          color: accentColor,
+          padding: '0.4rem 0.5rem',
+          textAlign: 'center',
+          background: 'rgba(15, 23, 42, 0.95)',
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '5px',
+          fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+        }}>
+          <span>📸</span> {label}
+        </div>
+      </div>
+
+      {lightbox && (
+        <div
+          onClick={() => setLightbox(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.92)',
+            zIndex: 99999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1.5rem',
+            cursor: 'zoom-out',
+          }}
+        >
+          <img
+            src={effectiveSrc}
+            alt={label}
+            style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: 14, boxShadow: '0 0 50px rgba(0,0,0,0.8)' }}
+          />
+        </div>
+      )}
+    </>
+  );
+}
+
+// ── OXYGEN TREE: Environmental Living Factory Dashboard with Dynamic Tree Structure ──
+export function OxygenTreeCard({ tree }) {
+  const [selectedMetric, setSelectedMetric] = useState('oxygen');
+  const [hoveredMetric, setHoveredMetric] = useState(null);
+
+  const age = Math.max(1, Number(tree.age || 10));
+  const lifetimeOxygen = Number(tree.oxygen || (age * 22 * 0.727));
+  const lifetimeCo2 = Number(tree.co2 || (age * 22));
+  const lifetimeCarbon = Number(tree.carbon || (lifetimeCo2 / 3.67));
+  const lifetimeBiomass = Number(tree.biomass || (lifetimeCarbon / 0.47));
+
+  const annualOxygen = lifetimeOxygen / age;
+  const dailyO2 = (annualOxygen / 365).toFixed(2);
+  const annualCo2 = (lifetimeCo2 / age).toFixed(1);
+  const o2Days = Math.round(lifetimeOxygen / 0.84);
+  const cylinders = Math.round(lifetimeOxygen / 1.5);
+  const canopyCover = Math.round(15 + age * 1.5);
+  const co2EquivalentKm = Math.round(lifetimeCo2 / 0.12);
+
+  const activeMetricKey = hoveredMetric || selectedMetric;
+
+  const metricsDetails = {
+    oxygen: {
+      key: 'oxygen',
+      name: 'Oxygen Released',
+      emoji: '💨',
+      value: `~${lifetimeOxygen.toFixed(1)} kg`,
+      dailyRate: `~${dailyO2} kg O₂ / day`,
+      color: '#22d3ee',
+      bgColor: 'rgba(34, 211, 238, 0.08)',
+      borderColor: 'rgba(34, 211, 238, 0.4)',
+      glowColor: '0 0 30px rgba(34, 211, 238, 0.25)',
+      explanation: 'Diatomic Oxygen (O₂) produced via stoichiometric daytime photolysis in leaf chloroplasts.',
+      preservationImpact: `This tree supplies enough oxygen to sustain 1 adult human for ~${o2Days.toLocaleString()} days. Saving it keeps this living air support continuously active.`,
+      destructionCost: 'Cutting this tree immediately terminates a natural oxygen factory. A replacement sapling takes over 12–15 years to match this output.',
+    },
+    co2: {
+      key: 'co2',
+      name: 'CO₂ Sequestration',
+      emoji: '🌍',
+      value: `~${lifetimeCo2.toFixed(1)} kg`,
+      dailyRate: `~${annualCo2} kg CO₂ / yr`,
+      color: '#2dd4bf',
+      bgColor: 'rgba(45, 212, 191, 0.08)',
+      borderColor: 'rgba(45, 212, 191, 0.4)',
+      glowColor: '0 0 30px rgba(45, 212, 191, 0.25)',
+      explanation: 'Atmospheric CO₂ captured through stomatal absorption and fixed as biological plant matter.',
+      preservationImpact: `Permanently locks away greenhouse carbon equivalent to driving ~${co2EquivalentKm.toLocaleString()} km in an average gasoline car.`,
+      destructionCost: 'Felling this tree terminates active carbon scrubbing. Decomposition or combustion re-releases this carbon back into the atmosphere.',
+    },
+    carbon: {
+      key: 'carbon',
+      name: 'Carbon Storage',
+      emoji: '🌿',
+      value: `~${lifetimeCarbon.toFixed(1)} kg`,
+      dailyRate: '47% of total biomass',
+      color: '#34d399',
+      bgColor: 'rgba(52, 211, 153, 0.08)',
+      borderColor: 'rgba(52, 211, 153, 0.4)',
+      glowColor: '0 0 30px rgba(52, 211, 153, 0.25)',
+      explanation: 'Pure organic elemental carbon stored solidly within structural cellulose and lignin cell walls.',
+      preservationImpact: 'Represents a stable biological carbon vault protected within living woody tissue.',
+      destructionCost: 'Destroying this tree converts structural plant biomass into released greenhouse emissions, erasing decades of accumulated carbon vaulting.',
+    },
+    biomass: {
+      key: 'biomass',
+      name: 'Aboveground Biomass',
+      emoji: '🪵',
+      value: `~${lifetimeBiomass.toFixed(1)} kg`,
+      dailyRate: 'Trunk & canopy weight',
+      color: '#fbbf24',
+      bgColor: 'rgba(251, 191, 36, 0.08)',
+      borderColor: 'rgba(251, 191, 36, 0.4)',
+      glowColor: '0 0 30px rgba(251, 191, 36, 0.25)',
+      explanation: 'Total dry wood tissue weight calculated via validated botanical allometric equations.',
+      preservationImpact: 'Quantifies the physical substance of trunk, branches, and foliage providing continuous habitat shield and microclimate cooling.',
+      destructionCost: 'Cutting this tree wipes out years of slow vertical wood development, destabilizing local soil and thermal canopy cover instantly.',
+    },
+  };
+
+  const activeMetric = metricsDetails[activeMetricKey] || metricsDetails.oxygen;
+
+  return (
+    <div style={{
+      background: 'linear-gradient(135deg, rgba(6, 78, 59, 0.55) 0%, rgba(15, 23, 42, 0.9) 100%)',
+      border: '1px solid rgba(16, 185, 129, 0.35)',
+      borderRadius: 18,
+      padding: '1.25rem 1.4rem',
+      marginBottom: '1.25rem',
+      boxShadow: '0 8px 32px rgba(16, 185, 129, 0.15)',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Header Banner */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '1.1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 38,
+            height: 38,
+            borderRadius: '50%',
+            background: 'rgba(34, 211, 238, 0.2)',
+            border: '1px solid rgba(34, 211, 238, 0.45)',
+            fontSize: '1.2rem',
+          }}>
+            🌳
+          </span>
+          <div>
+            <div style={{
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+              fontSize: '1.1rem',
+              fontWeight: 800,
+              color: '#6ee7b7',
+              letterSpacing: '0.02em',
+              textTransform: 'uppercase',
+            }}>
+              Oxygen Tree · Living Biosphere Factory
+            </div>
+            <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
+              Dynamic botanical structure for {tree.species} ({age} yrs old) · Hover &amp; click canopy/trunk to inspect
+            </div>
+          </div>
+        </div>
+
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.45rem',
+          background: 'rgba(16, 185, 129, 0.18)',
+          border: '1px solid rgba(16, 185, 129, 0.4)',
+          borderRadius: 999,
+          padding: '0.3rem 0.85rem',
+          fontSize: '0.72rem',
+          fontWeight: 800,
+          color: '#34d399',
+          fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+        }}>
+          <span style={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            background: '#10b981',
+            boxShadow: '0 0 10px #10b981',
+            display: 'inline-block',
+          }} />
+          ACTIVE O₂ BIOSYNTHESIS
+        </div>
+      </div>
+
+      {/* ── INTERACTIVE DYNAMIC TREE STRUCTURE & METRIC DETAILS ── */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+        gap: '1.25rem',
+        alignItems: 'center',
+        marginBottom: '1.25rem',
+      }}>
+        {/* Left: Interactive SVG Tree Graphic with rounded canopy clusters */}
+        <div style={{
+          background: 'rgba(2, 6, 23, 0.8)',
+          borderRadius: 18,
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          padding: '1rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.5)',
+        }}>
+          <div style={{
+            fontSize: '0.68rem',
+            color: '#94a3b8',
+            marginBottom: '0.4rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            fontWeight: 700,
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}>
+            <span style={{ color: '#22d3ee' }}>✨</span> Click or hover rounded tree parts
+          </div>
+
+          <svg viewBox="0 0 360 400" style={{ width: '100%', maxHeight: '330px', userSelect: 'none' }}>
+            <defs>
+              <radialGradient id="grad-oxygen" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#22d3ee" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#0891b2" stopOpacity="0.08" />
+              </radialGradient>
+              <radialGradient id="grad-co2" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#2dd4bf" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#0d9488" stopOpacity="0.08" />
+              </radialGradient>
+              <radialGradient id="grad-carbon" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#34d399" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#059669" stopOpacity="0.08" />
+              </radialGradient>
+              <radialGradient id="grad-biomass" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#d97706" stopOpacity="0.05" />
+              </radialGradient>
+            </defs>
+
+            {/* Trunk / Base Path (Biomass) */}
+            <g
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setHoveredMetric('biomass')}
+              onMouseLeave={() => setHoveredMetric(null)}
+              onClick={() => setSelectedMetric('biomass')}
+            >
+              <circle cx="180" cy="300" r="50" fill="url(#grad-biomass)" />
+              <path
+                d="M 165 340 C 165 300, 160 220, 150 180 C 170 170, 190 170, 210 180 C 200 220, 195 300, 195 340 Z M 150 180 L 120 120 C 130 110, 140 120, 155 140 L 165 160 Z M 210 180 L 240 120 C 230 110, 220 120, 205 140 L 195 160 Z"
+                fill={activeMetricKey === 'biomass' ? '#f59e0b' : '#334155'}
+                stroke={activeMetricKey === 'biomass' ? '#fbbf24' : '#475569'}
+                strokeWidth="2.5"
+                style={{
+                  filter: activeMetricKey === 'biomass' ? 'drop-shadow(0 0 14px rgba(245,158,11,0.85))' : 'none',
+                  transition: 'all 0.25s ease',
+                }}
+              />
+              <text x="180" y="323" textAnchor="middle" fill="#fcd34d" fontWeight="900" fontSize="11" fontFamily="'Outfit', sans-serif" style={{ pointerEvents: 'none' }}>TRUNK</text>
+              <text x="180" y="338" textAnchor="middle" fill="#cbd5e1" fontWeight="700" fontSize="10" fontFamily="'Plus Jakarta Sans', sans-serif" style={{ pointerEvents: 'none' }}>BIOMASS ~{lifetimeBiomass.toFixed(0)} kg</text>
+            </g>
+
+            {/* Left Canopy Cluster (Carbon Storage) */}
+            <g
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setHoveredMetric('carbon')}
+              onMouseLeave={() => setHoveredMetric(null)}
+              onClick={() => setSelectedMetric('carbon')}
+            >
+              <circle cx="110" cy="140" r="55" fill="url(#grad-carbon)" />
+              <circle
+                cx="110"
+                cy="140"
+                r="45"
+                fill={activeMetricKey === 'carbon' ? 'rgba(52, 211, 153, 0.25)' : 'rgba(15, 23, 42, 0.88)'}
+                stroke={activeMetricKey === 'carbon' ? '#34d399' : '#475569'}
+                strokeWidth={activeMetricKey === 'carbon' ? 3.5 : 2}
+                style={{
+                  filter: activeMetricKey === 'carbon' ? 'drop-shadow(0 0 14px rgba(52,211,153,0.85))' : 'none',
+                  transition: 'all 0.25s ease',
+                }}
+              />
+              <text x="110" y="134" textAnchor="middle" fill="#34d399" fontWeight="900" fontSize="12" fontFamily="'Outfit', sans-serif" style={{ pointerEvents: 'none' }}>CARBON</text>
+              <text x="110" y="152" textAnchor="middle" fill="#f1f5f9" fontWeight="800" fontSize="11" fontFamily="'Plus Jakarta Sans', sans-serif" style={{ pointerEvents: 'none' }}>~{lifetimeCarbon.toFixed(0)} kg</text>
+            </g>
+
+            {/* Right Canopy Cluster (CO2 Sequestration) */}
+            <g
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setHoveredMetric('co2')}
+              onMouseLeave={() => setHoveredMetric(null)}
+              onClick={() => setSelectedMetric('co2')}
+            >
+              <circle cx="250" cy="140" r="55" fill="url(#grad-co2)" />
+              <circle
+                cx="250"
+                cy="140"
+                r="45"
+                fill={activeMetricKey === 'co2' ? 'rgba(45, 212, 191, 0.25)' : 'rgba(15, 23, 42, 0.88)'}
+                stroke={activeMetricKey === 'co2' ? '#2dd4bf' : '#475569'}
+                strokeWidth={activeMetricKey === 'co2' ? 3.5 : 2}
+                style={{
+                  filter: activeMetricKey === 'co2' ? 'drop-shadow(0 0 14px rgba(45,212,191,0.85))' : 'none',
+                  transition: 'all 0.25s ease',
+                }}
+              />
+              <text x="250" y="134" textAnchor="middle" fill="#2dd4bf" fontWeight="900" fontSize="12" fontFamily="'Outfit', sans-serif" style={{ pointerEvents: 'none' }}>CO₂ CAPTURE</text>
+              <text x="250" y="152" textAnchor="middle" fill="#f1f5f9" fontWeight="800" fontSize="11" fontFamily="'Plus Jakarta Sans', sans-serif" style={{ pointerEvents: 'none' }}>~{lifetimeCo2.toFixed(0)} kg</text>
+            </g>
+
+            {/* Top Crown Canopy Cluster (Oxygen Released) */}
+            <g
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={() => setHoveredMetric('oxygen')}
+              onMouseLeave={() => setHoveredMetric(null)}
+              onClick={() => setSelectedMetric('oxygen')}
+            >
+              <circle cx="180" cy="75" r="65" fill="url(#grad-oxygen)" />
+              <circle
+                cx="180"
+                cy="75"
+                r="55"
+                fill={activeMetricKey === 'oxygen' ? 'rgba(34, 211, 238, 0.25)' : 'rgba(15, 23, 42, 0.88)'}
+                stroke={activeMetricKey === 'oxygen' ? '#22d3ee' : '#475569'}
+                strokeWidth={activeMetricKey === 'oxygen' ? 3.5 : 2}
+                style={{
+                  filter: activeMetricKey === 'oxygen' ? 'drop-shadow(0 0 16px rgba(34,211,238,0.9))' : 'none',
+                  transition: 'all 0.25s ease',
+                }}
+              />
+              <text x="180" y="68" textAnchor="middle" fill="#22d3ee" fontWeight="900" fontSize="13" fontFamily="'Outfit', sans-serif" style={{ pointerEvents: 'none' }}>OXYGEN</text>
+              <text x="180" y="87" textAnchor="middle" fill="#f1f5f9" fontWeight="800" fontSize="12" fontFamily="'Plus Jakarta Sans', sans-serif" style={{ pointerEvents: 'none' }}>~{lifetimeOxygen.toFixed(0)} kg</text>
+            </g>
+          </svg>
+
+          {/* Quick selection pills below tree */}
+          <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', justifyContent: 'center', marginTop: '0.4rem' }}>
+            {[
+              { key: 'oxygen', label: '💨 Oxygen', color: '#22d3ee' },
+              { key: 'co2', label: '🌍 CO₂', color: '#2dd4bf' },
+              { key: 'carbon', label: '🌿 Carbon', color: '#34d399' },
+              { key: 'biomass', label: '🪵 Biomass', color: '#fbbf24' },
+            ].map((p) => (
+              <button
+                key={p.key}
+                type="button"
+                onClick={() => setSelectedMetric(p.key)}
+                style={{
+                  fontSize: '0.66rem',
+                  fontWeight: 800,
+                  padding: '3px 9px',
+                  borderRadius: 999,
+                  border: `1px solid ${activeMetricKey === p.key ? p.color : 'rgba(255,255,255,0.1)'}`,
+                  background: activeMetricKey === p.key ? `${p.color}25` : 'rgba(255,255,255,0.03)',
+                  color: activeMetricKey === p.key ? p.color : '#94a3b8',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Dynamic Interactive Metric Details Panel */}
+        <div style={{
+          background: activeMetric.bgColor,
+          border: `1px solid ${activeMetric.borderColor}`,
+          borderRadius: 18,
+          padding: '1.25rem 1.4rem',
+          boxShadow: activeMetric.glowColor,
+          transition: 'all 0.3s ease',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.75rem',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+              fontWeight: 900,
+              fontSize: '1rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: activeMetric.color,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}>
+              <span>{activeMetric.emoji}</span> {activeMetric.name}
+            </div>
+            <span style={{
+              fontSize: '0.7rem',
+              fontWeight: 800,
+              color: activeMetric.color,
+              background: 'rgba(0,0,0,0.35)',
+              padding: '3px 9px',
+              borderRadius: 999,
+              border: `1px solid ${activeMetric.borderColor}`,
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            }}>
+              {activeMetric.dailyRate}
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+            <div style={{
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+              fontSize: '2.2rem',
+              fontWeight: 900,
+              color: '#f8fafc',
+              lineHeight: 1.1,
+            }}>
+              {activeMetric.value}
+            </div>
+            <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 600 }}>Lifetime Output</span>
+          </div>
+
+          <p style={{ fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.5, margin: 0, fontStyle: 'italic' }}>
+            {activeMetric.explanation}
+          </p>
+
+          {/* Preservation Benefit Card */}
+          <div style={{
+            background: 'rgba(6, 78, 59, 0.4)',
+            border: '1px solid rgba(52, 211, 153, 0.4)',
+            borderRadius: 12,
+            padding: '0.7rem 0.9rem',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.65rem',
+          }}>
+            <span style={{ fontSize: '1.15rem', flexShrink: 0 }}>🛡️</span>
+            <div>
+              <div style={{
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                color: '#34d399',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+              }}>
+                Preservation Benefit
+              </div>
+              <p style={{ fontSize: '0.78rem', color: '#e2e8f0', lineHeight: 1.45, margin: '2px 0 0' }}>
+                {activeMetric.preservationImpact}
+              </p>
+            </div>
+          </div>
+
+          {/* Cut Down Impact Card */}
+          <div style={{
+            background: 'rgba(127, 29, 29, 0.4)',
+            border: '1px solid rgba(248, 113, 113, 0.4)',
+            borderRadius: 12,
+            padding: '0.7rem 0.9rem',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.65rem',
+          }}>
+            <span style={{ fontSize: '1.15rem', flexShrink: 0 }}>⚠️</span>
+            <div>
+              <div style={{
+                fontSize: '0.7rem',
+                fontWeight: 800,
+                color: '#f87171',
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+              }}>
+                Cut Down Impact
+              </div>
+              <p style={{ fontSize: '0.78rem', color: '#fca5a5', lineHeight: 1.45, margin: '2px 0 0' }}>
+                {activeMetric.destructionCost}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 4 Impact Stat Cards */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+        gap: '0.75rem',
+        marginBottom: '0.9rem',
+      }}>
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.7)',
+          border: '1px solid rgba(34, 211, 238, 0.3)',
+          borderRadius: 14,
+          padding: '0.85rem 1rem',
+        }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#22d3ee', marginBottom: 4, fontFamily: "var(--font-heading, 'Outfit', sans-serif)" }}>
+            DAILY OXYGEN OUTPUT
+          </div>
+          <div style={{
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            fontWeight: 900,
+            fontSize: '1.35rem',
+            color: '#f8fafc',
+          }}>
+            ~{dailyO2} <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#22d3ee' }}>kg O₂/day</span>
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 3 }}>
+            Sustains ~{(Number(dailyO2) / 0.84).toFixed(1)} adults daily
+          </div>
+        </div>
+
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.7)',
+          border: '1px solid rgba(52, 211, 153, 0.3)',
+          borderRadius: 14,
+          padding: '0.85rem 1rem',
+        }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#34d399', marginBottom: 4, fontFamily: "var(--font-heading, 'Outfit', sans-serif)" }}>
+            ANNUAL CARBON FIXED
+          </div>
+          <div style={{
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            fontWeight: 900,
+            fontSize: '1.35rem',
+            color: '#f8fafc',
+          }}>
+            ~{annualCo2} <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#34d399' }}>kg CO₂/yr</span>
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 3 }}>
+            Offsets ~{(Number(annualCo2) / 0.12).toFixed(0)} km car emissions
+          </div>
+        </div>
+
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.7)',
+          border: '1px solid rgba(251, 191, 36, 0.3)',
+          borderRadius: 14,
+          padding: '0.85rem 1rem',
+        }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#fbbf24', marginBottom: 4, fontFamily: "var(--font-heading, 'Outfit', sans-serif)" }}>
+            MEDICAL O₂ EQUIVALENT
+          </div>
+          <div style={{
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            fontWeight: 900,
+            fontSize: '1.35rem',
+            color: '#f8fafc',
+          }}>
+            ~{cylinders.toLocaleString()} <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#fbbf24' }}>cylinders</span>
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 3 }}>
+            Standard 1.5 kg medical canisters
+          </div>
+        </div>
+
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.7)',
+          border: '1px solid rgba(96, 165, 250, 0.3)',
+          borderRadius: 14,
+          padding: '0.85rem 1rem',
+        }}>
+          <div style={{ fontSize: '0.68rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#60a5fa', marginBottom: 4, fontFamily: "var(--font-heading, 'Outfit', sans-serif)" }}>
+            COOLING CANOPY SHADE
+          </div>
+          <div style={{
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            fontWeight: 900,
+            fontSize: '1.35rem',
+            color: '#f8fafc',
+          }}>
+            ~{canopyCover} <span style={{ fontSize: '0.82rem', fontWeight: 600, color: '#60a5fa' }}>m² area</span>
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 3 }}>
+            Drops ground heat up to 3°C–8°C
+          </div>
+        </div>
+      </div>
+
+      {/* Biological Factory Impact Callout */}
+      <div style={{
+        background: 'rgba(0, 0, 0, 0.32)',
+        borderRadius: 12,
+        padding: '0.8rem 1rem',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+        fontSize: '0.82rem',
+        color: '#cbd5e1',
+        lineHeight: 1.55,
+      }}>
+        <span style={{ fontSize: '1.25rem', flexShrink: 0 }}>🌱</span>
+        <div>
+          This living tree splits water molecules during daylight to release <strong style={{ color: '#22d3ee' }}>~{lifetimeOxygen.toFixed(0)} kg of lifetime O₂</strong> into the local atmosphere, supporting <strong style={{ color: '#34d399' }}>~{o2Days.toLocaleString()} adult breathing days</strong>. Cutting this tree permanently terminates this natural oxygen production.
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const TABS = [
@@ -240,8 +1091,8 @@ function ConservationBanner({ text }) {
 }
 
 function TabContent({ tabKey, tree }) {
-  const co2Km = (Number(tree.co2 || 0) / 0.12).toFixed(0);
-  const o2Days = (Number(tree.oxygen || 0) / 0.84).toFixed(0);
+  const co2Km = ((tree.co2 || 0) / 0.12).toFixed(0);
+  const o2Days = ((tree.oxygen || 0) / 0.84).toFixed(0);
 
   switch (tabKey) {
     case 'oxygen':
@@ -249,9 +1100,9 @@ function TabContent({ tabKey, tree }) {
         <div>
           <Section title="Key Metrics" color="#22d3ee">
             <InfoCards items={[
-              { label: 'Oxygen Released', value: `${Number(tree.oxygen || 0).toFixed(2)} kg`, sub: 'Lifetime total output' },
+              { label: 'Oxygen Released', value: `${(tree.oxygen || 0).toFixed(2)} kg`, sub: 'Lifetime total output' },
               { label: 'Supports Breathing', value: `${o2Days} days`, sub: 'For one adult human' },
-              { label: 'Annual Rate', value: `${(Number(tree.oxygen || 0) / Math.max(1, Number(tree.age || 1))).toFixed(1)} kg/yr`, sub: 'Average yearly production' },
+              { label: 'Annual Rate', value: `${((tree.oxygen || 0) / Math.max(1, tree.age)).toFixed(1)} kg/yr`, sub: 'Average yearly production' },
             ]} />
           </Section>
           <Section title="Biochemical Foundation" color="#94a3b8">
@@ -269,15 +1120,15 @@ function TabContent({ tabKey, tree }) {
         <div>
           <Section title="Key Metrics" color="#34d399">
             <InfoCards items={[
-              { label: 'CO2 Sequestered', value: `${Number(tree.co2 || 0).toFixed(2)} kg`, sub: 'Lifetime total trapped' },
-              { label: 'Carbon Stored', value: `${Number(tree.carbon || 0).toFixed(2)} kg`, sub: '~47% of total dry biomass' },
+              { label: 'CO2 Sequestered', value: `${(tree.co2 || 0).toFixed(2)} kg`, sub: 'Lifetime total trapped' },
+              { label: 'Carbon Stored', value: `${(tree.carbon || 0).toFixed(2)} kg`, sub: '~47% of total dry biomass' },
               { label: 'Car Km Offset', value: `${co2Km} km`, sub: 'Equivalent vehicle emission offset' },
             ]} />
           </Section>
           <Section title="Sequestration Science" color="#94a3b8">
             <p style={{ color: '#cbd5e1', fontSize: '0.88rem', lineHeight: 1.7 }}>
               Atmospheric CO₂ has a molecular weight of 44 vs carbon's 12 (ratio <strong style={{ color: '#34d399' }}>44/12 ≈ 3.67</strong>).
-              This tree's carbon store locks away {Number(tree.co2 || 0).toFixed(1)} kg of atmospheric greenhouse gases into dense cellulose, hemicellulose, and lignin — the structural polymer that forms trunk wood and root systems.
+              This tree's carbon store locks away {(tree.co2 || 0).toFixed(1)} kg of atmospheric greenhouse gases into dense cellulose, hemicellulose, and lignin — the structural polymer that forms trunk wood and root systems.
             </p>
           </Section>
           <ConservationBanner text="If cut and incinerated or decomposed, all stored carbon oxidizes back into atmospheric CO₂ within months, wiping out decades of natural climate service." />
@@ -289,9 +1140,9 @@ function TabContent({ tabKey, tree }) {
         <div>
           <Section title="Key Metrics" color="#fbbf24">
             <InfoCards items={[
-              { label: 'Aboveground Biomass', value: `${Number(tree.biomass || 0).toFixed(2)} kg`, sub: 'Total dry wood weight' },
-              { label: 'Root Biomass (IPCC)', value: `${(Number(tree.biomass || 0) * 0.26).toFixed(2)} kg`, sub: 'Below-ground root system' },
-              { label: 'Total Biological Mass', value: `${(Number(tree.biomass || 0) * 1.26).toFixed(2)} kg`, sub: 'Combined structural weight' },
+              { label: 'Aboveground Biomass', value: `${(tree.biomass || 0).toFixed(2)} kg`, sub: 'Total dry wood weight' },
+              { label: 'Root Biomass (IPCC)', value: `${((tree.biomass || 0) * 0.26).toFixed(2)} kg`, sub: 'Below-ground root system' },
+              { label: 'Total Biological Mass', value: `${((tree.biomass || 0) * 1.26).toFixed(2)} kg`, sub: 'Combined structural weight' },
             ]} />
           </Section>
           <Section title="Allometric Equation" color="#94a3b8">
@@ -555,219 +1406,22 @@ function TabContent({ tabKey, tree }) {
   }
 }
 
-const BOTANICAL_SPECIES_PHOTOS = {
-  'Ashok Tree': {
-    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80',
-  },
-  'Ashoka': {
-    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=800&q=80',
-  },
-  'Palm Tree': {
-    leaf: 'https://images.unsplash.com/photo-1488470015861-8bb1317353ef?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1727702765180-bbec16280977?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1573261289561-d584b9e07feb?auto=format&fit=crop&w=800&q=80',
-  },
-  'Child Palm': {
-    leaf: 'https://images.unsplash.com/photo-1488470015861-8bb1317353ef?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1639969267655-fdde49bab5ff?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1573261289561-d584b9e07feb?auto=format&fit=crop&w=800&q=80',
-  },
-  'Chinese Palm': {
-    leaf: 'https://images.unsplash.com/photo-1488470015861-8bb1317353ef?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1727702765180-bbec16280977?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1573261289561-d584b9e07feb?auto=format&fit=crop&w=800&q=80',
-  },
-  'Rain Tree': {
-    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
-  },
-  'Coconut Tree': {
-    leaf: 'https://images.unsplash.com/photo-1488470015861-8bb1317353ef?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1727702765180-bbec16280977?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1573261289561-d584b9e07feb?auto=format&fit=crop&w=800&q=80',
-  },
-  'Guava Tree': {
-    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80',
-  },
-  'Neem': {
-    leaf: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
-  },
-  'Banyan': {
-    leaf: 'https://images.unsplash.com/photo-1580133318324-f2f76d987dd8?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1772831133001-b10fbc22c3dc?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1750286709198-1a1c391b438d?auto=format&fit=crop&w=800&q=80',
-  },
-  'Mango': {
-    leaf: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=800&q=80',
-  },
-  'Peepal': {
-    leaf: 'https://images.unsplash.com/photo-1580133318324-f2f76d987dd8?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
-  },
-  'Moringa': {
-    leaf: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
-    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80',
-    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
-  },
-};
-
-const DEFAULT_BOTANICAL = {
-  leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=800&q=80',
-  bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=800&q=80',
-  tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80',
-};
-
-// ── Photo Card Component: Permanent visibility with robust fallback ────────
-function PhotoSlot({ src, label, accentColor, species = 'Ashok Tree', part = 'leaf' }) {
-  const [lightbox, setLightbox] = useState(false);
-
-  const getFallback = () => {
-    const pack = BOTANICAL_SPECIES_PHOTOS[species] || DEFAULT_BOTANICAL;
-    return pack[part] || pack.tree || DEFAULT_BOTANICAL[part] || DEFAULT_BOTANICAL.tree;
-  };
-
-  const initialSrc = src || getFallback();
-  const [currentSrc, setCurrentSrc] = useState(initialSrc);
-  const [triedFallback, setTriedFallback] = useState(!src);
-
-  useEffect(() => {
-    if (src) {
-      setCurrentSrc(src);
-      setTriedFallback(false);
-    } else {
-      setCurrentSrc(getFallback());
-      setTriedFallback(true);
-    }
-  }, [src, species, part]);
-
-  const handleError = () => {
-    if (!triedFallback) {
-      setTriedFallback(true);
-      setCurrentSrc(getFallback());
-    }
-  };
-
-  return (
-    <>
-      <div
-        onClick={() => setLightbox(true)}
-        style={{
-          borderRadius: 14,
-          overflow: 'hidden',
-          border: `1px solid ${accentColor}55`,
-          background: 'rgba(255, 255, 255, 0.04)',
-          display: 'flex',
-          flexDirection: 'column',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          boxShadow: `0 4px 18px ${accentColor}18`,
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; }}
-        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; }}
-      >
-        <div style={{ height: 115, overflow: 'hidden', background: '#020617', position: 'relative' }}>
-          <img
-            src={currentSrc}
-            alt={label}
-            onError={handleError}
-            referrerPolicy="no-referrer"
-            loading="lazy"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          />
-        </div>
-        <div style={{
-          fontSize: '0.7rem',
-          fontWeight: 700,
-          color: accentColor,
-          padding: '0.35rem 0.5rem',
-          textAlign: 'center',
-          background: 'rgba(15, 23, 42, 0.9)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '5px',
-        }}>
-          <span>📸</span> {label}
-        </div>
-      </div>
-
-      {lightbox && (
-        <div
-          onClick={() => setLightbox(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.92)',
-            zIndex: 99999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1.5rem',
-            cursor: 'zoom-out',
-          }}
-        >
-          <img
-            src={currentSrc}
-            alt={label}
-            onError={handleError}
-            referrerPolicy="no-referrer"
-            style={{ maxWidth: '90vw', maxHeight: '90vh', objectFit: 'contain', borderRadius: 14, boxShadow: '0 0 50px rgba(0,0,0,0.8)' }}
-          />
-        </div>
-      )}
-    </>
-  );
-}
-
-
 // ── Main Unified Report Component ──────────────────────────────────────────
 export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive', onPrint }) {
   const tree = normalizeTree(rawTree);
   const [activeTab, setActiveTab] = useState('oxygen');
 
-  if (!tree) {
-    return (
-      <div style={{
-        padding: '2.5rem 1.5rem',
-        textAlign: 'center',
-        background: 'rgba(15, 23, 42, 0.6)',
-        borderRadius: 16,
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        color: '#94a3b8',
-        margin: '1rem 0',
-      }}>
-        <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>🌳</div>
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#f1f5f9', marginBottom: '0.4rem' }}>
-          Tree Report Unavailable
-        </h3>
-        <p style={{ fontSize: '0.84rem', color: '#64748b' }}>
-          The selected tree record could not be loaded or parsed.
-        </p>
-      </div>
-    );
-  }
+  if (!tree) return null;
 
   const isPrint = mode === 'print';
-  const leafSrc = resolveImg(tree.leafImage);
-  const barkSrc = resolveImg(tree.barkImage);
-  const fullSrc = resolveImg(tree.fullImage);
+  const fallbacks = getSpeciesFallbacks(tree.species);
+  const leafSrc = resolveImg(tree.leafImage, tree.species, 'leaf') || fallbacks.leaf;
+  const barkSrc = resolveImg(tree.barkImage, tree.species, 'bark') || fallbacks.bark;
+  const fullSrc = resolveImg(tree.fullImage, tree.species, 'tree') || fallbacks.tree;
   const activeTabDef = TABS.find((t) => t.key === activeTab) || TABS[0];
 
   return (
-    <div style={{ fontFamily: "'Inter', system-ui, sans-serif", color: '#e2e8f0', width: '100%' }}>
+    <div style={{ fontFamily: "var(--font-body, 'Plus Jakarta Sans', sans-serif)", color: '#e2e8f0', width: '100%' }}>
 
       {/* ── TOP BANNER & METRICS ── */}
       <div style={{ marginBottom: '1.25rem' }}>
@@ -791,10 +1445,12 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
               textTransform: 'uppercase',
               letterSpacing: '0.08em',
               display: 'inline-block',
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
             }}>
               Analytical Arboreal Assessment
             </span>
             <h2 style={{
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
               fontSize: 'clamp(1.5rem, 3.5vw, 2.1rem)',
               fontWeight: 900,
               color: '#f8fafc',
@@ -810,10 +1466,10 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
             {[
-              { label: 'Age', val: `${Number(tree.age || 0)} yrs` },
-              { label: 'CO2 Stored', val: `${Number(tree.co2 || 0).toFixed(0)} kg` },
-              { label: 'O2 Released', val: `${Number(tree.oxygen || 0).toFixed(0)} kg` },
-              { label: 'Biomass', val: `${Number(tree.biomass || 0).toFixed(0)} kg` },
+              { label: 'Age', val: `${tree.age} yrs` },
+              { label: 'CO2 Stored', val: `${(tree.co2 || 0).toFixed(0)} kg` },
+              { label: 'O2 Released', val: `${(tree.oxygen || 0).toFixed(0)} kg` },
+              { label: 'Biomass', val: `${(tree.biomass || 0).toFixed(0)} kg` },
             ].map((m) => (
               <div key={m.label} style={{
                 background: 'rgba(15, 23, 42, 0.75)',
@@ -823,10 +1479,10 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
                 textAlign: 'center',
                 minWidth: 70,
               }}>
-                <div style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.06em' }}>
+                <div style={{ fontSize: '0.62rem', textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.06em', fontFamily: "var(--font-heading, 'Outfit', sans-serif)" }}>
                   {m.label}
                 </div>
-                <div style={{ fontWeight: 800, fontSize: '0.98rem', color: '#34d399' }}>
+                <div style={{ fontWeight: 800, fontSize: '0.98rem', color: '#34d399', fontFamily: "var(--font-heading, 'Outfit', sans-serif)" }}>
                   {m.val}
                 </div>
               </div>
@@ -839,14 +1495,16 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
           </div>
         </div>
 
-        {/* ── PHOTO ROW: Resilient field photos with permanent botanical fallback ── */}
+        {/* ── PHOTO ROW: Always displays uploaded image or species botanical photo ── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
-          <PhotoSlot src={leafSrc} label="Leaf / Foliage" accentColor="#34d399" species={tree.species} part="leaf" />
-          <PhotoSlot src={barkSrc} label="Trunk / Bark" accentColor="#fbbf24" species={tree.species} part="bark" />
-          <PhotoSlot src={fullSrc} label="Entire Tree" accentColor="#60a5fa" species={tree.species} part="tree" />
+          <PhotoSlot src={leafSrc} fallbackSrc={fallbacks.leaf} label="Leaf / Foliage" accentColor="#34d399" />
+          <PhotoSlot src={barkSrc} fallbackSrc={fallbacks.bark} label="Trunk / Bark" accentColor="#fbbf24" />
+          <PhotoSlot src={fullSrc} fallbackSrc={fallbacks.tree} label="Entire Tree" accentColor="#60a5fa" />
         </div>
       </div>
 
+      {/* ── OXYGEN TREE LIVING BIOSYNTHESIS FACTORY ── */}
+      <OxygenTreeCard tree={tree} />
 
       {/* ── SMALL HEADINGS IN VISUALLY IMPELLING SHAPES & COLOURS ── */}
       {!isPrint && (
@@ -876,8 +1534,9 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
                   border: `1px solid ${isActive ? tab.border : 'rgba(255, 255, 255, 0.08)'}`,
                   background: isActive ? tab.bg : 'rgba(255, 255, 255, 0.03)',
                   color: isActive ? tab.color : '#94a3b8',
-                  fontWeight: isActive ? 800 : 500,
+                  fontWeight: isActive ? 800 : 600,
                   fontSize: '0.82rem',
+                  fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
                   cursor: 'pointer',
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: isActive ? 'scale(1.05)' : 'scale(1)',
@@ -920,6 +1579,7 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
               color: activeTabDef.color,
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
             }}>
               {activeTabDef.label} Analysis
             </span>

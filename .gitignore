@@ -40,3 +40,4 @@ Thumbs.db
 # Large unused model checkpoints
 backend/models/best_resnet50.pth
 backend/models/last_model.pth
+backend/export/*.pth

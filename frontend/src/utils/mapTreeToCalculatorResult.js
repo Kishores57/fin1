@@ -41,6 +41,12 @@ export function mapRegisteredTreeToCalculatorResult(tree) {
       '',
   });
 
+  const images = tree.images || {};
+  const leafImg = tree.leafImage || tree.leaf_image || tree.leaf_photo || images.leaf || null;
+  const barkImg = tree.barkImage || tree.bark_image || tree.bark_photo || images.bark || null;
+  const fullImg = tree.fullImage || tree.heightImage || tree.height_image || tree.height_photo || tree.treeImage || images.tree || null;
+  const photo = leafImg || fullImg || barkImg || tree.photo || null;
+
   return {
     species_name: tree.species || tree.commonName || tree.treeName || 'Unknown',
     gbh: Number(tree.gbh ?? calc.gbh) || 0,
@@ -57,6 +63,18 @@ export function mapRegisteredTreeToCalculatorResult(tree) {
     latitude: tree.latitude != null ? Number(tree.latitude) : null,
     longitude: tree.longitude != null ? Number(tree.longitude) : null,
     treeId: tree.treeId,
+    leafImage: leafImg,
+    barkImage: barkImg,
+    fullImage: fullImg,
+    leaf_photo: leafImg,
+    bark_photo: barkImg,
+    height_photo: fullImg,
+    photo: photo,
+    images: {
+      leaf: leafImg,
+      bark: barkImg,
+      tree: fullImg,
+    },
     fromMap: true,
   };
 }

@@ -1,6 +1,107 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X, Printer, FileText, Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '../services/api';
+
+const DEFAULT_FALLBACKS = {
+  leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+  bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+  tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+};
+
+const SPECIES_PHOTOS = {
+  'Ashok Tree': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80',
+  },
+  'Ashoka': {
+    leaf: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80',
+  },
+  'Neem': {
+    leaf: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+  },
+  'Banyan': {
+    leaf: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  },
+  'Mango': {
+    leaf: 'https://images.unsplash.com/photo-1550258987-190a2d41a8ba?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1473448912268-2022ce9509d8?auto=format&fit=crop&w=600&q=80',
+  },
+  'Peepal': {
+    leaf: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?auto=format&fit=crop&w=600&q=80',
+  },
+  'Palm Tree': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  },
+  'Rain Tree': {
+    leaf: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=600&q=80',
+  },
+  'Coconut Tree': {
+    leaf: 'https://images.unsplash.com/photo-1509223197845-458d87318791?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80',
+  },
+  'Bamboo Tree': {
+    leaf: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80',
+    bark: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80',
+    tree: 'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?auto=format&fit=crop&w=600&q=80',
+  },
+};
+
+function getSpeciesFallbacks(species) {
+  if (!species) return DEFAULT_FALLBACKS;
+  const exact = SPECIES_PHOTOS[species];
+  if (exact) return exact;
+  const key = Object.keys(SPECIES_PHOTOS).find(
+    (k) =>
+      k.toLowerCase() === species.toLowerCase() ||
+      species.toLowerCase().includes(k.toLowerCase()) ||
+      k.toLowerCase().includes(species.toLowerCase())
+  );
+  if (key && SPECIES_PHOTOS[key]) {
+    return SPECIES_PHOTOS[key];
+  }
+  return DEFAULT_FALLBACKS;
+}
+
+function isEpicollectGuid(val) {
+  if (!val || typeof val !== 'string') return false;
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_\d+\.(jpg|jpeg|png)$/i.test(val.trim());
+}
+
+function resolveImg(val, species = null, type = 'tree') {
+  if (!val) return null;
+  if (typeof val !== 'string') return null;
+  if (val.startsWith('data:') || val.startsWith('blob:')) return val;
+  if (val.startsWith('http://') || val.startsWith('https://')) return val;
+
+  // If this is an Epicollect survey GUID photo, request direct from live Epicollect API endpoint
+  if (isEpicollectGuid(val)) {
+    const base = API_BASE_URL || (typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:8000');
+    return `${base}/api/epicollect/media?name=${encodeURIComponent(val)}`;
+  }
+
+  // User-uploaded photos from TreeRegistration (/api/registered-trees/uploads/...)
+  const base = API_BASE_URL || (typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:8000');
+  if (val.startsWith('/')) {
+    return `${base}${val}`;
+  }
+  return `${base}/api/registered-trees/uploads/${encodeURIComponent(val)}`;
+}
 
 /* ──────────────────────────────────────────────────────
    DATA: Indian Tree Protection Laws
@@ -233,54 +334,31 @@ function buildPrintHTML({ result, reportID, address, locationCards, doNotCutPoin
     </div>`).join('');
 
   // Build conservation section HTML
-  const conserveHTML = (doNotCutPoints && doNotCutPoints.length > 0)
+  const conserveHTML = doNotCutPoints && doNotCutPoints.length > 0
     ? doNotCutPoints.map((p, i) => `
       <div class="conserve-item">
-        <div class="conserve-badge">🛡 Conservation Reason ${i + 1} — ${p.title || 'Arboreal Protection Mandate'}</div>
+        <div class="conserve-badge">🛡 Conservation Reason ${i + 1} — ${p.title || ''}</div>
         <p class="conserve-text">${p.highlight || p.conservation_message || ''}</p>
         ${p.support ? `<p class="conserve-support">${p.support}</p>` : ''}
       </div>`).join('')
-    : `
-      <div class="conserve-item">
-        <div class="conserve-badge">🛡 Conservation Reason 1 — Multi-Decade Biological Asset</div>
-        <p class="conserve-text">This tree represents ${age > 0 ? age.toFixed(1) : 'decades of'} years of biological growth and environmental services. A newly planted sapling requires 12 to 15 years to match this current oxygen output and carbon sequestration capacity.</p>
-        <p class="conserve-support">Under municipal tree retention principles, destroying established canopy causes an immediate, unrecoverable ecological deficit.</p>
-      </div>
-      <div class="conserve-item">
-        <div class="conserve-badge">🛡 Conservation Reason 2 — Keystone Habitat & Ecosystem Protection</div>
-        <p class="conserve-text">Mature tree canopies provide nesting habitat, roosting perches, and vital nectar corridors for urban birds, pollinators, and beneficial insects in Nashik's urban ecosystem.</p>
-        <p class="conserve-support">Section 9 of the Wildlife Protection Act prohibits destroying wildlife and nesting habitats during breeding seasons.</p>
-      </div>`;
+    : '';
 
   // Build climate analysis HTML
   const climateEntries = Object.entries(climate).filter(([k]) => !['research_pipeline', 'identification'].includes(k));
-  const climateHTML = climateEntries.length > 0
-    ? climateEntries.map(([key, section]) => {
-      if (!section || typeof section !== 'object') return '';
-      const text = section.scientific_explanation || section.importance || section.short_description || '';
-      const fact = section.interesting_fact || '';
-      const conservation = section.conservation_message || '';
-      if (!text) return '';
-      return `
-        <div class="analysis-item">
-          <div class="analysis-heading">${section.title || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</div>
-          <p class="analysis-text">${text}</p>
-          ${fact ? `<div class="fact-box">💡 ${fact}</div>` : ''}
-          ${conservation ? `<div class="conserve-note">🛡 ${conservation}</div>` : ''}
-        </div>`;
-    }).join('')
-    : `
+  const climateHTML = climateEntries.map(([key, section]) => {
+    if (!section || typeof section !== 'object') return '';
+    const text = section.scientific_explanation || section.importance || section.short_description || '';
+    const fact = section.interesting_fact || '';
+    const conservation = section.conservation_message || '';
+    if (!text) return '';
+    return `
       <div class="analysis-item">
-        <div class="analysis-heading">Microclimate & Thermal Regulation</div>
-        <p class="analysis-text">Through canopy evapotranspiration and solar radiation interception, mature trees lower surrounding urban surface temperatures by 2°C to 8°C. Shaded asphalt streets remain significantly cooler during peak summer, directly mitigating the Urban Heat Island effect and reducing thermal stress.</p>
-        <div class="fact-box">💡 Estimated canopy shade footprint: ~${Math.round(15 + age * 1.5)} m² with active cooling equivalent to multiple domestic air-conditioning units operating 20 hours daily.</div>
-        <div class="conserve-note">🛡 Removing this tree increases localized heat island intensity and elevates microclimate temperatures for pedestrians and nearby buildings.</div>
-      </div>
-      <div class="analysis-item">
-        <div class="analysis-heading">Biomass & Allometric Carbon Sequestration</div>
-        <p class="analysis-text">Calculated using the internationally validated Chave Allometric Model (AGB = 0.0673 × (ρ × D² × H)^0.976). Locks away ${co2.toFixed(1)} kg of atmospheric CO₂ into dense cellulose and lignin, representing a vital multi-year carbon sink that oxidizes immediately back into the atmosphere if felled.</p>
-        <div class="fact-box">💡 Sequestration equivalent: Offsets approximately ${co2Km} km of standard passenger vehicle carbon emissions.</div>
+        <div class="analysis-heading">${section.title || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</div>
+        <p class="analysis-text">${text}</p>
+        ${fact ? `<div class="fact-box">💡 ${fact}</div>` : ''}
+        ${conservation ? `<div class="conserve-note">🛡 ${conservation}</div>` : ''}
       </div>`;
+  }).join('');
 
   // Build habitat HTML
   const birds = habitat.birds || [];
@@ -292,55 +370,195 @@ function buildPrintHTML({ result, reportID, address, locationCards, doNotCutPoin
       ${birds.length ? `<div><div class="fauna-title">🐦 Birds</div>${birds.map(x => `<div>• ${x}</div>`).join('')}</div>` : ''}
       ${insects.length ? `<div><div class="fauna-title">🐛 Insects</div>${insects.map(x => `<div>• ${x}</div>`).join('')}</div>` : ''}
       ${mammals.length ? `<div><div class="fauna-title">🦎 Mammals</div>${mammals.map(x => `<div>• ${x}</div>`).join('')}</div>` : ''}
-    </div>` : `
-    <p class="analysis-text" style="margin-bottom:10px">Mature trees act as foundational ecological anchors in urban environments, sheltering local biodiversity:</p>
-    <div class="fauna-grid">
-      <div><div class="fauna-title">🐦 Avian Fauna</div><div>• Nesting &amp; Roosting Songbirds</div><div>• Parakeets, Owls &amp; Doves</div></div>
-      <div><div class="fauna-title">🐝 Pollinators</div><div>• Honeybees &amp; Native Bees</div><div>• Floral Nectar Butterflies</div></div>
-      <div><div class="fauna-title">🌿 Soil Network</div><div>• Mycorrhizal Root Fungi</div><div>• Topsoil Microfauna</div></div>
-    </div>`;
+    </div>` : '';
 
   // Build medicinal HTML
   const medHTML = (medicinal.description || (medicinal.applications && medicinal.applications.length > 0)) ? `
     ${medicinal.description ? `<p class="analysis-text">${medicinal.description}</p>` : ''}
     ${medicinal.applications && medicinal.applications.length ? `<p class="analysis-text"><strong>Applications:</strong> ${medicinal.applications.join(' · ')}</p>` : ''}
     ${medicinal.compounds && medicinal.compounds.length ? `<p class="analysis-text"><strong>Active Compounds:</strong> ${medicinal.compounds.join(' · ')}</p>` : ''}
-    ${medicinal.diseases && medicinal.diseases.length ? `<p class="analysis-text"><strong>Traditionally Used For:</strong> ${medicinal.diseases.join(' · ')}</p>` : ''}` : `
-    <p class="analysis-text">Documented in classical Indian ethnobotanical traditions and Ayurveda. Different parts of mature trees (foliage, bark, seeds) yield natural bioactive compounds, terpenes, and phenolics utilized in indigenous wellness traditions and atmospheric purification.</p>`;
+    ${medicinal.diseases && medicinal.diseases.length ? `<p class="analysis-text"><strong>Traditionally Used For:</strong> ${medicinal.diseases.join(' · ')}</p>` : ''}` : '';
+
+  // Build field survey photos HTML
+  const speciesKey = result.species_name || result.species || '';
+  const fallbacks = getSpeciesFallbacks(speciesKey);
+  const leafSrc = resolveImg(result.leaf_photo || result.leafImage || result.photo, speciesKey, 'leaf') || fallbacks.leaf;
+  const barkSrc = resolveImg(result.bark_photo || result.barkImage, speciesKey, 'bark') || fallbacks.bark;
+  const fullSrc = resolveImg(result.height_photo || result.fullImage || (!leafSrc ? result.photo : null), speciesKey, 'tree') || fallbacks.tree;
+
+  const photosHTML = `
+  <div class="section-title no-break" style="margin-top:14px;">Field Survey &amp; Botanical Photography</div>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;" class="no-break">
+    <div style="border: 1px solid #10b98155; border-radius: 8px; overflow: hidden; background: #fafdf7;">
+      <div style="height: 125px; overflow: hidden; background: #020617; text-align: center;">
+        <img src="${leafSrc}" alt="Leaf / Foliage" referrerPolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+      </div>
+      <div style="font-size: 8pt; font-weight: bold; color: #166534; padding: 5px; text-align: center; background: #f0fdf4;">🌿 Leaf / Foliage</div>
+    </div>
+    <div style="border: 1px solid #d9770655; border-radius: 8px; overflow: hidden; background: #fffdf5;">
+      <div style="height: 125px; overflow: hidden; background: #020617; text-align: center;">
+        <img src="${barkSrc}" alt="Trunk / Bark" referrerPolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+      </div>
+      <div style="font-size: 8pt; font-weight: bold; color: #92400e; padding: 5px; text-align: center; background: #fefce8;">🪵 Trunk / Bark</div>
+    </div>
+    <div style="border: 1px solid #2563eb55; border-radius: 8px; overflow: hidden; background: #f8faff;">
+      <div style="height: 125px; overflow: hidden; background: #020617; text-align: center;">
+        <img src="${fullSrc}" alt="Entire Tree" referrerPolicy="no-referrer" style="width: 100%; height: 100%; object-fit: cover; display: block;" />
+      </div>
+      <div style="font-size: 8pt; font-weight: bold; color: #1e40af; padding: 5px; text-align: center; background: #eff6ff;">🌳 Entire Tree</div>
+    </div>
+  </div>`;
+
+  const annualOxygen = oxygen / Math.max(1, age);
+  const dailyO2 = (annualOxygen / 365).toFixed(2);
+  const annualCo2 = (co2 / Math.max(1, age)).toFixed(1);
+  const cylinders = Math.round(oxygen / 1.5);
+  const canopyCover = Math.round(15 + age * 1.5);
+
+  const lifetimeCarbon = Number(result.carbon || (co2 / 3.67));
+  const lifetimeBiomass = Number(result.biomass || (lifetimeCarbon / 0.47));
+
+  const oxygenTreeHTML = `
+  <div class="no-break" style="background: #f0fdf4; border: 1.5px solid #10b981; border-radius: 8px; padding: 12px 14px; margin: 16px 0 18px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+      <div style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 11pt; color: #047857; text-transform: uppercase; letter-spacing: 0.04em;">
+        🌳 Oxygen Tree · Environmental Living Factory Dashboard
+      </div>
+      <span style="font-size: 7.5pt; font-weight: bold; background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 99px; border: 1px solid #86efac; text-transform: uppercase;">
+        Active Biosynthesis
+      </span>
+    </div>
+
+    <!-- Tree SVG Structure & Stoichiometric Overview -->
+    <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px; background: #ffffff; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px 14px;">
+      <div style="width: 170px; height: 180px; flex-shrink: 0; text-align: center;">
+        <svg viewBox="0 0 360 400" style="width: 100%; height: 100%;">
+          <defs>
+            <radialGradient id="print-grad-ox" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="#0891b2" stop-opacity="0.1" />
+            </radialGradient>
+            <radialGradient id="print-grad-co2" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#2dd4bf" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="#0d9488" stop-opacity="0.1" />
+            </radialGradient>
+            <radialGradient id="print-grad-carb" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#34d399" stop-opacity="0.35" />
+              <stop offset="100%" stop-color="#059669" stop-opacity="0.1" />
+            </radialGradient>
+            <radialGradient id="print-grad-bio" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.3" />
+              <stop offset="100%" stop-color="#d97706" stop-opacity="0.08" />
+            </radialGradient>
+          </defs>
+          <!-- Trunk -->
+          <g>
+            <circle cx="180" cy="300" r="50" fill="url(#print-grad-bio)" />
+            <path d="M 165 340 C 165 300, 160 220, 150 180 C 170 170, 190 170, 210 180 C 200 220, 195 300, 195 340 Z M 150 180 L 120 120 C 130 110, 140 120, 155 140 L 165 160 Z M 210 180 L 240 120 C 230 110, 220 120, 205 140 L 195 160 Z" fill="#d97706" stroke="#b45309" stroke-width="2" />
+            <text x="180" y="324" text-anchor="middle" fill="#92400e" font-weight="900" font-size="12" font-family="'Outfit', sans-serif">TRUNK</text>
+            <text x="180" y="338" text-anchor="middle" fill="#78350f" font-weight="700" font-size="10">~${lifetimeBiomass.toFixed(0)} kg</text>
+          </g>
+          <!-- Left Canopy (Carbon) -->
+          <g>
+            <circle cx="110" cy="140" r="55" fill="url(#print-grad-carb)" stroke="#059669" stroke-width="2.5" />
+            <text x="110" y="134" text-anchor="middle" fill="#047857" font-weight="900" font-size="12" font-family="'Outfit', sans-serif">CARBON</text>
+            <text x="110" y="152" text-anchor="middle" fill="#065f46" font-weight="800" font-size="11">~${lifetimeCarbon.toFixed(0)} kg</text>
+          </g>
+          <!-- Right Canopy (CO2) -->
+          <g>
+            <circle cx="250" cy="140" r="55" fill="url(#print-grad-co2)" stroke="#0d9488" stroke-width="2.5" />
+            <text x="250" y="134" text-anchor="middle" fill="#0f766e" font-weight="900" font-size="12" font-family="'Outfit', sans-serif">CO₂ CAPTURE</text>
+            <text x="250" y="152" text-anchor="middle" fill="#115e59" font-weight="800" font-size="11">~${co2.toFixed(0)} kg</text>
+          </g>
+          <!-- Top Crown (Oxygen) -->
+          <g>
+            <circle cx="180" cy="75" r="62" fill="url(#print-grad-ox)" stroke="#0284c7" stroke-width="3" />
+            <text x="180" y="68" text-anchor="middle" fill="#0369a1" font-weight="900" font-size="13" font-family="'Outfit', sans-serif">OXYGEN</text>
+            <text x="180" y="87" text-anchor="middle" fill="#075985" font-weight="800" font-size="12">~${oxygen.toFixed(0)} kg</text>
+          </g>
+        </svg>
+      </div>
+
+      <div style="flex: 1; font-size: 8.5pt; color: #1f2937; line-height: 1.55;">
+        <div style="font-weight: 800; font-size: 10pt; color: #065f46; margin-bottom: 4px; font-family: 'Outfit', sans-serif;">
+          Botanical Stoichiometry &amp; Canopy Impact
+        </div>
+        <div>
+          • <strong>Photosynthetic Oxygen Output:</strong> Generates ~<strong>${dailyO2} kg O₂/day</strong>, meeting daily respiratory requirements for ~<strong>${(Number(dailyO2) / 0.84).toFixed(1)} adult humans</strong>.
+        </div>
+        <div style="margin-top: 3px;">
+          • <strong>Carbon Sequestration Vault:</strong> Fixes ~<strong>${annualCo2} kg CO₂/year</strong> (~<strong>${co2.toFixed(0)} kg</strong> lifetime), buffering vehicular greenhouse emissions.
+        </div>
+        <div style="margin-top: 3px;">
+          • <strong>Microclimate Cooling Shade:</strong> Shaded canopy spread of ~<strong>${canopyCover} m²</strong> reduces surface asphalt radiant heat by 3°C–8°C.
+        </div>
+      </div>
+    </div>
+
+    <!-- 4 Metrics Row -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 8px;">
+      <div style="background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; padding: 8px; text-align: center;">
+        <div style="font-size: 7pt; font-weight: bold; color: #047857; text-transform: uppercase;">DAILY OXYGEN OUTPUT</div>
+        <div class="ox-val" style="font-size: 12pt; font-weight: 900; color: #065f46; margin: 2px 0;">~${dailyO2} kg/day</div>
+        <div style="font-size: 7pt; color: #6b7280;">Sustains ~${(Number(dailyO2) / 0.84).toFixed(1)} adults</div>
+      </div>
+      <div style="background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; padding: 8px; text-align: center;">
+        <div style="font-size: 7pt; font-weight: bold; color: #047857; text-transform: uppercase;">ANNUAL CO₂ FIXED</div>
+        <div class="ox-val" style="font-size: 12pt; font-weight: 900; color: #065f46; margin: 2px 0;">~${annualCo2} kg/yr</div>
+        <div style="font-size: 7pt; color: #6b7280;">Offsets vehicle emissions</div>
+      </div>
+      <div style="background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; padding: 8px; text-align: center;">
+        <div style="font-size: 7pt; font-weight: bold; color: #047857; text-transform: uppercase;">MEDICAL O₂ EQUIV.</div>
+        <div class="ox-val" style="font-size: 12pt; font-weight: 900; color: #065f46; margin: 2px 0;">~${cylinders.toLocaleString()} cyl.</div>
+        <div style="font-size: 7pt; color: #6b7280;">1.5 kg medical canisters</div>
+      </div>
+      <div style="background: #ffffff; border: 1px solid #a7f3d0; border-radius: 6px; padding: 8px; text-align: center;">
+        <div style="font-size: 7pt; font-weight: bold; color: #047857; text-transform: uppercase;">COOLING CANOPY</div>
+        <div class="ox-val" style="font-size: 12pt; font-weight: 900; color: #065f46; margin: 2px 0;">~${canopyCover} m²</div>
+        <div style="font-size: 7pt; color: #6b7280;">Drops ground heat 3–8°C</div>
+      </div>
+    </div>
+    <div style="font-size: 8pt; color: #374151; line-height: 1.45; border-top: 1px dashed #86efac; padding-top: 6px;">
+      🌿 <strong>Biochemical Valuation:</strong> Lifetime oxygen released: <strong>~${oxygen.toFixed(0)} kg</strong> (equivalent to <strong>~${o2Days.toLocaleString()} adult breathing days</strong>). Felling this tree permanently ends this natural life support system.
+    </div>
+  </div>`;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <title>VanJeevan Tree Report — ${result.species_name || 'Tree'}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   @page { size: A4; margin: 15mm 14mm 15mm 14mm; }
-  body { font-family: Georgia, 'Times New Roman', serif; font-size: 10.5pt; color: #111; background: #fff; line-height: 1.58; }
+  body { font-family: 'Plus Jakarta Sans', Arial, sans-serif; font-size: 10pt; color: #111; background: #fff; line-height: 1.58; }
 
   /* Header */
   .header { border-bottom: 3px solid #1b5e38; padding-bottom: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: flex-start; }
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand-icon { width: 40px; height: 40px; background: #1b5e38; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-  .brand-name { font-size: 15pt; font-weight: bold; color: #1b5e38; }
-  .brand-sub { font-size: 8pt; color: #666; letter-spacing: 0.03em; font-family: Arial, sans-serif; }
-  .header-meta { text-align: right; font-size: 8pt; color: #555; line-height: 1.7; font-family: Arial, sans-serif; }
+  .brand-name { font-size: 15pt; font-weight: bold; color: #1b5e38; font-family: 'Outfit', sans-serif; }
+  .brand-sub { font-size: 8pt; color: #666; letter-spacing: 0.03em; font-family: 'Plus Jakarta Sans', sans-serif; }
+  .header-meta { text-align: right; font-size: 8pt; color: #555; line-height: 1.7; font-family: 'Plus Jakarta Sans', sans-serif; }
   .report-id { font-weight: bold; color: #1b5e38; font-family: 'Courier New', monospace; font-size: 9pt; }
 
   /* Species block */
   .species-block { background: #f0f7f0; border-left: 5px solid #1b5e38; border-radius: 4px; padding: 12px 16px; margin-bottom: 18px; }
-  .species-name { font-size: 17pt; font-weight: bold; color: #1b3022; margin-bottom: 2px; }
-  .species-sub { font-size: 9.5pt; color: #3d6b52; font-style: italic; margin-bottom: 8px; font-family: Arial, sans-serif; }
+  .species-name { font-size: 17pt; font-weight: bold; color: #1b3022; margin-bottom: 2px; font-family: 'Outfit', sans-serif; }
+  .species-sub { font-size: 9.5pt; color: #3d6b52; font-style: italic; margin-bottom: 8px; font-family: 'Plus Jakarta Sans', sans-serif; }
   .tags { display: flex; gap: 8px; flex-wrap: wrap; }
-  .tag { font-size: 7.5pt; font-family: Arial, sans-serif; font-weight: bold; padding: 2px 9px; border-radius: 99px; border: 1px solid; letter-spacing: 0.04em; text-transform: uppercase; }
+  .tag { font-size: 7.5pt; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: bold; padding: 2px 9px; border-radius: 99px; border: 1px solid; letter-spacing: 0.04em; text-transform: uppercase; }
   .tag-g { background: #e8f5e9; color: #1b5e38; border-color: #a5d6a7; }
   .tag-b { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
   .tag-a { background: #fff8e1; color: #e65100; border-color: #ffcc80; }
   .tag-r { background: #fce4ec; color: #b71c1c; border-color: #f48fb1; }
-  .address { font-size: 8.5pt; color: #555; margin-top: 7px; font-family: Arial, sans-serif; }
+  .address { font-size: 8.5pt; color: #555; margin-top: 7px; font-family: 'Plus Jakarta Sans', sans-serif; }
 
   /* Section titles */
-  .section-title { font-size: 10.5pt; font-weight: bold; color: #1b5e38; border-bottom: 1.5px solid #c8e6c9; padding-bottom: 4px; margin: 22px 0 10px; text-transform: uppercase; letter-spacing: 0.06em; font-family: Arial, sans-serif; }
+  .section-title { font-size: 10.5pt; font-weight: bold; color: #1b5e38; border-bottom: 1.5px solid #c8e6c9; padding-bottom: 4px; margin: 22px 0 10px; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Outfit', sans-serif; }
 
   /* Metrics table */
   table { width: 100%; border-collapse: collapse; margin-bottom: 6px; font-family: Arial, sans-serif; font-size: 9pt; }
@@ -425,6 +643,10 @@ function buildPrintHTML({ result, reportID, address, locationCards, doNotCutPoin
   ${address ? `<div class="address">📍 Location: ${address}</div>` : ''}
 </div>
 
+${photosHTML}
+
+${oxygenTreeHTML}
+
 <!-- ENVIRONMENTAL METRICS -->
 <div class="section-title">Environmental Impact Metrics</div>
 <table>
@@ -451,21 +673,25 @@ ${locationHTML}
 ${lawsHTML}
 
 <!-- CONSERVATION MANDATE -->
+${conserveHTML ? `
 <div class="section-title pb">Conservation Mandate — Why Not to Cut</div>
 <p class="analysis-text" style="margin-bottom:10px">The following reasons, derived from this tree's climatic and ecological analysis, constitute scientific grounds for preservation:</p>
-${conserveHTML}
+${conserveHTML}` : ''}
 
 <!-- CLIMATIC ANALYSIS -->
+${climateHTML ? `
 <div class="section-title pb">Climatic &amp; Ecological Analysis</div>
-${climateHTML}
+${climateHTML}` : ''}
 
 <!-- HABITAT -->
+${habitatHTML ? `
 <div class="section-title">Habitat &amp; Biodiversity Support</div>
-${habitatHTML}
+${habitatHTML}` : ''}
 
 <!-- MEDICINAL -->
+${medHTML ? `
 <div class="section-title">Medicinal &amp; Traditional Value</div>
-${medHTML}
+${medHTML}` : ''}
 
 <!-- FOOTER -->
 <div class="footer">
@@ -481,8 +707,9 @@ ${medHTML}
 </div>
 
 <script>
+  // Auto print when the window loads
   window.onload = function() {
-    setTimeout(function() { window.print(); }, 400);
+    setTimeout(function() { window.print(); }, 600);
   };
 <\/script>
 </body>
@@ -522,51 +749,21 @@ function ReportModal({ result, onClose }) {
   }, [result]);
 
   const handlePrint = useCallback(() => {
-    try {
-      const html = buildPrintHTML({
-        result,
-        reportID: id,
-        address,
-        locationCards,
-        doNotCutPoints,
-      });
-
-      // Try printing via hidden iframe (avoids popup blockers and blank window issues)
-      let printFrame = document.getElementById('vanjeevan-print-frame');
-      if (!printFrame) {
-        printFrame = document.createElement('iframe');
-        printFrame.id = 'vanjeevan-print-frame';
-        printFrame.style.position = 'fixed';
-        printFrame.style.right = '0';
-        printFrame.style.bottom = '0';
-        printFrame.style.width = '0';
-        printFrame.style.height = '0';
-        printFrame.style.border = 'none';
-        document.body.appendChild(printFrame);
-      }
-
-      const frameDoc = printFrame.contentWindow || printFrame.contentDocument;
-      const doc = frameDoc.document || frameDoc;
-      doc.open();
-      doc.write(html);
-      doc.close();
-
-      setTimeout(() => {
-        try {
-          printFrame.contentWindow.focus();
-          printFrame.contentWindow.print();
-        } catch {
-          // Fallback to Blob window.open if iframe print is blocked
-          const blob = new Blob([html], { type: 'text/html' });
-          const url = URL.createObjectURL(blob);
-          const win = window.open(url, '_blank');
-          if (win) win.focus();
-        }
-      }, 400);
-    } catch (err) {
-      console.error('Print generation error:', err);
-      alert('Failed to generate report: ' + err.message);
+    const html = buildPrintHTML({
+      result,
+      reportID: id,
+      address,
+      locationCards,
+      doNotCutPoints,
+    });
+    const win = window.open('', '_blank', 'width=900,height=700,scrollbars=yes');
+    if (!win) {
+      alert('Please allow pop-ups for this site to generate the PDF report.');
+      return;
     }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
   }, [result, id, address, locationCards, doNotCutPoints]);
 
   const climate = safeParse(result.summary, {});

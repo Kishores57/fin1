@@ -1,0 +1,53 @@
+{
+  "model_type": "age",
+  "architecture": "EfficientNet-B4",
+  "version": "1.0",
+  "num_classes": 4,
+  "class_names": [
+    "mature",
+    "old",
+    "sapling",
+    "young"
+  ],
+  "class_info": {
+    "mature": {
+      "label": "Mature",
+      "age_range": "15 \u2013 40 years",
+      "description": "Deeply furrowed, rough bark with visible patterns"
+    },
+    "old": {
+      "label": "Old (Veteran)",
+      "age_range": "40+ years",
+      "description": "Very rough, cracked, gnarled, dark bark"
+    },
+    "sapling": {
+      "label": "Sapling",
+      "age_range": "0 \u2013 5 years",
+      "description": "Smooth, thin, greenish or light-coloured bark"
+    },
+    "young": {
+      "label": "Young",
+      "age_range": "5 \u2013 15 years",
+      "description": "Slightly textured, early fissures forming"
+    }
+  },
+  "image_size": 224,
+  "imagenet_mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "imagenet_std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "val_accuracy": 29.803328290468986,
+  "epoch": 20,
+  "exported_at": "2026-10-23T02:25:06.370066",
+  "usage": {
+    "input": "Preprocessed bark image tensor [1, 3, 224, 224]",
+    "output": "Logits [1, 4] \u2014 apply softmax for probabilities",
+    "preprocessing": "Resize to 255\u00d7255, CenterCrop 224\u00d7224, ToTensor, Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))"
+  }
+}

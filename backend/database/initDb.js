@@ -16,7 +16,12 @@ const CALCULATOR_SPECIES = [
   { name: 'Supari', mai: 1.00, wood_density: 0.45 },
   { name: 'Ad', mai: 1.00, wood_density: 0.55 },
   { name: 'Bel', mai: 0.90, wood_density: 0.70 },
+  { name: 'Banyan', mai: 1.30, wood_density: 0.58 },
+  { name: 'Neem', mai: 1.15, wood_density: 0.72 },
+  { name: 'Peepal', mai: 1.40, wood_density: 0.52 },
+  { name: 'Rubber', mai: 1.35, wood_density: 0.60 },
 ];
+
 
 export async function initDb() {
   console.log('Initializing database schema...');

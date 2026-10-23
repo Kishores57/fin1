@@ -228,6 +228,35 @@ export const speciesDetectionApi = {
     return response.data;
   },
 
+  predictAge: async (imageFile, { species = '', dbh = '', gbh = '', growthRate = '' } = {}) => {
+    const fd = new FormData();
+    fd.append('file', imageFile);
+    if (species) fd.append('species', species);
+    if (dbh) fd.append('dbh', String(dbh));
+    if (gbh) fd.append('gbh', String(gbh));
+    if (growthRate) fd.append('growth_rate', String(growthRate));
+
+    // 1. Try unified backend proxy first
+    try {
+      const response = await axios.post(`${PROXY_DETECTION_URL}/predict-age`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 20000,
+      });
+      if (response.data && !response.data.fallback && !response.data.error) {
+        return response.data;
+      }
+    } catch (proxyErr) {
+      console.warn('Backend age detection proxy unavailable, attempting direct model connection:', proxyErr.message);
+    }
+
+    // 2. Direct fallback to Python FastAPI server
+    const response = await axios.post(`${DIRECT_DETECTION_URL}/predict-age`, fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 25000,
+    });
+    return response.data;
+  },
+
   health: async () => {
     try {
       const res = await axios.get(`${PROXY_DETECTION_URL}/health`, { timeout: 3000 });

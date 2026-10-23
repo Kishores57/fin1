@@ -16,6 +16,8 @@ import {
   ScanLine,
   Sparkles,
   ArrowRight,
+  Clock,
+  Layers,
 } from 'lucide-react';
 import { treeApi, registeredTreeApi, mediaBaseUrl, speciesDetectionApi } from '../services/api';
 import ResultCard from './ResultCard';
@@ -266,6 +268,18 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
   const streamRef = useRef(null);
   const canvasRef = useRef(null);
 
+  // Bark age analysis state (EfficientNet-B4)
+  const [activeAiTab, setActiveAiTab] = useState('species'); // 'species' | 'age'
+  const [barkAgeImage, setBarkAgeImage] = useState(null);
+  const [barkAgePreview, setBarkAgePreview] = useState(null);
+  const [barkAgeResult, setBarkAgeResult] = useState(null);
+  const [predictingAge, setPredictingAge] = useState(false);
+  const [barkCameraOpen, setBarkCameraOpen] = useState(false);
+  const barkVideoRef = useRef(null);
+  const barkStreamRef = useRef(null);
+  const barkCanvasRef = useRef(null);
+  const aiStudioRef = useRef(null);
+
   const gpsValid = hasValidGps(form.latitude, form.longitude);
   const canCalculate = Boolean(form.species && Number(form.gbh) > 0 && Number(form.height) > 0);
   const canAddTree = Boolean(canCalculate && analysisPreview && gpsValid);
@@ -401,6 +415,115 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
       onError?.('Species detection server not reachable. Is it running on port 5000?');
     } finally {
       setDetecting(false);
+    }
+  };
+
+  // --- Bark Age Analysis Handlers ---
+  const currentSpeciesObj = speciesList.find(
+    (s) => s.name?.toLowerCase() === form.species?.toLowerCase()
+  );
+  const currentSpeciesMai = currentSpeciesObj?.mai || (form.species ? 1.20 : null);
+
+  const handleBarkAgeImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBarkAgeImage(file);
+    setBarkAgePreview(URL.createObjectURL(file));
+    setBarkImage(file); // sync with Card 2 photo field
+    setBarkAgeResult(null);
+  };
+
+  const openBarkCamera = async () => {
+    setBarkCameraOpen(true);
+    setBarkAgeResult(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+      });
+      barkStreamRef.current = stream;
+      if (barkVideoRef.current) {
+        barkVideoRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      onError?.('Camera access denied or not available.');
+      setBarkCameraOpen(false);
+    }
+  };
+
+  const captureBarkPhoto = () => {
+    if (!barkVideoRef.current || !barkCanvasRef.current) return;
+    const video = barkVideoRef.current;
+    const canvas = barkCanvasRef.current;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], 'bark_camera_capture.jpg', { type: 'image/jpeg' });
+        setBarkAgeImage(file);
+        setBarkAgePreview(URL.createObjectURL(blob));
+        setBarkImage(file);
+      }
+    }, 'image/jpeg', 0.9);
+    closeBarkCamera();
+  };
+
+  const closeBarkCamera = () => {
+    if (barkStreamRef.current) {
+      barkStreamRef.current.getTracks().forEach((t) => t.stop());
+      barkStreamRef.current = null;
+    }
+    setBarkCameraOpen(false);
+  };
+
+  const handlePredictAge = async (overrideFile = null) => {
+    const file = overrideFile || barkAgeImage || barkImage;
+    if (!file) {
+      onError?.('Please upload or capture a bark image first.');
+      setActiveAiTab('age');
+      setTimeout(() => {
+        aiStudioRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+      return;
+    }
+
+    setPredictingAge(true);
+    try {
+      const result = await speciesDetectionApi.predictAge(file, {
+        species: form.species || '',
+        dbh: form.dbh || '',
+        gbh: form.gbh || '',
+        growthRate: currentSpeciesMai || '',
+      });
+
+      if (result.error && !result.fallback) {
+        onError?.(result.error);
+        setPredictingAge(false);
+        return;
+      }
+
+      setBarkAgeResult(result);
+      if (!barkImage) setBarkImage(file);
+      if (!barkAgePreview && file instanceof Blob) {
+        setBarkAgePreview(URL.createObjectURL(file));
+      }
+      if (result.approximate_age) {
+        setField('age', String(result.approximate_age));
+        setSuccessMsg(`Bark analysis complete! Tree age estimated at ${result.approximate_age} yrs (${result.stage_label}).`);
+        setTimeout(() => setSuccessMsg(''), 4500);
+      }
+    } catch (e) {
+      onError?.('Age prediction service not reachable. Is backend running on port 5000?');
+    } finally {
+      setPredictingAge(false);
+    }
+  };
+
+  const applyAgeToForm = (ageVal) => {
+    if (ageVal != null) {
+      setField('age', String(ageVal));
+      setSuccessMsg(`Tree age set to ${ageVal} years from AI bark analysis.`);
+      setTimeout(() => setSuccessMsg(''), 4000);
     }
   };
 
@@ -787,7 +910,16 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
                     step="0.1"
                     className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
                     value={form.gbh}
-                    onChange={(e) => setField('gbh', e.target.value)}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const g = parseFloat(val);
+                      const computedDbh = (!isNaN(g) && g > 0) ? String((g / Math.PI).toFixed(1)) : '';
+                      setForm((f) => ({
+                        ...f,
+                        gbh: val,
+                        dbh: computedDbh,
+                      }));
+                    }}
                     placeholder="e.g. 110"
                   />
                 </label>
@@ -804,26 +936,76 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
                   />
                 </label>
                 <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
-                  <span>DBH (auto-computed)</span>
+                  <span className="flex items-center justify-between">
+                    <span>DBH (auto-computed)</span>
+                    <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md">GBH / π</span>
+                  </span>
                   <input
                     className="w-full rounded-2xl bg-slate-100 border-2 border-slate-300 px-4 py-3 text-[15px] font-bold text-slate-800 outline-none shadow-xs cursor-not-allowed"
                     value={form.dbh ? `${form.dbh} cm` : '—'}
                     readOnly
                   />
                 </label>
-                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
-                  <span>Estimated Age (yr)</span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.1"
-                    className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
-                    value={form.age}
-                    onChange={(e) => setField('age', e.target.value)}
-                    placeholder="e.g. 35"
-                  />
-                </label>
-                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide sm:col-span-2">
+
+                {/* Estimated Age with Automatic Bark Age AI beside it */}
+                <div className="space-y-1.5 block col-span-2 sm:col-span-1">
+                  <div className="flex items-center justify-between text-xs font-extrabold text-[#022c17] tracking-wide">
+                    <span>Estimated Age (yr)</span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (barkAgeResult?.approximate_age) {
+                          applyAgeToForm(barkAgeResult.approximate_age);
+                        } else if (barkImage || barkAgeImage) {
+                          handlePredictAge(barkImage || barkAgeImage);
+                        } else {
+                          setActiveAiTab('age');
+                          setTimeout(() => {
+                            aiStudioRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                          }, 100);
+                        }
+                      }}
+                      disabled={predictingAge}
+                      className="inline-flex items-center gap-1 text-[11px] font-black text-purple-900 bg-purple-100 hover:bg-purple-200 border border-purple-300 px-2.5 py-0.5 rounded-full transition-all shadow-2xs hover:scale-105 active:scale-95 cursor-pointer"
+                      title="Estimate tree age using the bark analysis AI model and species growth rate"
+                    >
+                      {predictingAge ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin text-purple-700" />
+                          <span>Analyzing...</span>
+                        </>
+                      ) : barkAgeResult ? (
+                        <>
+                          <Sparkles className="w-3 h-3 text-purple-700" />
+                          <span>AI: {barkAgeResult.approximate_age} yr</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3 h-3 text-purple-700" />
+                          <span>⚡ Auto-Age (Bark AI)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.1"
+                      className="w-full rounded-2xl bg-white border-2 border-[#059669] hover:border-[#047857] focus:border-[#047857] focus:ring-4 focus:ring-emerald-500/25 px-4 py-3 text-[15px] font-bold text-[#022c17] placeholder:text-slate-500 transition-all outline-none shadow-xs"
+                      value={form.age}
+                      onChange={(e) => setField('age', e.target.value)}
+                      placeholder="e.g. 35"
+                    />
+                    {barkAgeResult && (
+                      <span className="absolute right-3 top-3 text-[10px] font-bold text-purple-800 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 pointer-events-none">
+                        Bark AI: {barkAgeResult.stage_label}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide col-span-2">
                   <span>Crown Diameter (m)</span>
                   <input
                     type="number"
@@ -892,15 +1074,15 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
             RIGHT COLUMN: AI Species Detection, Geospatial Geolocation & Actions
             ═══════════════════════════════════════════════════════════════════ */}
         <div className="lg:col-span-6 space-y-6">
-          {/* Card 3: AI Species Detection Scanner */}
-          <div className="nature-card p-6 md:p-7 space-y-4 bg-white border-2 border-slate-200 shadow-sm rounded-2xl">
+          {/* Card 3: AI Computer Vision Botanical & Bark Studio */}
+          <div ref={aiStudioRef} className="nature-card p-6 md:p-7 space-y-4 bg-white border-2 border-slate-200 shadow-sm rounded-2xl">
             <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
               <div>
                 <h3 className="text-base font-bold font-['Fraunces'] text-[#022c17] flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-purple-600" />
-                  AI Computer Vision Species Detection
+                  AI Vision Studio: Species &amp; Bark Age Analysis
                 </h3>
-                <p className="text-xs text-slate-600 mt-0.5 font-medium">Automatic species recognition powered by deep neural networks</p>
+                <p className="text-xs text-slate-600 mt-0.5 font-medium">Deep learning species identification + EfficientNet-B4 bark age estimation</p>
               </div>
               {detectionServerUp === true && (
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-full shadow-xs">
@@ -914,84 +1096,299 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
               )}
             </div>
 
-            {/* Camera view */}
-            {cameraOpen && (
-              <div className="relative rounded-2xl overflow-hidden border-2 border-purple-500 shadow-md">
-                <video ref={videoRef} autoPlay playsInline muted className="w-full h-56 object-cover bg-black" />
-                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-3">
-                  <button type="button" onClick={capturePhoto} className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-700 text-white flex items-center gap-2 shadow-lg hover:bg-purple-600 transition-colors">
-                    <Camera className="w-4 h-4" /> Capture Photo
-                  </button>
-                  <button type="button" onClick={closeCamera} className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-white flex items-center gap-2 hover:bg-slate-700 transition-colors">
-                    <X className="w-4 h-4" /> Cancel
-                  </button>
-                </div>
-              </div>
-            )}
-            <canvas ref={canvasRef} className="hidden" />
+            {/* Workflow Navigation Tabs */}
+            <div className="flex border-b border-slate-200 gap-1 pb-1">
+              <button
+                type="button"
+                onClick={() => setActiveAiTab('species')}
+                className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all ${
+                  activeAiTab === 'species'
+                    ? 'bg-purple-100 text-purple-900 border border-purple-300 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <TreePine className="w-4 h-4 text-emerald-600" />
+                <span>1. Species Detection</span>
+                {form.species && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveAiTab('age')}
+                className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all ${
+                  activeAiTab === 'age'
+                    ? 'bg-purple-100 text-purple-900 border border-purple-300 shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <Clock className="w-4 h-4 text-purple-600" />
+                <span>2. Bark Age Analysis</span>
+                {barkAgeResult && <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />}
+              </button>
+            </div>
 
-            {/* Preview image */}
-            {detectionPreview && !cameraOpen && (
-              <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs">
-                <img src={detectionPreview} alt="Detection preview" className="w-full h-44 object-cover" />
-                <button
-                  type="button"
-                  onClick={() => { setDetectionImage(null); setDetectionPreview(null); setDetectionResult(null); }}
-                  className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/70 text-white hover:bg-red-600 transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-
-            {/* Camera / Upload Action Bar */}
-            {!cameraOpen && (
-              <div className="flex flex-wrap gap-2.5">
-                <button
-                  type="button"
-                  onClick={openCamera}
-                  className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-900 border-2 border-purple-200 hover:bg-purple-100 flex items-center gap-2 transition-all shadow-xs"
-                >
-                  <Camera className="w-4 h-4 text-purple-700" /> Open Camera
-                </button>
-                <label className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-800 border-2 border-slate-200 hover:bg-slate-200 flex items-center gap-2 cursor-pointer transition-all shadow-xs">
-                  <Upload className="w-4 h-4 text-slate-700" /> Upload Photo
-                  <input type="file" accept="image/*" className="hidden" onChange={handleDetectionImageUpload} />
-                </label>
-                <button
-                  type="button"
-                  disabled={!detectionImage || detecting}
-                  onClick={handleDetectSpecies}
-                  className="px-5 py-2.5 rounded-xl text-xs font-black bg-[#047857] hover:bg-[#065f46] text-white flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all ml-auto"
-                >
-                  {detecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ScanLine className="w-4 h-4" />}
-                  {detecting ? 'Analyzing Image...' : 'Detect Species with AI'}
-                </button>
-              </div>
-            )}
-
-            {/* Detection Results Card */}
-            {detectionResult && (
-              <div className="p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50/80 space-y-2.5 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 text-[#059669]" />
-                    <div>
-                      <span className="text-sm font-black text-[#022c17]">
-                        {detectionResult.display_name}
-                      </span>
-                      <span className="text-xs text-slate-600 italic ml-2">
-                        ({detectionResult.scientific_name})
-                      </span>
+            {/* TAB 1: SPECIES DETECTION */}
+            {activeAiTab === 'species' && (
+              <div className="space-y-4">
+                {/* Camera view */}
+                {cameraOpen && (
+                  <div className="relative rounded-2xl overflow-hidden border-2 border-purple-500 shadow-md">
+                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-56 object-cover bg-black" />
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-3">
+                      <button type="button" onClick={capturePhoto} className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-700 text-white flex items-center gap-2 shadow-lg hover:bg-purple-600 transition-colors">
+                        <Camera className="w-4 h-4" /> Capture Photo
+                      </button>
+                      <button type="button" onClick={closeCamera} className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-white flex items-center gap-2 hover:bg-slate-700 transition-colors">
+                        <X className="w-4 h-4" /> Cancel
+                      </button>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-200 text-[#022c17]">
-                    Confidence: {detectionResult.confidence}%
-                  </span>
+                )}
+                <canvas ref={canvasRef} className="hidden" />
+
+                {/* Preview image */}
+                {detectionPreview && !cameraOpen && (
+                  <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs">
+                    <img src={detectionPreview} alt="Detection preview" className="w-full h-44 object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => { setDetectionImage(null); setDetectionPreview(null); setDetectionResult(null); }}
+                      className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/70 text-white hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Camera / Upload Action Bar */}
+                {!cameraOpen && (
+                  <div className="flex flex-wrap gap-2.5">
+                    <button
+                      type="button"
+                      onClick={openCamera}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-900 border-2 border-purple-200 hover:bg-purple-100 flex items-center gap-2 transition-all shadow-xs"
+                    >
+                      <Camera className="w-4 h-4 text-purple-700" /> Open Camera
+                    </button>
+                    <label className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-800 border-2 border-slate-200 hover:bg-slate-200 flex items-center gap-2 cursor-pointer transition-all shadow-xs">
+                      <Upload className="w-4 h-4 text-slate-700" /> Upload Foliage Photo
+                      <input type="file" accept="image/*" className="hidden" onChange={handleDetectionImageUpload} />
+                    </label>
+                    <button
+                      type="button"
+                      disabled={!detectionImage || detecting}
+                      onClick={handleDetectSpecies}
+                      className="px-5 py-2.5 rounded-xl text-xs font-black bg-[#047857] hover:bg-[#065f46] text-white flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all ml-auto"
+                    >
+                      {detecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ScanLine className="w-4 h-4" />}
+                      {detecting ? 'Analyzing Image...' : 'Detect Species with AI'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Detection Results Card */}
+                {detectionResult && (
+                  <div className="p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50/80 space-y-3 shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-5 h-5 text-[#059669]" />
+                        <div>
+                          <span className="text-sm font-black text-[#022c17]">
+                            {detectionResult.display_name}
+                          </span>
+                          <span className="text-xs text-slate-600 italic ml-2">
+                            ({detectionResult.scientific_name})
+                          </span>
+                        </div>
+                      </div>
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-200 text-[#022c17]">
+                        Confidence: {detectionResult.confidence}%
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-700 font-medium">
+                      Identified species synchronized to form. Growth rate (MAI): <strong>{currentSpeciesMai || 1.2} cm/yr</strong>.
+                    </p>
+
+                    {/* Next step prompt to Bark Age Analysis */}
+                    <div className="pt-2 border-t border-emerald-200 flex items-center justify-between">
+                      <span className="text-xs font-bold text-slate-800">
+                        Step 2: Add bark image to calculate approximate tree age
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setActiveAiTab('age')}
+                        className="px-3.5 py-1.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs"
+                      >
+                        <span>Bark Age Studio</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 2: BARK AGE ANALYSIS (EFFICIENTNET-B4) */}
+            {activeAiTab === 'age' && (
+              <div className="space-y-4">
+                {/* Botanical Context Badge */}
+                <div className="p-3.5 rounded-xl bg-purple-50 border border-purple-200 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-purple-950">
+                  <div className="flex items-center gap-2">
+                    <TreePine className="w-4 h-4 text-emerald-700" />
+                    <span>Species: <strong>{form.species || 'Select Species First'}</strong></span>
+                    {currentSpeciesMai && (
+                      <span className="text-[11px] text-purple-800 bg-purple-200/80 px-2 py-0.5 rounded-md font-bold">
+                        MAI Growth Rate: {currentSpeciesMai} cm/yr
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <span>DBH: <strong>{form.dbh ? `${form.dbh} cm` : 'Not computed (enter GBH in form)'}</strong></span>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-700 font-medium">
-                  Identified species has been automatically synchronized to the botanical biometrics form.
-                </p>
+
+                {/* Bark Camera view */}
+                {barkCameraOpen && (
+                  <div className="relative rounded-2xl overflow-hidden border-2 border-purple-500 shadow-md">
+                    <video ref={barkVideoRef} autoPlay playsInline muted className="w-full h-56 object-cover bg-black" />
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-3">
+                      <button type="button" onClick={captureBarkPhoto} className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-700 text-white flex items-center gap-2 shadow-lg hover:bg-purple-600 transition-colors">
+                        <Camera className="w-4 h-4" /> Capture Bark Photo
+                      </button>
+                      <button type="button" onClick={closeBarkCamera} className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-white flex items-center gap-2 hover:bg-slate-700 transition-colors">
+                        <X className="w-4 h-4" /> Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+                <canvas ref={barkCanvasRef} className="hidden" />
+
+                {/* Bark Preview image */}
+                {barkAgePreview && !barkCameraOpen && (
+                  <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs">
+                    <img src={barkAgePreview} alt="Bark preview" className="w-full h-44 object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => { setBarkAgeImage(null); setBarkAgePreview(null); setBarkAgeResult(null); }}
+                      className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/70 text-white hover:bg-red-600 transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Bark Camera / Upload Action Bar */}
+                {!barkCameraOpen && (
+                  <div className="flex flex-wrap gap-2.5">
+                    <button
+                      type="button"
+                      onClick={openBarkCamera}
+                      className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-900 border-2 border-purple-200 hover:bg-purple-100 flex items-center gap-2 transition-all shadow-xs"
+                    >
+                      <Camera className="w-4 h-4 text-purple-700" /> Open Camera (Bark)
+                    </button>
+                    <label className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-800 border-2 border-slate-200 hover:bg-slate-200 flex items-center gap-2 cursor-pointer transition-all shadow-xs">
+                      <Upload className="w-4 h-4 text-slate-700" /> Upload Bark Image
+                      <input type="file" accept="image/*" className="hidden" onChange={handleBarkAgeImageUpload} />
+                    </label>
+                    <button
+                      type="button"
+                      disabled={(!barkAgeImage && !barkImage) || predictingAge}
+                      onClick={() => handlePredictAge()}
+                      className="px-5 py-2.5 rounded-xl text-xs font-black bg-purple-700 hover:bg-purple-800 text-white flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all ml-auto"
+                    >
+                      {predictingAge ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
+                      {predictingAge ? 'Analyzing Bark Texture...' : 'Estimate Age with Bark Model'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Bark Age Result Card */}
+                {barkAgeResult && (
+                  <div className="p-5 rounded-2xl border-2 border-purple-300 bg-purple-50/70 space-y-4 shadow-xs">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-black uppercase tracking-wider text-purple-900 bg-purple-200 px-2.5 py-1 rounded-md">
+                            Bark Life Stage: {barkAgeResult.stage_label}
+                          </span>
+                          <span className="text-xs font-bold text-purple-700 bg-white border border-purple-200 px-2 py-0.5 rounded-md">
+                            Typical: {barkAgeResult.age_range}
+                          </span>
+                        </div>
+                        <h4 className="text-2xl font-black text-slate-900 mt-2 font-['Fraunces'] flex items-baseline gap-2">
+                          <span>~{barkAgeResult.approximate_age}</span>
+                          <span className="text-sm font-bold text-slate-600">years approximate age</span>
+                        </h4>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-purple-200 text-purple-950 border border-purple-300">
+                          AI Confidence: {barkAgeResult.confidence}%
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-700 font-medium leading-relaxed bg-white/70 p-3 rounded-xl border border-purple-200">
+                      {barkAgeResult.comparison_summary}
+                    </p>
+
+                    {/* Growth Rate & DBH Comparison Matrix */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                      <div className="p-2.5 bg-white rounded-xl border border-purple-200">
+                        <div className="text-[10px] uppercase font-bold text-slate-500">Species MAI</div>
+                        <div className="font-extrabold text-[#022c17] mt-0.5">{barkAgeResult.growth_rate_mai ? `${barkAgeResult.growth_rate_mai} cm/yr` : '—'}</div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-xl border border-purple-200">
+                        <div className="text-[10px] uppercase font-bold text-slate-500">Tree DBH</div>
+                        <div className="font-extrabold text-[#022c17] mt-0.5">{barkAgeResult.dbh ? `${barkAgeResult.dbh} cm` : '—'}</div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-xl border border-purple-200">
+                        <div className="text-[10px] uppercase font-bold text-slate-500">Growth Age</div>
+                        <div className="font-extrabold text-purple-800 mt-0.5">{barkAgeResult.growth_age ? `${barkAgeResult.growth_age} yr` : '—'}</div>
+                      </div>
+                      <div className="p-2.5 bg-white rounded-xl border border-purple-200">
+                        <div className="text-[10px] uppercase font-bold text-slate-500">Bark Morphology</div>
+                        <div className="font-extrabold text-purple-800 mt-0.5">{barkAgeResult.bark_age ? `${barkAgeResult.bark_age} yr` : '—'}</div>
+                      </div>
+                    </div>
+
+                    {/* Probability distribution across all 4 stages */}
+                    {barkAgeResult.all_stages && barkAgeResult.all_stages.length > 0 && (
+                      <div className="space-y-1.5 pt-1">
+                        <div className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">Maturity Class Probabilities:</div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                          {barkAgeResult.all_stages.map((st) => (
+                            <div key={st.stage} className="bg-white p-2 rounded-lg border border-purple-100 text-xs">
+                              <div className="flex justify-between items-center text-[11px] font-bold text-slate-700">
+                                <span>{st.label}</span>
+                                <span>{st.confidence}%</span>
+                              </div>
+                              <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
+                                <div className="bg-purple-600 h-full rounded-full" style={{ width: `${st.confidence}%` }} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Apply to form button */}
+                    <div className="pt-2 flex items-center justify-between border-t border-purple-200">
+                      <span className="text-xs text-slate-600 font-semibold">
+                        Ready to apply to the tree biometric record?
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => applyAgeToForm(barkAgeResult.approximate_age)}
+                        className="px-4 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-black flex items-center gap-2 shadow-sm transition-all"
+                      >
+                        <CheckCircle2 className="w-4 h-4 text-purple-200" />
+                        <span>Apply Age ({barkAgeResult.approximate_age} yr) to Form</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
