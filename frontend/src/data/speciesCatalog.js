@@ -56,9 +56,9 @@ export const SPECIES_CATALOG = {
     aliases: ['Betel nut palm', 'Areca nut', 'Supari'],
   },
   Ad: {
-    scientific: 'Ad',
-    family: 'Unknown',
-    aliases: ['Ad'],
+    scientific: 'Adansonia digitata',
+    family: 'Malvaceae',
+    aliases: ['Ad', 'Baobab', 'African Baobab', 'Gorak Chinch', 'Khurasani Imli', 'Kalpavriksha'],
   },
   Bel: {
     scientific: 'Aegle marmelos',

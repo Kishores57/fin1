@@ -472,4 +472,243 @@ export const SPECIES_EXTENDED_KNOWLEDGE = {
       agroforestryValue: 'Premier agroforestry companion tree, provides sustainable timber (lacewood), and honeybee forage.',
     },
   },
+
+  Christmas: {
+    medicinalParts: {
+      leaves: 'Needle-like foliage extracts contain flavonoids and diterpenes evaluated for antimicrobial and topical anti-inflammatory properties.',
+      bark: 'Resinous exudate collected and applied in traditional ethnomedicine as an antiseptic sealant on cuts and insect bites.',
+      flowers: 'Dioecious cone structures; microsporangiate male catkins release windborne pollen, studied for bioflavonoids.',
+      fruits: 'Female seed cones contain winged seeds; not consumed medicinally in Ayurveda.',
+      roots: 'Extensive stabilizing anchor root network; traditional resin poultices for foot cracks.',
+      seeds: 'Nutrient-rich edible seed kernel occasionally roasted in Pacific ethnomedicine.',
+      traditionalUses: 'Widely planted as iconic formal architectural evergreen conifer; needle resin historically used as incense and natural antiseptic gum.',
+    },
+    diseasesPests: {
+      diseases: [
+        'Needle blight (Pestalotiopsis funerea)',
+        'Root rot (Phytophthora cinnamomi)',
+        'Dieback (Diplodia pinea)',
+        'Stem canker',
+      ],
+      pests: [
+        'Araucaria mealybug (Nipaecoccus aurilanatus)',
+        'Spider mites (Oligonychus spp.)',
+        'Termites on young saplings',
+        'Bark boring weevils',
+      ],
+      symptoms: 'Browning and premature shedding of lower needle whorls, resin bleeding from trunk, branch dieback.',
+      treatment: 'Copper hydroxide foliar sprays for needle blight, improving soil drainage to prevent Phytophthora root rot, systemic neem drenching.',
+      iucnStatus: 'Least Concern (LC)',
+      researchPapers: [
+        'Phytochemical constituents and bioactivity of Araucariaceae resins (Semantic Scholar)',
+        'Particulate deposition and needle microstructure of Araucaria columnaris in urban corridors (PubMed)',
+      ],
+    },
+    otherAdvantages: {
+      airPurification: 'High evergreen needle density traps fine particulate matter (PM2.5/PM10) year-round without seasonal leaf shedding.',
+      noiseReduction: 'Dense symmetrical whorled tiered branch architecture acts as an acoustic sound baffle along urban avenues.',
+      climateResilience: 'High tolerance to maritime salt spray, high coastal winds, and seasonal heat waves; flexible column trunk bends with gales.',
+      soilProtection: 'Deep fibrous taproot and lateral anchor roots prevent soil displacement on steep hills and urban park lawns.',
+      agroforestryValue: 'Premier ornamental landmark specimen, urban skyline beautification, and long-term timber/resin asset.',
+    },
+  },
+
+  'Tej Patta': {
+    medicinalParts: {
+      leaves: 'Rich in aromatic eugenol, linalool, and cinnamic aldehyde; primary Ayurvedic "Twik-patra" used in Chandraprabha Vati for diabetes and digestion.',
+      bark: 'Aromatic cinnamon substitute bark; astringent and carminative decoction used for colic, dyspepsia, and chronic bronchitis.',
+      flowers: 'Small yellowish inflorescences with aromatic volatile essential oils used in traditional soothing baths.',
+      fruits: 'Small dark purple ellipsoid berries yielding aromatic fat used in traditional liniments for rheumatic joints.',
+      roots: 'Root bark decoctions act as an aromatic stimulant and carminative tonic in mountain folk medicine.',
+      seeds: 'Crushed seed preparations used traditionally as vermifuge and anti-flatulent paste.',
+      traditionalUses: 'Revered in Charaka Samhita as one of the "Trijata" spices; stimulates digestive Agni, lowers blood sugar, and clears respiratory mucus.',
+    },
+    diseasesPests: {
+      diseases: [
+        'Leaf spot (Colletotrichum gloeosporioides)',
+        'Grey blight (Pestalotiopsis palmarum)',
+        'Sooty mold (Meliola spp.)',
+        'Seedling wilt',
+      ],
+      pests: [
+        'Cinnamon butterfly / Leaf webber (Sorolopha bryana)',
+        'Tej Patta gall midge',
+        'Leaf mining beetles',
+        'Scale insects',
+      ],
+      symptoms: 'Brown leaf marginal blotches, leaf web nests with chewed edges, raised gall blisters on leaf blades.',
+      treatment: 'Pruning infested leaf web clusters, organic neem seed kernel extract (NSKE 5%) sprays, bio-control with Trichoderma.',
+      iucnStatus: 'Least Concern (LC)',
+      researchPapers: [
+        'Hypoglycemic and hypolipidemic activity of Cinnamomum tamala essential oils (PubMed)',
+        'Antioxidant profiling of polyphenol-rich Himalayan spice leaves (Semantic Scholar)',
+      ],
+    },
+    otherAdvantages: {
+      airPurification: 'Continuous volatile terpene transpiration purifies ambient air with natural anti-microbial phytoncides.',
+      noiseReduction: 'Dense multi-layered glossy evergreen sub-canopy absorbs mid-frequency community noise.',
+      climateResilience: 'Flourishes in subtropical sub-montane climates and shady understory zones; withstands monsoon downpours.',
+      soilProtection: 'Deep feeder root networks bind loose Himalayan and foothill soils against hillside sheet erosion.',
+      agroforestryValue: 'High-value commercial cash crop for spices and perfumery; ideal agroforestry intercrop under taller forest canopies.',
+    },
+  },
+
+  Badam: {
+    medicinalParts: {
+      leaves: 'Foliar decoctions rich in punicalagin and tannins; antibacterial water conditioner used in aquaculture and dermatological baths.',
+      bark: 'Potent astringent decoction utilized in traditional medicine for dysentery, diarrhea, and gargling for sore throats.',
+      flowers: 'Small white axillary spikes; traditional infusions for mild gastric cooling.',
+      fruits: 'Fibrous drupe with high-antioxidant epicarp; edible kernel inside is nutrient-dense and high in protein and monounsaturated fats.',
+      roots: 'Root decoction used in folklore remedies for gonorrheal urethritis and intestinal parasites.',
+      seeds: 'Nut kernel contains squalene, oleic acid, and vitamin E; acts as a neuroprotective and cardiotonic dietary nut.',
+      traditionalUses: 'Foliar extracts widely applied in folk medicine for liver disorders; leaves placed in fish tanks worldwide to prevent bacterial and fungal infections.',
+    },
+    diseasesPests: {
+      diseases: [
+        'Leaf spot (Cercospora catappae)',
+        'Anthracnose (Colletotrichum spp.)',
+        'Root rot (Ganoderma)',
+        'Algal leaf spot (Cephaleuros virescens)',
+      ],
+      pests: [
+        'Termites on heartwood',
+        'Hairy caterpillars (Trabala vishnou)',
+        'Thrips',
+        'Fruit-piercing moths',
+      ],
+      symptoms: 'Large purplish-brown foliar necrotic spots, skeletonized leaves, orange velvety algal rust patches on foliage.',
+      treatment: 'Sanitary disposal of fallen autumnal leaves, organic copper fungicide spray, barrier banding against climbing caterpillars.',
+      iucnStatus: 'Least Concern (LC)',
+      researchPapers: [
+        'Hepatoprotective and antioxidant properties of Terminalia catappa leaf tannins (PubMed)',
+        'Aqueous leaf extract antimicrobial efficacy against aquatic and dermal pathogens (Crossref)',
+      ],
+    },
+    otherAdvantages: {
+      airPurification: 'Massive broad leathery obovate leaves offer huge surface area for capturing airborne toxic particulate dust.',
+      noiseReduction: 'Distinct pagoda-like horizontal tiered whorls create multi-level acoustic buffering against highway noise.',
+      climateResilience: 'Exceptional salt spray and maritime wind resistance; highly tolerant of seasonal tropical droughts and sandy soil.',
+      soilProtection: 'Wide horizontal buttress and taproot system anchors coastal sands and prevents shoreline beach erosion.',
+      agroforestryValue: 'Edible almond-substitute nuts, valuable furniture timber, tannin dye, and cooling coastal avenue shade.',
+    },
+  },
+
+  Supari: {
+    medicinalParts: {
+      leaves: 'Frond sheath (Areca sheath) provides natural biodegradable plates; leaf infusions used as cooling topical washes.',
+      bark: 'Slender fibrous trunk decoction traditionally used as mild astringent for periodontal rinses.',
+      flowers: 'Fragrant sweet floral panicles used in traditional ceremonies and cooling digestive tonics.',
+      fruits: 'Nut contains arecoline, tannins, and gallic acid; potent anthelmintic for expelling tapeworms in veterinary and traditional medicine.',
+      roots: 'Fibrous root decoction used for dysentery, liver ailments, and urinary disorders.',
+      seeds: 'Endosperm of the nut is chewed as traditional masticatory with betel leaf; acts as a central nervous system stimulant and sialagogue.',
+      traditionalUses: 'Central to Indian cultural, ritual, and hospitable traditions (Tambula); Charaka Samhita documents nut as carminative and astringent.',
+    },
+    diseasesPests: {
+      diseases: [
+        'Koleroga / Fruit rot (Phytophthora meadii)',
+        'Yellow leaf disease (Phytoplasma)',
+        'Anabe roga / Foot rot (Ganoderma lucidum)',
+        'Inflorescence dieback',
+      ],
+      pests: [
+        'Spindle bug (Carvalhoia arecae)',
+        'White mite (Oligonychus indicus)',
+        'Root grub (Leucopholis burmeisteri)',
+        'Arecanut weevil',
+      ],
+      symptoms: 'Water-soaked rotting lesions on green nuts causing premature drop, yellowing frond tips, rotting collar base.',
+      treatment: 'Spraying 1% Bordeaux mixture on bunches before monsoon, application of Trichoderma viride in root basins, pheromone traps.',
+      iucnStatus: 'Least Concern (LC)',
+      researchPapers: [
+        'Arecoline pharmacology and secondary metabolite diversity in Areca catechu (PubMed)',
+        'Integrated management of Phytophthora fruit rot in tropical multi-tier plantations (Semantic Scholar)',
+      ],
+    },
+    otherAdvantages: {
+      airPurification: 'High vertical monocot canopy filters sea mist and airborne dust in coastal horticultural belts.',
+      noiseReduction: 'Tall slender multi-stem plantation stands baffle ground-level wind turbulence and noise transmission.',
+      climateResilience: 'Adapted to high rainfall (>2000 mm) humid tropical valleys; flexible stem sways safely in seasonal monsoon gales.',
+      soilProtection: 'Fibrous lateral root network stabilizes red laterite soils on plantation terraces.',
+      agroforestryValue: 'Core pillar of multi-tier agroforestry with black pepper, cocoa, and cardamom intercrops; fallen sheaths yield eco-tableware.',
+    },
+  },
+
+  Ad: {
+    medicinalParts: {
+      leaves: 'Rich in calcium, mucilage, and flavonoids; dried foliar powder used in traditional porridge to treat fevers and asthma.',
+      bark: 'Bitter bark decoction rich in adansonin used as traditional febrifuge substitute for quinine to lower malaria fever.',
+      flowers: 'Pendulous nocturnal blooms rich in amino acids; consumed in traditional tonic drinks.',
+      fruits: 'Velvety woody capsules contain powdery pulp with 6x more Vitamin C than oranges; exceptional prebiotic and antioxidant food.',
+      roots: 'Taproot of young seedlings chewed as survival food; root bark paste applied to chronic boils and glandular swellings.',
+      seeds: 'Protein and zinc-rich seeds pressed for golden Baobab cosmetic oil; regenerates skin barrier and soothes eczema.',
+      traditionalUses: 'Revered as sacred "Gorak Chinch" in western India and "Tree of Life" in Africa; Charaka mentions African Baobab as longevity and cooling tonic.',
+    },
+    diseasesPests: {
+      diseases: [
+        'Sooty mold on foliage',
+        'Stem canker and wood decay fungi',
+        'Phytophthora collar rot (in waterlogged heavy clay)',
+      ],
+      pests: [
+        'Baobab stem borer (Apate monachus)',
+        'Cotton stainer bugs (Dysdercus spp.)',
+        'Fruit-piercing moths',
+        'Termites on decaying deadwood',
+      ],
+      symptoms: 'Wood sawdust frass on trunk bark, rotting collar base from waterlogging, yellowing foliage in rainy season.',
+      treatment: 'Planting only on high elevated well-drained ground, painting trunk wounds with organic copper paste, biological neem drenches.',
+      iucnStatus: 'Least Concern (LC) globally; heritage conservation priority in Maharashtra, Gujarat, and central India',
+      researchPapers: [
+        'Superfood nutritional analysis and polyphenol bioavailability of Adansonia digitata fruit pulp (PubMed)',
+        'Ancient Baobabs of the Indian subcontinent: Heritage genetics and maritime dispersal (DOAJ)',
+      ],
+    },
+    otherAdvantages: {
+      airPurification: 'Tremendous leaf canopy area scrubs tons of carbon dioxide and particulate dust during the monsoon vegetative phase.',
+      noiseReduction: 'Monumental swollen trunk diameter (>5-10 meters) forms a physical acoustic barrier deflecting roadside reverberations.',
+      climateResilience: 'Extreme drought survival; spongy interior stores up to 120,000 liters of water through multi-year severe arid spells.',
+      soilProtection: 'Deep radial taproot and anchor system stabilizes arid plateau soils and prevents catastrophic wind erosion.',
+      agroforestryValue: 'Iconic sacred landmark tree, superfood fruit pulp, drought sanctuary for wildlife, and centuries-long carbon reservoir.',
+    },
+  },
+
+  Bel: {
+    medicinalParts: {
+      leaves: 'Trifoliate leaves sacred to Lord Shiva; rich in aegeline and marmin; leaf juice taken daily for diabetes, fever, and jaundice.',
+      bark: 'Astringent root and stem bark is one of the core "Dashamoola" herbs in Ayurveda; relieves inflammatory swellings and colitis.',
+      flowers: 'Sweet greenish-white blossoms distilled into cooling fragrant herbal water for epilepsy and nervous tremors.',
+      fruits: 'Hard-shelled woody fruit; pulp rich in marmelosin, pectin, and tannins; premier Ayurvedic remedy for chronic amoebic dysentery and irritable bowel syndrome.',
+      roots: 'Major ingredient of classical Dashamoola Kwatha; anti-inflammatory, cardiac tonic, and febrifuge.',
+      seeds: 'Mucilaginous seeds yield bitter oil with purgative and wound-healing properties.',
+      traditionalUses: 'Revered in Hindu rituals as sacred Bilva tree; Sushruta Samhita proclaims unripe fruit as the ultimate digestive binder (Grahi) for intestinal ulcers.',
+    },
+    diseasesPests: {
+      diseases: [
+        'Bacterial canker (Xanthomonas bilvae)',
+        'Fusarium fruit rot',
+        'Leaf spot (Alternaria spp.)',
+        'Powdery mildew',
+      ],
+      pests: [
+        'Citrus butterfly caterpillar (Papilio demoleus)',
+        'Fruit fly (Bactrocera zonata)',
+        'Bael leaf webber',
+        'Scale insects',
+      ],
+      symptoms: 'Raised corky canker lesions on leaves and fruit rinds, defoliated shoots from swallowtail caterpillars, rotting fruit pulp.',
+      treatment: 'Spraying Streptocycline and copper oxychloride for bacterial canker, handpicking swallowtail larvae on young trees, neem oil.',
+      iucnStatus: 'Least Concern (LC) / Near Threatened in some fragmented wild habitats',
+      researchPapers: [
+        'Pharmacological actions of Aegle marmelos in gastrointestinal disorders and ulcerative colitis (PubMed)',
+        'Antidiabetic and antioxidant mechanisms of aegeline in Bilva leaf extracts (Semantic Scholar)',
+      ],
+    },
+    otherAdvantages: {
+      airPurification: 'High foliar release of oxygen and volatile terpenes; traditionally planted around homes and temples to purify atmospheric air.',
+      noiseReduction: 'Compact thorny semi-deciduous canopy dampens street acoustic reverberation.',
+      climateResilience: 'Remarkable drought and heat tolerance (>46°C); thrives in stony, ravine, alkaline, and degraded dryland soils.',
+      soilProtection: 'Deep sturdy taproot binds fragile dryland topsoils and prevents ravine erosion in rocky plateau tracts.',
+      agroforestryValue: 'Sacred temple tree, commercially valuable medicinal fruit (Bael Sharbat), and host plant for Lime Swallowtail butterflies.',
+    },
+  },
 };

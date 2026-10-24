@@ -3,42 +3,253 @@ Sources: ICAR Indian Institute of Horticultural Research, FAO Plant Production a
 
 === SPECIES: AZADIRACHTA INDICA (NEEM) ===
 1. Diseases & Pests
-- Common Diseases: Leaf spot (caused by Colletotrichum gloeosporioides), powdery mildew (Oidium azadirachtae), root rot (Ganoderma lucidum), and damping-off (Fusarium oxysporum).
-- Pests: Tea mosquito bug (Helopeltis antonii), scale insects (Pulvinaria maxima), neem scale (Aonidiella orientalis), and leaf webber (Loboschiza koenigiana).
-- Symptoms: Yellowing leaves, white powdery patches, brown necrotic lesions, tip dieback, and stunted growth.
-- Treatment & Prevention: Apply neem oil spray or bio-fungicides like Trichoderma viride. Maintain proper spacing to ensure canopy aeration and avoid waterlogging. Prune infected branches (verified by ICAR guidelines).
+- Common Diseases: Leaf spot (Colletotrichum gloeosporioides), Powdery mildew (Oidium azadirachtae), Root rot (Ganoderma lucidum), Seedling damping-off (Fusarium oxysporum).
+- Pests: Tea mosquito bug (Helopeltis antonii), Scale insects (Pulvinaria maxima), Neem scale (Aonidiella orientalis), Leaf webber (Loboschiza koenigiana).
+- Symptoms: Yellowing foliage, white powdery crusts, brown necrotic margins, tip dieback, and stunted growth.
+- Treatment & Prevention: Apply neem oil spray, bio-fungicides like Trichoderma viride, ensure canopy aeration, and avoid waterlogging.
 
 2. Conservation Status & Research Studies
 - IUCN Status: Least Concern (LC).
-- Threats: Habitat clearing, localized over-harvesting of seeds, and monoculture scale infestations.
+- Threats: Urban clear-felling, monoculture scale insect outbreaks, and seasonal waterlogged soil conditions.
 - Research Papers:
-  - "Azadirachtin: Phytochemistry and modern biocontrol efficacy" (Semantic Scholar) - Details the synthesis of azadirachtin and its impact as a growth disruptor for over 400 species of insect pests.
-  - "Antifungal activity of Neem leaf extracts against human dermatophytic fungi" (PubMed) - A clinical study showing rapid inhibition of Trichophyton species.
+  - "Azadirachtin: Phytochemistry and modern biocontrol efficacy against insect pests (Semantic Scholar)"
+  - "Antifungal activity of Neem leaf extracts against human dermatophytic fungi (PubMed)"
 
 === SPECIES: SARACA ASOCA (ASHOKA) ===
 1. Diseases & Pests
-- Common Diseases: Leaf spot (Pestalotiopsis versicolor), seedling blight (Phytophthora nicotianae), and root rot (Rhizoctonia solani).
-- Pests: Pod borers (Deudorix isocrates), leaf miners (Acrocercops tetradelta), and mealybugs (Pseudococcus species).
-- Symptoms: Dark brown spots with yellow halos on leaves, curling leaves, white cottony deposits on twigs, and pod rot.
-- Treatment & Prevention: Spray organic copper fungicides (Bordeaux mixture). Apply organic neem-based insecticidal soaps for sucking pests. Remove leaf litter around stream banks to prevent fungal spore overwintering.
+- Common Diseases: Leaf spot (Pestalotiopsis versicolor), Seedling blight (Phytophthora nicotianae), Root rot (Rhizoctonia solani).
+- Pests: Pod borers (Deudorix isocrates), Leaf miners (Acrocercops tetradelta), Mealybugs (Pseudococcus spp.).
+- Symptoms: Dark brown spots with yellow halos, curling foliage, white powdery deposits, and pod drop.
+- Treatment & Prevention: Organic copper fungicides (Bordeaux mixture), neem seed kernel sprays, and pruning of overcrowded twigs.
 
 2. Conservation Status & Research Studies
 - IUCN Status: Vulnerable (VU).
-- Threats: Heavy bark harvesting for Ashokarishta production, riverbank habitat degradation, and poor seed germination rate in the wild.
+- Threats: Destructive commercial debarking for pharmaceutical trade and fragmentation of riparian habitat.
 - Research Papers:
-  - "Conservation and population fragmentation of Saraca asoca in the Western Ghats" (Semantic Scholar) - A study detailing the genetic erosion of wild populations due to commercial bark collection.
-  - "Evaluation of the analgesic and anti-inflammatory properties of Saraca asoca bark" (PubMed) - Demonstrates significant reduction in tissue inflammation models in vivo.
+  - "Conservation and population fragmentation of Saraca asoca in the Western Ghats (Semantic Scholar)"
+  - "Pharmacological evaluation of the uterine-tonic and analgesic properties of Saraca asoca bark (PubMed)"
 
-=== SPECIES: HEVEA BRASILIENSIS (RUBBER TREE) ===
+=== SPECIES: BAMBUSA VULGARIS (BAMBOO) ===
 1. Diseases & Pests
-- Common Diseases: South American Leaf Blight (Microcyclus ulei) - a highly destructive disease, powdery mildew (Oidium heveae), white root disease (Rigidoporus microporus), and phytophthora leaf fall (Phytophthora palmivora).
-- Pests: Termites (Coptotermes curvignathus), scale insects, and rubber tree leafhoppers.
-- Symptoms: Black necrotic spots on leaves leading to defoliation, white fungal mycelia on roots, and excessive leaf fall during rainy periods.
-- Treatment & Prevention: Strict quarantine regulations (especially preventing South American Leaf Blight from spreading to Asia). Use sulfur dusting for powdery mildew. Apply propiconazole or copper oxychloride for leaf diseases.
+- Common Diseases: Bamboo culm rot (Fusarium spp.), Witches' broom (Balansia linearis), Leaf rust (Dasturella divina).
+- Pests: Bamboo culm borer (Dinoderus minutus), Bamboo aphid (Pseudoregma bambusicola), Leaf roller.
+- Symptoms: Powder post tunneling in dried culms, abnormal bushy shoot clusters, and premature leaf drop.
+- Treatment & Prevention: Boric-acid borax immersion for felled culms, biocontrol with Beauveria bassiana, and clump thinning.
 
 2. Conservation Status & Research Studies
-- IUCN Status: Least Concern (LC) globally due to extensive industrial farming, though wild Amazonian genetic germplasms are under threat from deforestation.
-- Threats: Amazonian deforestation, climate change restricting moisture zones, and extreme vulnerability to South American Leaf Blight (SALB).
+- IUCN Status: Least Concern (LC).
+- Threats: Gregarious flowering followed by clump mortality and over-exploitation for paper mills.
 - Research Papers:
-  - "Climatic limitations and disease challenges in Southeast Asian rubber plantations" (Crossref) - Evaluates the threat of SALB and seasonal drought on rubber yields.
-  - "Antioxidant flavonoids of Hevea brasiliensis leaves and their industrial applications" (DOAJ) - Isolates bioactive phenolics for potential skin-care applications.
+  - "Rapid carbon sequestration dynamics of Bambusa vulgaris in tropical river basins (Semantic Scholar)"
+  - "Pharmacognostic and bone-remineralizing evaluation of Tabasheer silica from Bambusa vulgaris (PubMed)"
+
+=== SPECIES: ARAUCARIA COLUMNARIS (CHRISTMAS) ===
+1. Diseases & Pests
+- Common Diseases: Needle blight (Pestalotiopsis funerea), Root rot (Armillaria spp.), Crown dieback.
+- Pests: Araucaria mealybug, Scale insects (Chrysomphalus), Spider mites.
+- Symptoms: Browning of lower branch needles, resin exudation from trunk fissures, and wilting crown tips.
+- Treatment & Prevention: Systemic bio-insecticides for mealybugs, improved soil aeration, and avoiding root injury during landscape work.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC).
+- Threats: Soil compaction in urban parks and severe tropical cyclone trunk snap.
+- Research Papers:
+  - "Phototropic and latitudinal lean dynamics of Araucaria columnaris across global hemispheres (Semantic Scholar)"
+  - "Antimicrobial diterpenes isolated from the resin of Araucaria species (PubMed)"
+
+=== SPECIES: HYOPHORBE LAGENICAULIS (PALM (BOTTLE PALM)) ===
+1. Diseases & Pests
+- Common Diseases: Bud rot (Phytophthora palmivora), Lethal yellowing phytoplasma, Graphiola leaf spot.
+- Pests: Red palm weevil, Scale insects, Palm aphids, Spider mites.
+- Symptoms: Collapse of central spear leaf, yellowing frond tips, and brown necrotic spotting on leaflets.
+- Treatment & Prevention: Apply systemic bio-fungicides to the bud cavity, ensure rapid soil drainage, and avoid overwatering.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Critically Endangered (CR) in the wild; widely cultivated globally..
+- Threats: Severe genetic bottleneck in native habitat and urban overwatering.
+- Research Papers:
+  - "Ex-situ conservation genetics and population recovery of Hyophorbe lagenicaulis (Semantic Scholar)"
+  - "Susceptibility and management of Phytophthora bud rot in ornamental tropical palms (PubMed)"
+
+=== SPECIES: COCOS NUCIFERA (COCONUT) ===
+1. Diseases & Pests
+- Common Diseases: Bud rot (Phytophthora palmivora), Root wilt disease (phytoplasma), Stem bleeding (Thielaviopsis paradoxa), Leaf rot.
+- Pests: Rhinoceros beetle (Oryctes rhinoceros), Red palm weevil (Rhynchophorus ferrugineus), Eriophyid mite (Aceria guerreronis), Black headed caterpillar.
+- Symptoms: V-shaped cuts on fronds, oozing brown sap from trunk, rotting central crown, and premature nut fall.
+- Treatment & Prevention: Pheromone traps for beetles, root feeding with azadirachtin bio-formulations, and Trichoderma trunk pastes.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC) / Extensively Cultivated.
+- Threats: Lethal yellowing outbreaks and sea-level rise storm damage.
+- Research Papers:
+  - "Carbon sequestration and biomass allometry of Cocos nucifera plantations across coastal zones (Semantic Scholar)"
+  - "Antimicrobial efficacy of virgin coconut oil and lauric acid against human pathogens (PubMed)"
+
+=== SPECIES: CINNAMOMUM TAMALA (TEJ PATTA) ===
+1. Diseases & Pests
+- Common Diseases: Leaf blight (Colletotrichum gloeosporioides), Grey blight (Pestalotia cinnamomi), Seedling rot.
+- Pests: Cinnamon butterfly caterpillar (Graphium sarpedon), Leaf gall thrips, Leaf miners.
+- Symptoms: Brown leaf edge necrosis, curled gall-like blistered foliage, and premature leaf drop.
+- Treatment & Prevention: Spray neem-based formulations, ensure proper mountain terrace drainage, and prune diseased twigs.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC).
+- Threats: Unsustainable over-harvesting of wild leaves and mountain road construction.
+- Research Papers:
+  - "Hypoglycemic and antioxidant activity of Cinnamomum tamala leaf extracts in diabetic animal models (PubMed)"
+  - "Phytochemical chemotyping of essential oils from wild and cultivated Cinnamomum tamala (Semantic Scholar)"
+
+=== SPECIES: TERMINALIA CATAPPA (BADAM) ===
+1. Diseases & Pests
+- Common Diseases: Leaf spot (Cercospora catappae), Sooty mold, Bacterial leaf scorch.
+- Pests: Almond moth caterpillar, Termites attacking dead wood, Thrips, Leaf skeletonizer.
+- Symptoms: Irregular brown lesions on leaves, dark sooty coating on upper foliage, and twig dieback.
+- Treatment & Prevention: Prune dead tiered branches, apply organic neem formulations for thrips, and clear fallen litter.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC).
+- Threats: Coastal land reclamation and intense urban pruning/chopping.
+- Research Papers:
+  - "Hepatoprotective and antioxidant properties of Terminalia catappa leaf extract (PubMed)"
+  - "Urban cooling efficiency and canopy radiation interception of Terminalia catappa in tropical cities (Semantic Scholar)"
+
+=== SPECIES: SAMANEA SAMAN (RAIN TREE) ===
+1. Diseases & Pests
+- Common Diseases: Root rot (Ganoderma pseudoferreum), Pink disease (Erythricium salmonicolor), Sooty mold.
+- Pests: Mealybugs (Ferrisia virgata), Stem borers, Bagworms, Leafhoppers.
+- Symptoms: Black sooty coating on lower foliage from honeydew secretions, branch dieback, and bark splitting.
+- Treatment & Prevention: Bio-control of mealybugs with ladybird beetles, systematic pruning of heavy dead limbs, and tree aeration.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC).
+- Threats: Storm-induced limb fracture due to massive branch leverage and improper urban root trenching.
+- Research Papers:
+  - "Urban microclimate cooling and carbon sequestration allometry of Samanea saman (Semantic Scholar)"
+  - "Bioactive alkaloids and pharmacology of Samanea saman bark and leaf extracts (PubMed)"
+
+=== SPECIES: GREVILLEA ROBUSTA (SILVER OAK) ===
+1. Diseases & Pests
+- Common Diseases: Stem canker (Botryosphaeria spp.), Pink disease (Erythricium salmonicolor), Root rot (Armillaria).
+- Pests: Stem borers, Termites, Scale insects, Mealybugs.
+- Symptoms: Dieback of upper branches, weeping resinous cankers on trunk, and silver foliage yellowing.
+- Treatment & Prevention: Paint trunk with copper-fungicide pastes, ensure sloped plantation drainage, and prune diseased limbs.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC).
+- Threats: Severe wind-breakage of over-tall mature trees and phosphorus-heavy chemical fertilizers.
+- Research Papers:
+  - "Biomass allometrics and carbon accounting in Grevillea robusta coffee agroforestry systems (Semantic Scholar)"
+  - "Chemical characterization of resorcinols and phenolic lipids from Grevillea robusta (PubMed)"
+
+=== SPECIES: MANGIFERA INDICA (MANGO) ===
+1. Diseases & Pests
+- Common Diseases: Anthracnose (Colletotrichum gloeosporioides), Powdery mildew (Oidium mangiferae), Mango malformation disease (Fusarium mangiferae), Dieback.
+- Pests: Mango hopper (Idioscopus clypealis), Fruit fly (Bactrocera dorsalis), Stem borer (Batocera rufomaculata), Bark-eating caterpillar.
+- Symptoms: Black spots on flowers and young fruit, white powdery coating on panicles, malformed bunchy vegetative shoots, and bored trunk holes.
+- Treatment & Prevention: Spray bio-fungicides during pre-bloom, install methyl eugenol fruit fly traps, and clear malformed shoots.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Data Deficient (DD) in wild; Least Concern (LC) cultivated..
+- Threats: Extreme unseasonal winter rainfall ruining blossom pollination and aggressive orchard clear-felling.
+- Research Papers:
+  - "Mangiferin: Pharmacological advances in diabetes, cardiovascular disease, and cancer therapy (PubMed)"
+  - "Carbon stock and allometric equations for Mangifera indica in tropical agroforestry orchards (Semantic Scholar)"
+
+=== SPECIES: ARECA CATECHU (SUPARI) ===
+1. Diseases & Pests
+- Common Diseases: Koleroga / Mahali fruit rot (Phytophthora meadii), Yellow leaf disease (phytoplasma), Anabe roga / foot rot (Ganoderma lucidum), Bud rot.
+- Pests: Spindle bug (Carvalhoia arecae), White mite (Oligonychus indicus), Root grub (Leucopholis burmeisteri).
+- Symptoms: Rotting and dropping of immature nuts, yellowing and drying of inner fronds, and bleeding brown sap at base.
+- Treatment & Prevention: Bordeaux mixture spray on nut bunches before monsoon, application of Trichoderma to soil, and light intercultural tilling.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC) / Extensively Cultivated.
+- Threats: Devastating Koleroga fruit rot epidemics during heavy monsoon downpours.
+- Research Papers:
+  - "Epidemiology and management of Phytophthora fruit rot in Areca catechu plantations (Semantic Scholar)"
+  - "Pharmacological actions and toxicological review of arecoline and related Areca catechu alkaloids (PubMed)"
+
+=== SPECIES: ADANSONIA DIGITATA (AD) ===
+1. Diseases & Pests
+- Common Diseases: Trunk rot (Ceratocystis spp.), Black fungal mold on fruit, Damping-off in seedlings.
+- Pests: Cotton stainer bug (Dysdercus fasciatus), Baobab longhorn beetle, Termites.
+- Symptoms: Soft waterlogged lesions on trunk, premature fruit drop, and boring holes in soft wood.
+- Treatment & Prevention: Ensure rapid site drainage, avoid mechanical damage to trunk bark, and apply organic bio-fungicides.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC) globally; highly protected heritage status in India..
+- Threats: Urban road widening chopping ancient heritage trees and prolonged waterlogging in modern concrete paved areas.
+- Research Papers:
+  - "Nutritional, phytochemical and therapeutic properties of Adansonia digitata fruit pulp (PubMed)"
+  - "Centuries-old Adansonia digitata heritage monuments in India: Historical and conservation assessment (Semantic Scholar)"
+
+=== SPECIES: AEGLE MARMELOS (BEL) ===
+1. Diseases & Pests
+- Common Diseases: Fruit rot (Aspergillus niger), Bacterial canker (Xanthomonas axonopodis), Fusarium wilt.
+- Pests: Lemon butterfly caterpillar (Papilio demoleus), Fruit borer, Leaf miner, Scale insects.
+- Symptoms: Brown corky cankers on fruit rinds, defoliation of leaves by caterpillars, and black rotting fruit pulp.
+- Treatment & Prevention: Spray neem seed kernel extract for caterpillars, apply copper oxychloride for bacterial canker, and clear dropped fruit.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Near Threatened (NT) in wild habitats; widely cultivated..
+- Threats: Deforestation of dry deciduous tracts and excessive harvesting of wild fruits without regeneration.
+- Research Papers:
+  - "Gastroprotective and anti-ulcer properties of Aegle marmelos fruit extract (PubMed)"
+  - "Phytochemical profiling and therapeutic spectrum of the sacred Bilva tree (Semantic Scholar)"
+
+=== SPECIES: FICUS BENGHALENSIS (BANYAN) ===
+1. Diseases & Pests
+- Common Diseases: Leaf spot (Cercospora ficicola), Powdery mildew, Dieback in damaged prop roots.
+- Pests: Banyan leaf skeletonizer, Fig wasp mutualism (Eupristina masoni), Scale insects, Stem borers.
+- Symptoms: Skeletonized leaf veins, powdery white fungal crusts, and drying of dangling prop roots.
+- Treatment & Prevention: Protect aerial prop roots with soil-filled bamboo guides until anchored, prune dead limbs, and apply bio-fungicides.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC).
+- Threats: Road widening cutting expansive branch spans and concrete paving smothering prop root anchorage.
+- Research Papers:
+  - "Keystone mutualism and frugivore biodiversity networks in Ficus benghalensis canopies (Semantic Scholar)"
+  - "Antidiabetic and wound-healing pharmacology of Ficus benghalensis bark and aerial roots (PubMed)"
+
+=== SPECIES: FICUS RELIGIOSA (PEEPAL) ===
+1. Diseases & Pests
+- Common Diseases: Leaf spot (Cercospora ficicola), Sooty mold, Rust (Cerotelium fici).
+- Pests: Specialized fig wasp (Blastophaga quadraticeps), Peepal leaf roller, Scale insects, Stem borers.
+- Symptoms: Brown necrotic spotting on heart-shaped leaves, curled leaf edges, and black powdery soot on foliage.
+- Treatment & Prevention: Maintain canopy aeration, spray organic neem-based bio-pesticides, and protect obligate fig pollinator wasps.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC).
+- Threats: Urban pruning and felling near buildings where vigorous roots penetrate foundations.
+- Research Papers:
+  - "Crassulacean Acid Metabolism and nocturnal oxygen dynamics in Ficus religiosa (Semantic Scholar)"
+  - "Pharmacological and phytochemical evaluation of Ficus religiosa: A sacred medicinal tree (PubMed)"
+
+=== SPECIES: HEVEA BRASILIENSIS (RUBBER) ===
+1. Diseases & Pests
+- Common Diseases: South American Leaf Blight (Microcyclus ulei), Powdery mildew (Oidium heveae), White root disease (Rigidoporus microporus), Phytophthora leaf fall.
+- Pests: Subterranean termites (Coptotermes curvignathus), Rubber scale insects, Yellow tea mite, Bark borers.
+- Symptoms: Curled blackened young leaves, white fungal mycelial threads on roots, and excessive defoliation during monsoon.
+- Treatment & Prevention: Strict international phytosanitary quarantine against Microcyclus, sulfur dusting for mildew, and propiconazole root application.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC) globally; wild Amazonian genotypes vulnerable..
+- Threats: Extreme vulnerability to South American Leaf Blight (SALB) and seasonal climate drought.
+- Research Papers:
+  - "Carbon sequestration dynamics and rotational biomass accounting in Hevea brasiliensis plantations (Semantic Scholar)"
+  - "Biochemical and pharmacological analysis of bioactive phenolics from Hevea brasiliensis leaves (PubMed)"
+
+=== SPECIES: PSIDIUM GUAJAVA (GUAVA) ===
+1. Diseases & Pests
+- Common Diseases: Guava wilt (Fusarium oxysporum f. sp. psidii), Anthracnose (Colletotrichum gloeosporioides), Fruit canker (Pestalotiopsis psidii).
+- Pests: Fruit fly (Bactrocera correcta), Tea mosquito bug (Helopeltis antonii), Guava bark borer, Mealybugs.
+- Symptoms: Sudden yellowing and wilting of branches, dark necrotic spots on ripening fruit, and internal fruit fly maggots.
+- Treatment & Prevention: Apply Trichoderma to soil against Fusarium wilt, bag young developing fruits against fruit flies, and spray neem oil for mealybugs.
+
+2. Conservation Status & Research Studies
+- IUCN Status: Least Concern (LC).
+- Threats: Devastating soil-borne Guava wilt disease in alkaline, poorly drained soils.
+- Research Papers:
+  - "Hypoglycemic and antidiabetic mechanisms of Psidium guajava leaf extract: A clinical review (PubMed)"
+  - "Etiology, biocontrol, and integrated management of Guava wilt (Fusarium oxysporum) (Semantic Scholar)"
+

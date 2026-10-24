@@ -3,57 +3,343 @@ Sources: AYUSH Ministry India, National Medicinal Plants Board (NMPB), Dr. Duke'
 
 === SPECIES: AZADIRACHTA INDICA (NEEM) ===
 1. Medicinal Properties & Phytochemistry
-- Medicinal Uses: Broad-spectrum antibacterial, antifungal, antiviral, anti-inflammatory, and insecticidal agent. Highly effective for acne, eczema, psoriasis, gingivitis, and wound healing.
-- Active Phytochemicals: Limonoids, primarily Azadirachtin, Nimbin, Salannin, Gedunin, and Nimbolide. Contains quercetin and various catechins (verified by Dr. Duke's Database).
-- Traditional & Ayurvedic Uses: Known in Ayurveda as 'Arishta' (reliever of sickness). Used in Nimbadi Kwatha and Nimba Taila formulations to pacify Pitta and Kapha doshas, treat skin diseases, and act as a blood purifier.
-- Modern Scientific Evidence: Numerous clinical trials in PubMed demonstrate Neem's efficacy in plaque reduction, dermatological healing, and organic pest control.
-- Toxicity & Side Effects: Safe for external use. Internal consumption in high doses can cause gastrointestinal irritation and is contraindicated for pregnant women and children (infant Neem oil poisoning can cause Reye's-like syndrome).
+- Medicinal Uses: Broad-spectrum antibacterial, antifungal, antiviral, anti-inflammatory, and insecticidal agent. Used for eczema, acne, gingivitis, wound healing, and blood purification.
+- Active Phytochemicals: Limonoids (Azadirachtin, Nimbin, Salannin, Gedunin, Nimbolide), quercetin, and catechins.
+- Traditional & Ayurvedic Uses: Known as "Arishta" (reliever of sickness). Used in Nimbadi Kwatha and Nimba Taila to pacify Pitta and Kapha doshas.
+- Modern Scientific Evidence: Over 1,200 PubMed studies validating dental plaque reduction, dermatological healing, and organic pest control.
+- Toxicity & Side Effects: Safe for external application. High oral doses contraindicated in pregnancy and infants (can induce Reye-like symptoms).
 
 2. Cultural and Spiritual Significance
-- Religious Importance: Widely regarded as a sacred tree in Hinduism. It is worshiped as an incarnation of the goddess Durga, Mariamman, or Sheetala Devi (goddess of smallpox/healing).
-- Cultural Significance: People perform "Pooja" under the Neem tree, offering flowers, turmeric, vermilion, and holy water to the trunk. Tying sacred red threads around its bark is a common ritual to invoke protection.
-- Festivals & Mythology: Leaves are eaten on Gudi Padwa (New Year in Maharashtra) to symbolize the bitter-sweet nature of life. Associated with the celestial nectar (Amrita) spilled during the Churning of the Ocean (Samudra Manthan).
-- Historical Importance: Known historically as the "Village Pharmacy" or "Nature's Drugstore" due to its ubiquitous presence and utility in rural community life.
+- Religious Importance: Sacred in Hinduism; venerated as an incarnation of Goddess Durga, Mariamman, or Sheetala Devi.
+- Cultural Significance: Pooja performed under the trunk with turmeric, vermilion, and red sacred threads for family protection.
+- Festivals & Mythology: Leaves eaten with jaggery on Gudi Padwa symbolizing life triumphs; associated with celestial Amrita.
+- Historical Importance: Historically termed the "Village Pharmacy" or "Nature's Drugstore" across rural India.
 
 3. Carbon Sequestration & Biomass
-- Biomass & Stored Carbon: Neem builds high structural density with a high wood density (~0.82 g/cm³). A mature tree of 30-40 years stores substantial aboveground biomass.
-- Sequestration Rate: Estimates from the Forest Survey of India (FSI) indicate a carbon sequestration rate of 15kg to 25kg of CO2 per tree per year.
-- Climate Mitigation: Excellent urban greening tree that intercepts solar radiation, reducing the urban heat island effect and acting as a carbon sink.
+- Biomass & Stored Carbon: Wood density of approximately 0.72 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 20kg to 30kg of CO2 per tree per year under mature canopy conditions.
+- Climate Mitigation: Dense canopy intercepts intense solar radiation, lowering ambient microclimate temperatures by 3°C to 5°C.
 
 === SPECIES: SARACA ASOCA (ASHOKA) ===
 1. Medicinal Properties & Phytochemistry
-- Medicinal Uses: Primary uterine tonic, anti-hemorrhagic, and anti-inflammatory agent. Used to treat menorrhagia, dysmenorrhea, uterine spasms, and internal bleeding.
-- Active Phytochemicals: Saracin, catechins, epicatechins, leucocyanidin, beta-sitosterol, and condensed tannins (verified by Dr. Duke's Database).
-- Traditional & Ayurvedic Uses: Known as 'Ashoka' (sorrowless). Celebrated for its affinity with the female reproductive system. Used in Ashokarishta and Ashokadi Vati to balance Vata and Pitta doshas.
-- Modern Scientific Evidence: PubMed studies show significant analgesic, uterine-contractile balancing, and antioxidant effects of the bark bark extracts.
-- Toxicity & Side Effects: Low toxicity; generally safe in standard dosages. Contraindicated during pregnancy due to potential uterine contractions.
+- Medicinal Uses: Premier uterine tonic, anti-hemorrhagic, and analgesic agent. Used for menorrhagia, dysmenorrhea, and internal bleeding.
+- Active Phytochemicals: Saracin, catechins, epicatechin, leucocyanidin, beta-sitosterol, and condensed tannins.
+- Traditional & Ayurvedic Uses: Revered in Charaka and Sushruta Samhitas; primary constituent of Ashokarishta and Ashokadi Vati.
+- Modern Scientific Evidence: PubMed pharmacology validates potent uterine-contractile regulation, anti-inflammatory, and antioxidant properties.
+- Toxicity & Side Effects: Low toxicity; contra-indicated during early pregnancy due to uterine-stimulating action.
 
 2. Cultural and Spiritual Significance
-- Religious Importance: Highly sacred in both Hinduism and Buddhism. It is dedicated to Kama (the god of love) and worshiped to alleviate grief.
-- Cultural Significance: Doing Pooja beneath an Ashoka tree is a traditional ritual to bring happiness. Women tie threads and offer prayers for fertility and family well-being.
-- Festivals & Mythology: Associated with Yakshi spirits (nature deities) who are depicted in ancient temple carvings with their foot touching the trunk, causing the tree to burst into flowers.
-- Historical Importance: The Buddha is traditionally believed to have been born under the shade of a sacred Ashoka tree in Lumbini. It was widely planted in royal palace gardens described in Sanskrit literature.
+- Religious Importance: Sacred in Hinduism, Buddhism, and Jainism. Dedicated to Kama; Buddha born under Ashoka in Lumbini.
+- Cultural Significance: Pooja performed by women for family harmony, fertility, and freedom from grief (sorrowless).
+- Festivals & Mythology: Linked to Yakshi temple sculptures where touch of maiden's foot causes the tree to blossom.
+- Historical Importance: Celebrated in Sanskrit literature by Kalidasa; central to royal pleasure gardens of ancient India.
 
 3. Carbon Sequestration & Biomass
-- Biomass & Stored Carbon: Evergreen foliage and dense branching support moderate wood density (~0.67 g/cm³).
-- Sequestration Rate: Sequesters approximately 12kg to 20kg of CO2 per tree per year under optimal tropical rainfall zones (FSI data).
-- Climate Mitigation: Its broad, dense evergreen canopy acts as an exceptional urban noise barrier and solar shadow shield.
+- Biomass & Stored Carbon: Wood density of approximately 0.67 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 12kg to 22kg of CO2 per tree per year in moist tropical settings.
+- Climate Mitigation: Broad evergreen umbrella provides deep acoustic dampening and micro-thermal shadow cooling.
 
-=== SPECIES: HEVEA BRASILIENSIS (RUBBER TREE) ===
+=== SPECIES: BAMBUSA VULGARIS (BAMBOO) ===
 1. Medicinal Properties & Phytochemistry
-- Medicinal Uses: Leaves show high antioxidant properties. The seed oil is studied for its fatty acid composition in skin therapies. Bark decoctions are traditionally used to treat rheumatism.
-- Active Phytochemicals: Cis-1,4-polyisoprene (primary component of latex). Leaves contain phenolics, flavonoids, quebrachitol, and cyanogenic glycosides.
-- Traditional & Ayurvedic Uses: Historically used by indigenous Amazonian tribes (e.g. Munduruku) for superficial wound protection and skin infections. Not traditionally part of classic Ayurveda but integrated in modern herbal databases.
-- Modern Scientific Evidence: PubMed studies investigate the antioxidant capacity of leaf extracts and the antimicrobial fatty acid profile of rubber seed oil.
-- Toxicity & Side Effects: Latex contains natural proteins that are common allergens, causing dermatological contact dermatitis or anaphylaxis in sensitive individuals.
+- Medicinal Uses: Rich in bio-available organic silica (Banslochan / Tabasheer). Treats respiratory distress, joint degeneration, and digestive ulcers.
+- Active Phytochemicals: Organic silica (up to 90% in Tabasheer), orientin, vitexin, phenolic acids, and dietary shoot fiber.
+- Traditional & Ayurvedic Uses: Known as "Vamsha" in Ayurveda. Formulated in Sitopaladi Churna for cough, bronchial asthma, and vitality restoration.
+- Modern Scientific Evidence: PubMed studies demonstrate exceptional bone remineralization, antioxidant capacity, and anti-hyperlipidemic activity of shoot extracts.
+- Toxicity & Side Effects: Raw young shoots contain cyanogenic glycosides; must be boiled or fermented before consumption.
 
 2. Cultural and Spiritual Significance
-- Religious Importance: Held in respect by Amazonian tribes who regard the forest as a single living conscious entity.
-- Cultural Significance: Tapping rubber sustainably represents a traditional lifestyle and co-existence model. Indigenous names like "Cahuchu" translate to the "weeping tree" or "tree of tears".
-- Festivals & Mythology: Central to local folklore in South American rubber-tapping regions, honoring the forest spirits that govern the flow of latex.
-- Historical Importance: The "Rubber Boom" of the late 19th and early 20th centuries reshaped the economic geography and human migration patterns of the Amazon basin.
+- Religious Importance: Sacred symbol of flexibility, resilience, and purity in Hindu, Buddhist, and East Asian traditions.
+- Cultural Significance: Associated with the divine flute (Bansuri) of Lord Krishna; essential in wedding mandaps and ceremonial canopies.
+- Festivals & Mythology: Used in Chhath Pooja and regional harvest festivals across India; symbolizes unbroken family lineage.
+- Historical Importance: The backbone of rural Asian material culture: bridges, housing, scaffolding, and artisan crafts.
 
 3. Carbon Sequestration & Biomass
-- Biomass & Stored Carbon: Fast-growing tree that accumulates high aboveground biomass quickly, although wood density is lower (~0.56 g/cm³).
-- Sequestration Rate: High sequestration rate during the first 10-15 years, storing 30kg to 50kg of CO2 per tree per year in commercial agroforestry systems.
-- Climate Mitigation: While rubber plantations act as significant temporary carbon sinks, clear-cutting plantations for replanting releases stored carbon, highlighting the importance of long-rotation management (IPCC Forestry guidelines).
+- Biomass & Stored Carbon: Wood density of approximately 0.4 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 35kg to 50kg of CO2 per mature clump per year (extremely high annual vegetative carbon increment).
+- Climate Mitigation: Massive underground rhizome network binds topsoil against torrential monsoon erosion and mudslides.
+
+=== SPECIES: ARAUCARIA COLUMNARIS (CHRISTMAS) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Resinous oleoresins exhibit topical antibacterial, wound-protective, and anti-fungal properties.
+- Active Phytochemicals: Diterpenoids, labdane-type resins, alpha-pinene, and bioflavonoids.
+- Traditional & Ayurvedic Uses: Not indigenous to classical Ayurveda; resin used in regional folk remedies for muscular aches and dressing minor cuts.
+- Modern Scientific Evidence: PubMed analyses demonstrate antioxidant and antimicrobial screening of Araucaria oleoresins.
+- Toxicity & Side Effects: Generally safe; ingestion of large quantities of needles can cause mild digestive upset in domestic pets.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Widely used in tropical countries as the living "Christmas Tree" for nativity celebrations.
+- Cultural Significance: Regarded as a symbol of architectural elegance, symmetry, and endurance in institutional master plans.
+- Festivals & Mythology: Central to holiday winter festivities in warm climates; decorated with festive lights in city plazas.
+- Historical Importance: Discovered during Captain Cook's second voyage (1774), who named the Isle of Pines after its silhouette.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.45 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 20kg to 35kg of CO2 per tree per year under tall mature stand conditions.
+- Climate Mitigation: Functions as a vertical maritime wind-deflector and provides year-round evergreen thermal shade.
+
+=== SPECIES: HYOPHORBE LAGENICAULIS (PALM (BOTTLE PALM)) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Bioactive polyphenols in leaf extracts exhibit mild free-radical scavenging and antimicrobial activity.
+- Active Phytochemicals: Flavonoid glycosides, sterols, and cellular polysaccharides.
+- Traditional & Ayurvedic Uses: Exotic ornamental palm; not part of classical Ayurveda; utilized in modern horticultural therapy.
+- Modern Scientific Evidence: PubMed studies on Mascarene endemic palms focus on conservation genetics and secondary metabolite isolation.
+- Toxicity & Side Effects: Non-toxic; safe for public and residential garden spaces.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Celebrated in horticultural traditions as a living sculpture of botanical survival.
+- Cultural Significance: Symbolizes hospitality, prestige, and classical balance in front garden landscaping.
+- Festivals & Mythology: Focal ornamental feature in tropical garden exhibitions and cultural landscape competitions.
+- Historical Importance: Rescued from the brink of extinction on Round Island through global ex-situ botanical garden propagation.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.4 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 10kg to 18kg of CO2 per tree per year.
+- Climate Mitigation: Swollen trunk acts as a localized water and carbon reservoir; creates cooling garden microclimates.
+
+=== SPECIES: COCOS NUCIFERA (COCONUT) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Coconut water provides bio-electrolytes for rehydration; virgin oil is antimicrobial and cardioprotective; shell carbon detoxifies.
+- Active Phytochemicals: Lauric acid, medium-chain triglycerides (MCTs), kinetin, trans-zeatin, polyphenols, and potassium.
+- Traditional & Ayurvedic Uses: Revered as "Narikelam" in Ayurveda. Calms Vata and Pitta doshas; hair tonic, coolant, and restorative tonic.
+- Modern Scientific Evidence: Over 2,500 PubMed studies confirming antibacterial monolaurin synthesis, metabolic MCT benefits, and wound healing.
+- Toxicity & Side Effects: Non-toxic; universally consumed natural food and therapeutic fluid.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Sacred "Shrifal" in Hinduism; broken before deities to symbolize surrender of ego; essential in all auspicious rituals.
+- Cultural Significance: Regarded as the coastal "Kalpavriksha" (wish-fulfilling tree) because every single part has human utility.
+- Festivals & Mythology: Central to Narali Purnima (Coconut Day in Maharashtra), Pongal, and Onam festivals.
+- Historical Importance: Enabled prehistoric maritime Polynesian and Indian Ocean human navigations as floating water and food source.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.5 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 25kg to 40kg of CO2 per palm per year.
+- Climate Mitigation: Primary coastal frontline shield absorbing cyclonic energy, buffering storm surges, and binding shoreline sands.
+
+=== SPECIES: CINNAMOMUM TAMALA (TEJ PATTA) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Potent hypoglycemic, carminative, anti-ulcer, anti-inflammatory, and antimicrobial agent. Regulates digestion and blood glucose.
+- Active Phytochemicals: Eugenol, cinnamaldehyde, beta-caryophyllene, linalool, alpha-pinene, and flavonoid glycosides.
+- Traditional & Ayurvedic Uses: Known as "Tamalapatra" in Ayurveda. Balances Kapha and Vata doshas; vital constituent of Trijataka and Chaturjata formulations.
+- Modern Scientific Evidence: PubMed studies demonstrate significant alpha-glucosidase inhibition for diabetes management and antioxidant organoprotection.
+- Toxicity & Side Effects: Safe in standard dietary and therapeutic usage; essential oil should be diluted before topical use.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Leaves offered in Vedic havans and festive temple sanctifications for their aromatic purifying scent.
+- Cultural Significance: An essential aromatic spice in Indian culinary heritage; key constituent of Garam Masala and Biryanis.
+- Festivals & Mythology: Used in seasonal winter culinary traditions and traditional post-partum healing diets.
+- Historical Importance: Traded along the ancient Silk Road and spice routes to ancient Rome and Greece as Malabathrum.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.6 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 14kg to 22kg of CO2 per tree per year.
+- Climate Mitigation: Evergreen mountain canopy stabilizes steep Himalayan hillsides against monsoon soil slips and erosion.
+
+=== SPECIES: TERMINALIA CATAPPA (BADAM) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Potent hepatoprotective, anti-diabetic, anti-microbial, and astringent properties. Leaves used in dermatology; edible kernels nourish.
+- Active Phytochemicals: Punicalagin, punicalin, terflavin A, corilagin, squalene, and triterpenoids.
+- Traditional & Ayurvedic Uses: Recognized in traditional coastal medicine as an astringent and wound wash; seeds eaten as a brain-nourishing tonic.
+- Modern Scientific Evidence: PubMed studies demonstrate significant liver-protective action against chemical toxicity and broad-spectrum antifungal activity.
+- Toxicity & Side Effects: Non-toxic; leaves contain high tannins which make them valuable in natural aquarium water conditioning.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Venerated in coastal communities as a guardian of fishermen and coastal village squares.
+- Cultural Significance: Classic town square shade tree; children crack open fibrous fruits to eat the sweet "Desi Badam" kernel.
+- Festivals & Mythology: The dramatic change of leaves to vivid crimson marks the onset of the cool dry season in tropical India.
+- Historical Importance: Used by coastal navigators and traditional shipwrights for water-resistant timber and black dye.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.55 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 25kg to 40kg of CO2 per tree per year.
+- Climate Mitigation: Massive tiered umbrella crown provides expansive urban shade, lowering street thermal radiation dramatically.
+
+=== SPECIES: SAMANEA SAMAN (RAIN TREE) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Bark and leaf decoctions possess antimicrobial, anti-inflammatory, and astringent properties for stomach ailments and eczema.
+- Active Phytochemicals: Alkaloid pithecolobine, saponins, lupeol, tannins, and complex polyphenols.
+- Traditional & Ayurvedic Uses: Integrated into regional folk medicine; sweet nutritious pods fed to livestock to increase vitality.
+- Modern Scientific Evidence: PubMed studies investigate antimicrobial activity of pithecolobine and antioxidant properties of leaf polyphenols.
+- Toxicity & Side Effects: Non-toxic; pods are edible and rich in natural sugars.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Revered as a sanctuary of shelter for all living creatures in municipal and rural folklore.
+- Cultural Significance: The ultimate civic shade tree; named "Rain Tree" because leaflets fold during overcast skies and rain.
+- Festivals & Mythology: Believed in folklore to shower cool droplets ("rain") caused by cicadas and micro-droplet condensation.
+- Historical Importance: Planted across the British Indian cantonments, rail junctions, and grand trunk roads to shelter caravans.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.5 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 45kg to 70kg of CO2 per mature tree per year (colossal canopy biomass sponge).
+- Climate Mitigation: Immense canopy drops ground surface temperatures by up to 15°C, effectively combating urban heat islands.
+
+=== SPECIES: GREVILLEA ROBUSTA (SILVER OAK) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Resins and wood extracts contain bioactive phenolics with natural antifungal and wood-preservative properties.
+- Active Phytochemicals: Robustol, grevillol, rutin, resorcinols, and phenolic glycosides.
+- Traditional & Ayurvedic Uses: Exotic plantation timber species; not part of classical Ayurveda; utilized in sustainable farm forestry.
+- Modern Scientific Evidence: PubMed studies analyze allelopathic compounds and contact dermatitis potential from resorcinols.
+- Toxicity & Side Effects: Caution: Wood dust and floral contact can cause contact dermatitis in sensitive foresters due to resorcinol lipids.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Revered in hill communities for providing sheltering shade to cash crops without sapping their moisture.
+- Cultural Significance: The defining visual signature of Indian hill stations (Ooty, Munnar, Darjeeling, Coorg); companion of fine tea and coffee.
+- Festivals & Mythology: Golden blooms in spring transform entire hill ranges into blazing honey-scented corridors.
+- Historical Importance: Introduced in the 19th century as the premier shade tree and pepper-vine trellis for tea and coffee plantations.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.55 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 25kg to 45kg of CO2 per tree per year (fast biomass increment).
+- Climate Mitigation: Provides light, dappled shade that moderates understory crop temperatures while fixing atmospheric carbon.
+
+=== SPECIES: MANGIFERA INDICA (MANGO) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Potent antioxidant, anti-diabetic, anti-inflammatory, digestive, and immunomodulatory agent. Leaves balance blood sugar; bark stops diarrhea.
+- Active Phytochemicals: Mangiferin, polyphenols, gallic acid, quercetin, mangiferic acid, and anthocyanins.
+- Traditional & Ayurvedic Uses: Revered as "Amra" in Ayurveda. Unripe fruit balances heat; ripe fruit nourishes Dhatus; bark and seed astringent.
+- Modern Scientific Evidence: Over 3,000 PubMed clinical papers validating mangiferin for glycemic control, cardioprotection, and anti-tumor mechanisms.
+- Toxicity & Side Effects: Non-toxic; contact with fresh sap (urushiol traces) can cause mild dermatitis in hypersensitive individuals.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Sacred in Hinduism and Buddhism. Dedicated to Kama; torans of mango leaves strung over doorways for auspicious purification.
+- Cultural Significance: The National Tree of India; celebrated as the "King of Fruits"; associated with prosperity, fertility, and hospitality.
+- Festivals & Mythology: Essential in Diwali, Ugadi, Chaitra Navratri, and wedding rituals; wood used in sacred Vedic havan fires.
+- Historical Importance: Cultivated in India for over 4,000 years; Mughal gardens extensively hybridized world-famous cultivars like Alphonso and Dasheri.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.65 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 25kg to 40kg of CO2 per mature tree per year.
+- Climate Mitigation: Broad, dense evergreen canopy intercepts extreme summer heat, cooling rural and urban microclimates.
+
+=== SPECIES: ARECA CATECHU (SUPARI) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Traditional anthelmintic, digestive stimulant, and oral astringent. Expels intestinal tapeworms; stimulates salivary secretion.
+- Active Phytochemicals: Alkaloids (Arecoline, Arecaidine, Guvacine, Guvacoline), condensed tannins, and polyphenols.
+- Traditional & Ayurvedic Uses: Known as "Pugiphala" in Ayurveda. Chewed as part of Tambula; pacifies Kapha and Pitta; expels intestinal parasites.
+- Modern Scientific Evidence: PubMed studies analyze arecoline neuro-activity, anthelmintic mechanisms, and public-health cautions on oral health.
+- Toxicity & Side Effects: Public-health caution: Chronic habitual chewing of supari with tobacco is linked to oral submucous fibrosis and oral malignancies.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Supreme ritual status in Hinduism; offered to deities in all Poojas and given as an auspicious gift with betel leaves.
+- Cultural Significance: Symbol of hospitality and solemn covenant; essential in Indian weddings, housewarming ceremonies, and social gatherings.
+- Festivals & Mythology: Dedicated to Lord Ganesha; unbroken whole Supari nuts are worshipped as representations of deities in Poojas.
+- Historical Importance: Traded for millennia across the Indian Ocean spice routes as a prestigious cultural commodity.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.45 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 12kg to 20kg of CO2 per palm per year.
+- Climate Mitigation: Vertical architectural stem supports multi-tier agroforestry, intercropped with black pepper, vanilla, and cocoa.
+
+=== SPECIES: ADANSONIA DIGITATA (AD) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Fruit pulp is exceptionally rich in Vitamin C (6x orange), bio-calcium, tartaric acid, and prebiotic pectin. Treats fever, diarrhea, and scurvy.
+- Active Phytochemicals: Ascorbic acid, pectin, hydroxycinnamic acid glycosides, epicatechin, and bioflavonoids.
+- Traditional & Ayurvedic Uses: Known in India as "Gorak Chinch" (associated with Guru Gorakhnath). Used as a digestive coolant, tonic, and fever reducer.
+- Modern Scientific Evidence: PubMed studies demonstrate high anti-inflammatory, prebiotic gut-microbiome enhancement, and metabolic regulatory effects.
+- Toxicity & Side Effects: Non-toxic; pulp, leaves, and roasted seeds are nutrient-dense superfoods.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Revered in western India as a living manifestation of the wish-fulfilling "Kalpavriksha". Worshipped for longevity and fertility.
+- Cultural Significance: Sacred heritage sentinel; legendary hermits and yogis meditated within the hollow chambers of ancient trunks.
+- Festivals & Mythology: Venerated during Guru Purnima and Shivratri; tied with sacred threads for health and spiritual blessing.
+- Historical Importance: Introduced to India centuries ago by Arab and African traders along Indian Ocean maritime trading routes.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.35 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 50kg to 100+ kg of CO2 per tree per year (colossal trunk volume and millenia-long lifespan).
+- Climate Mitigation: Massive trunk stores up to 100,000 liters of water, acting as a crucial microclimate resilience anchor in drought-prone landscapes.
+
+=== SPECIES: AEGLE MARMELOS (BEL) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Unsurpassed Ayurvedic remedy for chronic diarrhea, bacillary dysentery, IBS, colitis, peptic ulcers, and liver detoxification.
+- Active Phytochemicals: Marmelosin, imperatorin, psoralen, aegeline, marmin, tannins, and coumarins.
+- Traditional & Ayurvedic Uses: Revered as "Bilva" in Charaka Samhita. Core constituent of Dashamoola and Bilwadi Leha; balances Vata and Kapha.
+- Modern Scientific Evidence: Over 800 PubMed studies confirming gastro-protective, anti-diabetic, anti-microbial, and anti-ulcerogenic properties.
+- Toxicity & Side Effects: Non-toxic in dietary use; excessive medicinal use of leaves can impair fertility in animal models.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: One of the most sacred trees in Hinduism; deeply dedicated to Lord Shiva; its trifoliate leaves represent Shiva's Trishula.
+- Cultural Significance: Mandatory in Shiva Pooja; offering Bilva leaves is believed to cleanse sins and bestow divine health.
+- Festivals & Mythology: Central to Mahashivratri celebrations across India; Bilvashtakam hymns chant praises of the sacred tree.
+- Historical Importance: Mentioned extensively in the Yajurveda and ancient Vedic literature as a tree of light and healing.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.7 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 15kg to 25kg of CO2 per tree per year.
+- Climate Mitigation: Withstands extreme urban heat islands and cleanses airborne pollutants while providing wildlife forage.
+
+=== SPECIES: FICUS BENGHALENSIS (BANYAN) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Potent hypoglycemic, anti-inflammatory, astringent, and antimicrobial agent. Prop roots firm gums; latex cures cracked heels.
+- Active Phytochemicals: Ficusin, bergapten, beta-sitosterol, lupeol, condensed tannins, and milky latex enzymes.
+- Traditional & Ayurvedic Uses: Revered as "Nyagrodha" in Ayurveda. Part of the sacred Panchavalkala bark group; pacifies Pitta and Kapha; heals ulcers.
+- Modern Scientific Evidence: PubMed studies demonstrate significant blood-glucose lowering activity of bark extracts and wound-healing acceleration.
+- Toxicity & Side Effects: Non-toxic; milky latex can cause mild eye irritation upon direct contact.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Sacred "Vat Vriksha" representing the eternal Trimurti (Brahma in roots, Vishnu in trunk, Shiva in crown).
+- Cultural Significance: The National Tree of India; celebrated in Vat Purnima where married women tie sacred threads for marital longevity.
+- Festivals & Mythology: Known as the immortal "Akshaya Vat"; symbol of eternal life, stability, and cosmic consciousness.
+- Historical Importance: Historic gathering point for village panchayats, travellers, and ascetics across thousands of years of Indian history.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.58 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 60kg to 120+ kg of CO2 per tree per year (colossal biomass and sprawling multi-trunk canopy).
+- Climate Mitigation: Massive shade canopy reduces ground temperatures by up to 18°C; keystone refuge for hundreds of bird and mammal species.
+
+=== SPECIES: FICUS RELIGIOSA (PEEPAL) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Blood purifier, anti-asthmatic, wound-healing astringent, aphrodisiac, and anti-inflammatory. Bark heals skin ulcers and strengthens gums.
+- Active Phytochemicals: Beta-sitosterol, campesterol, stigmasterol, tannins, flavonoids (luteolin, kaempferol), and polyphenols.
+- Traditional & Ayurvedic Uses: Known as "Ashvattha" in Ayurveda. Part of Panchavalkala bark group; purifies blood; cures burning sensation and skin diseases.
+- Modern Scientific Evidence: PubMed studies demonstrate anti-asthmatic mast-cell stabilization, broad antibacterial, and anti-hyperglycemic properties.
+- Toxicity & Side Effects: Non-toxic; leaves and figs consumed by wildlife and in folk preparations.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Deepest spiritual reverence in Hinduism, Buddhism, and Jainism. Siddhartha Gautama attained Enlightenment under the Bodhi Tree.
+- Cultural Significance: Regarded in the Bhagavad Gita as the divine manifestation of Krishna ("Among all trees, I am Ashvattha"). Releases oxygen even at night.
+- Festivals & Mythology: Worshipped on Somvati Amavasya; women circumambulate the trunk 108 times for health, progeny, and prosperity.
+- Historical Importance: The Jaya Sri Maha Bodhi in Sri Lanka (planted 288 BCE from the original Bodh Gaya tree) is the oldest living human-planted tree with recorded history.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.52 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 40kg to 80kg of CO2 per tree per year (massive crown with exceptional particulate PM2.5 capture).
+- Climate Mitigation: Tremendous urban air-filtration capacity; flutters in light winds, cooling ambient air and capturing particulate pollution.
+
+=== SPECIES: HEVEA BRASILIENSIS (RUBBER) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Antioxidant and antimicrobial properties; seed oil contains unsaturated fatty acids for dermatology; bark decoctions treat rheumatism.
+- Active Phytochemicals: Cis-1,4-polyisoprene (natural rubber), quebrachitol, phenolics, flavonoids, and cyanogenic glycosides.
+- Traditional & Ayurvedic Uses: Historically used by indigenous Amazonian tribes (Munduruku) for wound protection; integrated into modern ethnobotany.
+- Modern Scientific Evidence: PubMed studies analyze antioxidant flavonoids from leaves and antimicrobial fatty acid profiles of rubber seed oil.
+- Toxicity & Side Effects: Natural latex contains proteins that can trigger contact dermatitis or severe type-I allergic reactions in sensitive individuals.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Respected by Amazonian indigenous traditions as a sacred living entity whose white sap is the "blood" of the forest.
+- Cultural Significance: The historic "Rubber Boom" reshaped South American and Southeast Asian economic history; core plantation livelihood in Kerala.
+- Festivals & Mythology: Celebrated in rubber-tapper folklore honoring forest guardians that protect sustainable tapping cycles.
+- Historical Importance: Enabled the global industrial revolution, modern tire manufacturing, and critical medical-grade barrier gloves.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.56 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 30kg to 55kg of CO2 per tree per year during active vegetative growth.
+- Climate Mitigation: Rapid biomass accumulation acts as a major terrestrial carbon sink when managed on long rotation cycles.
+
+=== SPECIES: PSIDIUM GUAJAVA (GUAVA) ===
+1. Medicinal Properties & Phytochemistry
+- Medicinal Uses: Premier anti-diarrheal, anti-hyperglycemic, dental astringent, wound-healing, and anti-inflammatory agent. Leaves cure toothache and gastroenteritis.
+- Active Phytochemicals: Quercetin, guajaverin, caryophyllene, tannins (up to 10%), ascorbic acid (4x orange), and polyphenols.
+- Traditional & Ayurvedic Uses: Known as "Amrutaphala" in Ayurveda. Astringent and cooling; balances Kapha and Pitta; chewed for oral ulcers and bleeding gums.
+- Modern Scientific Evidence: Over 1,800 PubMed studies confirming potent anti-diabetic alpha-glucosidase inhibition, antispasmodic diarrhea control, and antimicrobial action.
+- Toxicity & Side Effects: Non-toxic; universally consumed natural superfood.
+
+2. Cultural and Spiritual Significance
+- Religious Importance: Fruit offered to deities in rural Indian poojas and harvest festivals as a symbol of abundance and wholesome health.
+- Cultural Significance: The quintessential Indian backyard tree; memories of plucking fresh guavas with salt and chili across rural and urban childhoods.
+- Festivals & Mythology: Celebrated in winter fruit harvest markets across northern and western India (e.g., Allahabad and Nashik Guavas).
+- Historical Importance: Introduced to India by Portuguese traders in the 17th century; rapidly naturalized and integrated into Indian Ayurveda and home remedies.
+
+3. Carbon Sequestration & Biomass
+- Biomass & Stored Carbon: Wood density of approximately 0.68 g/cm³. High structural resilience and long-term carbon retention in woody tissues.
+- Sequestration Rate: 10kg to 18kg of CO2 per tree per year.
+- Climate Mitigation: Compact dense canopy provides localized urban garden shade and attracts a wide diversity of avian and insect pollinators.
+

@@ -18,7 +18,7 @@ export async function retrieveSpeciesDocuments(speciesName, nResults = 12) {
       ]
         .filter(Boolean)
         .map((t) => String(t).toLowerCase().trim())
-        .filter((t) => t.length > 2)
+        .filter((t) => t.length >= 2)
     )
   );
 

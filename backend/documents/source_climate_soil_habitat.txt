@@ -4,65 +4,396 @@ Sources: WorldClim Database, CHELSA Climate Model, NASA EarthData, Copernicus Cl
 === SPECIES: AZADIRACHTA INDICA (NEEM) ===
 1. Habitat Information
 - Natural Habitat: Dry deciduous forests, thorny scrublands, and open savannah woodlands.
-- Forest Type: Tropical dry deciduous forest and thorn forest.
+- Forest Type: Tropical dry deciduous forest and thorn scrub.
 - Ecosystem: Adapted to arid and semi-arid plains, riverbanks, and disturbed urban ecosystems.
-- Preferred Elevation: Thrives at elevations from sea level up to 700 meters, occasionally up to 1,500 meters in tropical zones.
-- Moisture Requirements: Drought-resistant; prefers moderate to low moisture. It does not tolerate waterlogging, prolonged flooding, or poorly drained soils.
+- Preferred Elevation: Sea level up to 700 meters, occasionally up to 1,500 meters.
+- Moisture Requirements: Drought-resistant; prefers moderate to low moisture. Intolerant of waterlogging or stagnant flooding.
 
 2. Climate Preference
-- Climate Zone: Tropical and subtropical dry zones (Köppen climate classification: Aw, BSh, Cwa).
-- Average Temperature: Annual mean temperature between 21°C and 32°C. Can tolerate extreme heat up to 48°C and mild winter temperatures down to 4°C.
-- Rainfall Range: Annual rainfall of 450mm to 1,200mm is optimal. It can survive in areas with as low as 150mm of rainfall, relying on deep taproots.
+- Climate Zone: Tropical and subtropical dry zones (Köppen: Aw, BSh, Cwa).
+- Average Temperature: Annual mean temperature between 21°C and 32°C. Tolerates extreme heat up to 48°C and down to 4°C.
+- Rainfall Range: Annual rainfall of 450mm to 1,200mm is optimal; survives in low zones down to 150mm with deep taproot.
 - Humidity: Low to moderate relative humidity (30% to 65%).
-- Tolerances: High drought tolerance; high heat tolerance; extremely low tolerance to frost and waterlogged conditions.
+- Tolerances: High drought and heat tolerance; extremely low tolerance to frost and persistent waterlogging.
 
 3. Soil Requirements
-- Soil Type: Grows on a wide variety of soils including sandy, stony, clayey, saline, and nutrient-poor soils.
-- Soil Texture: Prefers deep sandy loams for optimal root development, but tolerates gravelly and rocky soils.
-- Soil pH: Thrives in pH ranges from 6.0 to 8.5 (slightly acidic to highly alkaline).
-- Soil Organic Carbon: Can survive in soils with low organic carbon (<0.5%), though growth rate increases in organically rich soils.
-- Soil Drainage: Requires well-drained, sandy-aerated soils. Severe root rot occurs in heavy clays with poor drainage (verified by FAO Soil Database).
+- Soil Type: Sandy, stony, clayey, saline, and nutrient-poor dry soils.
+- Soil Texture: Prefers deep sandy loams for optimal root development, tolerates rocky substrates.
+- Soil pH: pH ranges from 6.0 to 8.5 (slightly acidic to highly alkaline).
+- Soil Organic Carbon: Survives in low organic carbon soils (<0.5%), growth accelerates in organically rich loams.
+- Soil Drainage: Well-drained, sandy-aerated soils required; root rot occurs in stagnant heavy clays.
 
 === SPECIES: SARACA ASOCA (ASHOKA) ===
 1. Habitat Information
-- Natural Habitat: Shady understory of tropical rain forests, riverine forests, and coastal green belts.
-- Forest Type: Tropical wet evergreen and semi-evergreen forests.
-- Ecosystem: Riparian zones along rivers, humid forest valleys, and shady ravines.
-- Preferred Elevation: Found at elevations from 50 meters up to 750 meters.
-- Moisture Requirements: Requires high soil moisture and atmospheric humidity year-round. It is sensitive to seasonal soil drying.
+- Natural Habitat: Shady understory of tropical rain forests, riverine buffer zones, and coastal green belts.
+- Forest Type: Tropical wet evergreen and semi-evergreen rain forests.
+- Ecosystem: Riparian stream corridors, humid mountain valleys, and sacred grove sanctuaries.
+- Preferred Elevation: Elevations from 50 meters up to 750 meters.
+- Moisture Requirements: Requires high soil moisture and continuous atmospheric humidity; sensitive to dry seasonal winds.
 
 2. Climate Preference
-- Climate Zone: Humid tropical zone (Köppen climate classification: Af, Am, monsoon zones).
-- Average Temperature: Annual mean temperature of 24°C to 30°C. Cold-sensitive; temperatures below 10°C cause leaf damage.
-- Rainfall Range: Optimal annual rainfall of 2,000mm to 4,500mm. Requires a short or absent dry season.
+- Climate Zone: Humid tropical zone (Köppen: Af, Am, monsoon belts).
+- Average Temperature: Annual mean temperature of 24°C to 32°C. Cold-sensitive; temperatures below 10°C cause leaf damage.
+- Rainfall Range: Optimal annual rainfall of 2,000mm to 4,500mm with short or absent dry season.
 - Humidity: High relative humidity (70% to 90% year-round).
-- Tolerances: Low drought tolerance; low frost tolerance; moderate heat tolerance; moderate flood tolerance, especially in riparian buffer zones.
+- Tolerances: Low drought tolerance; low frost tolerance; high shade tolerance; moderate seasonal riparian flood tolerance.
 
 3. Soil Requirements
-- Soil Type: Prefers deep alluvial, loamy, and clay-loam soils rich in organic matter.
-- Soil Texture: Silty clay loams and alluvial sandy clay loams.
-- Soil pH: Prefers slightly acidic to neutral soils in the pH range of 5.5 to 7.0.
-- Soil Organic Carbon: High organic carbon content (>1.5% in topsoil) is necessary for healthy wild growth.
-- Soil Drainage: Moderate drainage; requires soils that retain moisture but do not experience stagnant, oxygen-deprived waterlogging for long periods.
+- Soil Type: Deep alluvial, loamy, and humic clay-loam forest soils.
+- Soil Texture: Silty clay loams and alluvial sandy clay loams rich in decomposing leaf litter.
+- Soil pH: Slightly acidic to neutral pH (5.5 to 7.0).
+- Soil Organic Carbon: High organic carbon content (>1.5% in topsoil) essential for vigorous growth.
+- Soil Drainage: Moisture-retentive yet well-aerated; intolerant of stagnant, oxygen-depleted standing water.
 
-=== SPECIES: HEVEA BRASILIENSIS (RUBBER TREE) ===
+=== SPECIES: BAMBUSA VULGARIS (BAMBOO) ===
+1. Habitat Information
+- Natural Habitat: Riverbanks, moist forest margins, riparian floodplains, and rural farm boundaries.
+- Forest Type: Tropical moist deciduous and riparian bamboo brakes.
+- Ecosystem: Riparian soil-binding corridors, tropical ravine edges, and agroforestry farm mosaics.
+- Preferred Elevation: Sea level up to 1,200 meters.
+- Moisture Requirements: Demands abundant soil moisture; thrives near running streams; tolerates seasonal inundation.
+
+2. Climate Preference
+- Climate Zone: Tropical and subtropical humid monsoon zones (Köppen: Af, Am, Cwa).
+- Average Temperature: Annual mean temperature of 22°C to 35°C; frost-sensitive.
+- Rainfall Range: Annual rainfall of 1,200mm to 3,500mm optimal for rapid culm emergence.
+- Humidity: Moderate to high relative humidity (60% to 90%).
+- Tolerances: High flood and water-current tolerance; moderate short-drought tolerance; low frost tolerance.
+
+3. Soil Requirements
+- Soil Type: Rich alluvial, silty clay-loams, and moist riverine soils.
+- Soil Texture: Loamy to clay-loamy soils with rich organic sediments.
+- Soil pH: pH 5.0 to 6.5 (moderately acidic to neutral).
+- Soil Organic Carbon: High organic carbon content supported by heavy shedding of silica-rich bamboo leaves.
+- Soil Drainage: Moderate drainage; thrives in moist riparian terraces with aerated moving groundwater.
+
+=== SPECIES: ARAUCARIA COLUMNARIS (CHRISTMAS) ===
+1. Habitat Information
+- Natural Habitat: Coastal limestone cliffs, littoral rocky ridges, and subtropical maritime bluffs.
+- Forest Type: Subtropical coastal conifer forest.
+- Ecosystem: Maritime windward strands, coastal parks, and institutional campus avenues.
+- Preferred Elevation: Sea level up to 700 meters.
+- Moisture Requirements: Moderate moisture requirement; high resistance to maritime salt spray and coastal sea gales.
+
+2. Climate Preference
+- Climate Zone: Tropical and subtropical maritime zones (Köppen: Cfa, Aw).
+- Average Temperature: Annual mean temperature of 18°C to 30°C; intolerant of prolonged hard freezes.
+- Rainfall Range: Annual rainfall of 1,000mm to 2,200mm.
+- Humidity: Moderate to high relative humidity (55% to 85%).
+- Tolerances: High maritime wind tolerance, high salt spray tolerance; low waterlogging tolerance.
+
+3. Soil Requirements
+- Soil Type: Well-drained sandy loams, coastal calcareous soils, and weathered volcanic substrates.
+- Soil Texture: Sandy to loamy open-textured soils.
+- Soil pH: pH 6.0 to 7.5 (neutral to mildly alkaline).
+- Soil Organic Carbon: Moderate topsoil organic carbon (0.8% to 1.5%).
+- Soil Drainage: Fast drainage required; sensitive to root rot in waterlogged clay basins.
+
+=== SPECIES: HYOPHORBE LAGENICAULIS (PALM (BOTTLE PALM)) ===
+1. Habitat Information
+- Natural Habitat: Coastal littoral ridges, savannah rocky slopes, and well-drained volcanic scrub.
+- Forest Type: Maritime oceanic island palm scrub.
+- Ecosystem: Coastal garden landscapes, entrance boulevards, and institutional green courtyards.
+- Preferred Elevation: Sea level up to 400 meters.
+- Moisture Requirements: Moderate moisture requirement; swollen trunk stores water to withstand dry seasons.
+
+2. Climate Preference
+- Climate Zone: Tropical maritime zone (Köppen: Af, Aw).
+- Average Temperature: Annual mean temperature of 22°C to 34°C; highly sensitive below 10°C.
+- Rainfall Range: Annual rainfall of 1,100mm to 2,400mm.
+- Humidity: Moderate to high relative humidity (60% to 85%).
+- Tolerances: High coastal sea-salt tolerance; moderate drought tolerance once established; zero frost tolerance.
+
+3. Soil Requirements
+- Soil Type: Porous sandy loams, coastal sands, and volcanic soils.
+- Soil Texture: Coarse to medium sandy loams with rapid percolation.
+- Soil pH: pH 6.0 to 7.8 (neutral to mildly alkaline).
+- Soil Organic Carbon: Prefers well-composted organic soil (1.0% to 2.0%).
+- Soil Drainage: Fast drainage mandatory; standing water causes fatal trunk base decay.
+
+=== SPECIES: COCOS NUCIFERA (COCONUT) ===
+1. Habitat Information
+- Natural Habitat: Coastal beaches, littoral sand dunes, deltaic floodplains, and tropical riverbanks.
+- Forest Type: Coastal strand vegetation and tropical multi-story agroforests.
+- Ecosystem: Littoral ecosystems, coastal agroforestry mosaics, and canal-bank plantings.
+- Preferred Elevation: Sea level up to 600 meters (up to 1,000m in equatorial highlands).
+- Moisture Requirements: Requires abundant soil moisture and constant root hydration; tolerates high brackish water tables.
+
+2. Climate Preference
+- Climate Zone: Humid tropical maritime zone (Köppen: Af, Am, Aw).
+- Average Temperature: Annual mean temperature of 24°C to 34°C; stops growing below 15°C.
+- Rainfall Range: Annual rainfall of 1,300mm to 3,000mm, evenly distributed.
+- Humidity: High relative humidity (65% to 90%).
+- Tolerances: High salt tolerance, high ocean gale resistance; low frost tolerance; sensitive to inland dry winds.
+
+3. Soil Requirements
+- Soil Type: Coastal sands, alluvial deposits, riverine loams, and lateritic soils.
+- Soil Texture: Deep coarse to medium sandy soils allowing extensive fibrous root spread.
+- Soil pH: pH 5.5 to 8.0 (tolerates saline coastal sands).
+- Soil Organic Carbon: Responds strongly to organic mulching and potassium-rich biomass cycling.
+- Soil Drainage: Good drainage required; tolerates tidal fluctuation but suffers in permanently stagnant marshland.
+
+=== SPECIES: CINNAMOMUM TAMALA (TEJ PATTA) ===
+1. Habitat Information
+- Natural Habitat: Subtropical mountain valleys, moist montane evergreen forests, and shaded ravines.
+- Forest Type: Subtropical broadleaf hill forest and moist ravine jungle.
+- Ecosystem: Himalayan slope agroforests, community hill forests, and medicinal spice groves.
+- Preferred Elevation: 500 meters up to 2,200 meters.
+- Moisture Requirements: Requires consistent soil moisture and humid mountain air; thrives near clear mountain streams.
+
+2. Climate Preference
+- Climate Zone: Subtropical montane climate (Köppen: Cwb, Cwa).
+- Average Temperature: Annual mean temperature of 14°C to 26°C; tolerates light winter frosts and cool mountain nights.
+- Rainfall Range: Annual rainfall of 1,500mm to 3,500mm.
+- Humidity: High relative humidity (65% to 85%).
+- Tolerances: Moderate shade tolerance; high cool-moisture tolerance; sensitive to blistering hot, arid plains winds.
+
+3. Soil Requirements
+- Soil Type: Humus-rich forest soils, sandy-clay loams, and mountain terrace loams.
+- Soil Texture: Loamy to sandy-loam soils with high organic matter.
+- Soil pH: pH 5.5 to 6.8 (moderately acidic to neutral).
+- Soil Organic Carbon: High organic carbon content (>1.5%) supported by montane leaf litter.
+- Soil Drainage: Good drainage essential on sloped mountain terraces; intolerant of stagnant waterlogging.
+
+=== SPECIES: TERMINALIA CATAPPA (BADAM) ===
+1. Habitat Information
+- Natural Habitat: Coastal beach strands, littoral sand banks, mangrove margins, and rocky coastal bluffs.
+- Forest Type: Tropical coastal strand forest and beach littoral woodland.
+- Ecosystem: Coastal saline buffer strips, public city squares, university avenues, and urban parks.
+- Preferred Elevation: Sea level up to 400 meters.
+- Moisture Requirements: Moderate moisture requirement; high tolerance to coastal sea spray and seasonal drought.
+
+2. Climate Preference
+- Climate Zone: Tropical maritime and warm lowland humid/sub-humid zones (Köppen: Af, Aw).
+- Average Temperature: Annual mean temperature of 22°C to 36°C; sensitive to freezing conditions below 5°C.
+- Rainfall Range: Annual rainfall of 1,000mm to 3,000mm.
+- Humidity: Moderate to high relative humidity (50% to 85%).
+- Tolerances: Exceptional salt-air tolerance, strong coastal wind tolerance; moderate drought tolerance.
+
+3. Soil Requirements
+- Soil Type: Coastal sand dunes, alluvial loams, saline sands, and rocky gravelly soils.
+- Soil Texture: Sandy to sandy-loam soils with high permeability.
+- Soil pH: pH 6.0 to 8.2 (neutral to alkaline saline soils).
+- Soil Organic Carbon: Tolerates low organic carbon soils, enriched by broad deciduous leaf fall.
+- Soil Drainage: Rapid drainage; tolerates brief coastal saline inundation.
+
+=== SPECIES: SAMANEA SAMAN (RAIN TREE) ===
+1. Habitat Information
+- Natural Habitat: Lowland tropical savannah woodlands, open river basins, and sub-humid plains.
+- Forest Type: Tropical deciduous woodland and open parkland savannah.
+- Ecosystem: Expansive urban avenues, highway medians, livestock pasture parks, and municipal greenbelts.
+- Preferred Elevation: Sea level up to 900 meters.
+- Moisture Requirements: Moderate moisture requirement; deep taproot reaches groundwater; tolerates seasonal dry periods.
+
+2. Climate Preference
+- Climate Zone: Tropical and subtropical humid and sub-humid zones (Köppen: Aw, Am).
+- Average Temperature: Annual mean temperature of 22°C to 38°C; sensitive to severe cold and freezing temperatures.
+- Rainfall Range: Annual rainfall of 700mm to 2,800mm.
+- Humidity: Moderate to high relative humidity (50% to 85%).
+- Tolerances: High heat tolerance, nitrogen-fixing root resilience, moderate seasonal flood tolerance; frost-sensitive.
+
+3. Soil Requirements
+- Soil Type: Deep alluvial loams, clayey river soils, black cotton soils, and sandy-clay soils.
+- Soil Texture: Loamy to clay-loamy soils with high moisture-retention capacity.
+- Soil pH: pH 6.0 to 7.8 (neutral to mildly alkaline).
+- Soil Organic Carbon: Enriches soil organic carbon and nitrogen via extensive leaf drop and Rhizobium nodulation.
+- Soil Drainage: Moderate drainage; tolerates temporary waterlogging better than most upland trees.
+
+=== SPECIES: GREVILLEA ROBUSTA (SILVER OAK) ===
+1. Habitat Information
+- Natural Habitat: Subtropical rainforest edges, riverine forests, and moist volcanic plateau ridges.
+- Forest Type: Subtropical montane rainforest and riverine gallery woodland.
+- Ecosystem: Tea and coffee agroforestry plantations, hill station avenues, and windbreak shelterbelts.
+- Preferred Elevation: 300 meters up to 2,000 meters.
+- Moisture Requirements: Moderate moisture requirement; deep root system explores soil moisture; intolerant of stagnant swamps.
+
+2. Climate Preference
+- Climate Zone: Subtropical highlands, temperate montane, and warm tropical plateaus (Köppen: Cfa, Cwb, Aw).
+- Average Temperature: Annual mean temperature of 14°C to 30°C; tolerates light winter frosts down to -4°C.
+- Rainfall Range: Annual rainfall of 800mm to 2,200mm.
+- Humidity: Moderate relative humidity (45% to 75%).
+- Tolerances: Moderate frost tolerance; high wind resistance; sensitive to waterlogged and poorly drained soils.
+
+3. Soil Requirements
+- Soil Type: Deep, well-drained acidic to neutral loams, volcanic soils, and sandy-clay soils.
+- Soil Texture: Loamy to sandy-loam soils with good internal aeration.
+- Soil pH: pH 5.0 to 6.8 (sensitive to high alkalinity and phosphorus toxicity).
+- Soil Organic Carbon: Moderate to high topsoil organic carbon (1.0% to 2.5%).
+- Soil Drainage: Rapid internal drainage essential; root rot occurs in heavy waterlogged soils.
+
+=== SPECIES: MANGIFERA INDICA (MANGO) ===
+1. Habitat Information
+- Natural Habitat: Tropical moist and dry deciduous forests, riparian valleys, and lowland alluvial plains.
+- Forest Type: Tropical semi-evergreen and moist deciduous forest.
+- Ecosystem: Traditional village orchards, agricultural boundaries, sacred temple groves, and urban avenues.
+- Preferred Elevation: Sea level up to 1,200 meters.
+- Moisture Requirements: Moderate moisture requirement; deep taproot reaches subterranean water; requires dry winter for flower induction.
+
+2. Climate Preference
+- Climate Zone: Tropical and subtropical dry/wet seasonal zones (Köppen: Aw, Cwa).
+- Average Temperature: Annual mean temperature of 22°C to 36°C; heat-tolerant up to 45°C; intolerant of frost.
+- Rainfall Range: Annual rainfall of 750mm to 2,500mm with distinct dry period.
+- Humidity: Low to moderate during flowering (40% to 60%); higher during fruit development.
+- Tolerances: High summer heat tolerance, deep drought resilience via taproot; zero frost tolerance.
+
+3. Soil Requirements
+- Soil Type: Deep alluvial loams, red sandy-clay soils, and fertile river plain deposits.
+- Soil Texture: Deep, well-aerated sandy loam or loamy soil allowing deep root anchorage.
+- Soil pH: pH 5.5 to 7.5 (slightly acidic to neutral).
+- Soil Organic Carbon: Prefers organically rich soils (1.0% to 2.0%) for commercial fruiting.
+- Soil Drainage: Good drainage essential; suffers severe root asphyxiation in waterlogged marshy soils.
+
+=== SPECIES: ARECA CATECHU (SUPARI) ===
+1. Habitat Information
+- Natural Habitat: Lowland tropical rainforests, humid alluvial coastal valleys, and riparian flood terraces.
+- Forest Type: Tropical wet evergreen and semi-evergreen multi-tier plantation forests.
+- Ecosystem: Traditional homestead agroforests, multi-crop spice valleys, and Western Ghats riparian belts.
+- Preferred Elevation: Sea level up to 900 meters.
+- Moisture Requirements: Requires high, constant soil moisture and atmospheric humidity; highly sensitive to prolonged drought.
+
+2. Climate Preference
+- Climate Zone: Humid tropical monsoon and rainforest zones (Köppen: Af, Am).
+- Average Temperature: Annual mean temperature of 22°C to 35°C; intolerant of cold below 14°C.
+- Rainfall Range: Annual rainfall of 1,800mm to 4,500mm.
+- Humidity: High relative humidity (70% to 90% year-round).
+- Tolerances: High shade tolerance when young; high moisture tolerance; very low drought and windstorm tolerance.
+
+3. Soil Requirements
+- Soil Type: Deep, fertile alluvial loams, lateritic clay-loams, and rich red forest soils.
+- Soil Texture: Loamy to clay-loam soils with high moisture-retentive capacity.
+- Soil pH: pH 5.5 to 7.0 (slightly acidic to neutral).
+- Soil Organic Carbon: High organic carbon content (>1.5%) maintained by heavy organic recycling.
+- Soil Drainage: Good drainage required; roots rot in waterlogged, stagnant swamp conditions.
+
+=== SPECIES: ADANSONIA DIGITATA (AD) ===
+1. Habitat Information
+- Natural Habitat: Arid and semi-arid tropical savannahs, dry scrub plains, and coastal maritime ridges.
+- Forest Type: Dry savannah woodland and semi-desert scrub.
+- Ecosystem: Ancient trade-route heritage groves, arid rocky plateaus, and sacred temple courtyards in Gujarat and Maharashtra.
+- Preferred Elevation: Sea level up to 1,000 meters.
+- Moisture Requirements: Extremely drought-tolerant; swollen succulent trunk stores thousands of liters of water to survive multi-year droughts.
+
+2. Climate Preference
+- Climate Zone: Semi-arid and sub-humid tropical savannah zones (Köppen: BSh, Aw).
+- Average Temperature: Annual mean temperature of 20°C to 42°C; tolerates blistering heat up to 48°C; zero frost tolerance.
+- Rainfall Range: Annual rainfall of 250mm to 1,000mm.
+- Humidity: Low to moderate relative humidity (25% to 60%).
+- Tolerances: Extreme drought and heat tolerance; fire-resistant bark; extremely sensitive to freezing and waterlogging.
+
+3. Soil Requirements
+- Soil Type: Well-drained sandy soils, rocky gravelly substrates, alluvial sands, and limestone terrains.
+- Soil Texture: Coarse sandy to rocky porous soils.
+- Soil pH: pH 6.0 to 8.0 (neutral to moderately alkaline).
+- Soil Organic Carbon: Survives in low organic carbon soils (<0.5%); deep roots mobilize deep mineral nutrients.
+- Soil Drainage: Rapid drainage mandatory; prolonged waterlogged soils cause lethal trunk bacterial rot.
+
+=== SPECIES: AEGLE MARMELOS (BEL) ===
+1. Habitat Information
+- Natural Habitat: Dry deciduous forests, thorny scrub hills, open savannah woodlands, and rocky plains.
+- Forest Type: Dry deciduous forest and sub-humid tropical woodland.
+- Ecosystem: Temple sacred groves, dryland homesteads, village grazing lands, and agroforestry orchards.
+- Preferred Elevation: Sea level up to 1,200 meters.
+- Moisture Requirements: Drought-hardy; thrives in sub-arid zones; intolerant of prolonged waterlogged marsh soils.
+
+2. Climate Preference
+- Climate Zone: Tropical and subtropical dry to moist deciduous zones (Köppen: Aw, Cwa, BSh).
+- Average Temperature: Annual mean temperature of 18°C to 42°C; tolerates blistering heat up to 48°C and down to -6°C.
+- Rainfall Range: Annual rainfall of 500mm to 2,000mm.
+- Humidity: Low to moderate relative humidity (30% to 65%).
+- Tolerances: Exceptional drought tolerance, high heat and cold tolerance, high soil salinity tolerance.
+
+3. Soil Requirements
+- Soil Type: Tolerates a wide spectrum of soils: stony, gravelly, saline, alkaline, and degraded sandy-clay soils.
+- Soil Texture: Sandy loams to loamy soils with adequate aeration.
+- Soil pH: pH 6.0 to 8.5 (highly tolerant of alkaline and sodic soils).
+- Soil Organic Carbon: Survives in low organic carbon soils, growth boosted by composted manure.
+- Soil Drainage: Good drainage required; root rot occurs in permanently waterlogged, un-aerated clay.
+
+=== SPECIES: FICUS BENGHALENSIS (BANYAN) ===
+1. Habitat Information
+- Natural Habitat: Monsoon deciduous forests, tropical savannah woodlands, village commons, and temple grounds.
+- Forest Type: Tropical moist and dry deciduous forest.
+- Ecosystem: Keystone canopy sanctuaries, highway shelter corridors, village public squares, and sacred groves.
+- Preferred Elevation: Sea level up to 1,200 meters.
+- Moisture Requirements: Drought-tolerant once established; extensive prop-root network taps deep aquifers and atmospheric moisture.
+
+2. Climate Preference
+- Climate Zone: Tropical and subtropical monsoon and sub-humid zones (Köppen: Aw, Am, Cwa).
+- Average Temperature: Annual mean temperature of 18°C to 40°C; tolerates heat up to 48°C; sensitive to hard frost.
+- Rainfall Range: Annual rainfall of 600mm to 3,500mm.
+- Humidity: Moderate to high relative humidity (40% to 85%).
+- Tolerances: Extreme longevity, high heat tolerance, windstorm anchor resilience; intolerant of waterlogged stagnant swamps.
+
+3. Soil Requirements
+- Soil Type: Alluvial loams, clayey soils, rocky fissures, and shallow masonry structures.
+- Soil Texture: Adaptable to almost all soils; thrives in deep fertile alluvial loams.
+- Soil pH: pH 5.5 to 8.2 (slightly acidic to alkaline).
+- Soil Organic Carbon: Builds immense topsoil organic carbon through heavy leaf drop and aerial root decay.
+- Soil Drainage: Porous to moderately drained soils preferred; avoids oxygen-deprived waterlogging.
+
+=== SPECIES: FICUS RELIGIOSA (PEEPAL) ===
+1. Habitat Information
+- Natural Habitat: Monsoon deciduous forests, rocky foothills, riverbanks, and village shrines.
+- Forest Type: Tropical moist and dry deciduous woodland.
+- Ecosystem: Sacred grove sanctuaries, ancient temple compounds, rural village greens, and urban roadsides.
+- Preferred Elevation: Sea level up to 1,500 meters.
+- Moisture Requirements: Drought-hardy; deep taproots explore rock fissures; can survive in low moisture and urban crevices.
+
+2. Climate Preference
+- Climate Zone: Tropical and subtropical monsoon and sub-humid plains (Köppen: Aw, Cwa).
+- Average Temperature: Annual mean temperature of 18°C to 42°C; tolerates heat up to 48°C; sensitive to prolonged frost.
+- Rainfall Range: Annual rainfall of 700mm to 3,000mm.
+- Humidity: Moderate to high relative humidity (40% to 85%).
+- Tolerances: Extreme heat and drought tolerance, high air pollution tolerance; performs nocturnal CAM oxygen release.
+
+3. Soil Requirements
+- Soil Type: Alluvial loams, shallow rocky soils, brick masonry, and urban construction crevices.
+- Soil Texture: Extremely adaptable; thrives in deep fertile loams, but survives on bare rock surfaces.
+- Soil pH: pH 6.0 to 8.0 (neutral to moderately alkaline).
+- Soil Organic Carbon: Enriches soil organic matter through heavy annual leaf shedding and root exudates.
+- Soil Drainage: Porous, well-drained substrate preferred; dislikes waterlogged oxygen-deprived marsh basins.
+
+=== SPECIES: HEVEA BRASILIENSIS (RUBBER) ===
 1. Habitat Information
 - Natural Habitat: Lowland tropical rainforests, floodplains, and non-flooded upland terraces.
-- Forest Type: Tropical evergreen rainforest and agroforestry systems.
-- Ecosystem: Amazonian river basins, humid equatorial ecosystems, and commercial tropical plantations.
-- Preferred Elevation: Sea level up to 200 meters, occasionally up to 600 meters in equatorial regions.
-- Moisture Requirements: Demands continuous high soil moisture. Extremely high transpirational demand requires stable hydrological systems.
+- Forest Type: Tropical evergreen rainforest and commercial agroforestry plantations.
+- Ecosystem: Humid equatorial river basins, commercial plantation estates (Kerala, Tripura), and agroforests.
+- Preferred Elevation: Sea level up to 600 meters.
+- Moisture Requirements: Demands continuous high soil moisture; high transpirational demand requires stable hydrological systems.
 
 2. Climate Preference
-- Climate Zone: Equatorial hot-humid zone (Köppen climate classification: Af, tropical wet zone).
-- Average Temperature: Annual mean temperature of 25°C to 28°C. Requires stable temperatures with minimal seasonal variation.
-- Rainfall Range: Annual rainfall of 1,800mm to 3,000mm, evenly distributed throughout the year with no more than 2-3 dry months.
-- Humidity: Extremely high humidity (>80% relative humidity).
-- Tolerances: Low drought tolerance; zero frost tolerance (temperatures below 5°C are fatal); high heat tolerance up to 36°C; moderate wind tolerance (highly susceptible to trunk snap during storms).
+- Climate Zone: Equatorial hot-humid zone (Köppen: Af, Am).
+- Average Temperature: Annual mean temperature of 24°C to 32°C with minimal seasonal variation; frost-intolerant.
+- Rainfall Range: Annual rainfall of 1,800mm to 3,500mm, evenly distributed with no more than 2 dry months.
+- Humidity: High relative humidity (>75% year-round).
+- Tolerances: High heat and humidity tolerance; zero frost tolerance; susceptible to trunk snap in intense cyclonic winds.
 
 3. Soil Requirements
-- Soil Type: Acidic latosols (oxisols), deep weathered red clay soils, and alluvial forest soils.
-- Soil Texture: Deep clayey or clay-loamy soils.
-- Soil pH: Acidic soil preference, thriving in pH ranges from 4.5 to 5.5 (verified by ISRIC SoilGrids).
-- Soil Organic Carbon: Moderate to high organic carbon (1.0% to 2.0%) required in the topsoil.
-- Soil Drainage: Well-drained to moderately drained soils. Needs high water-holding capacity but suffers from root damage in persistently waterlogged soils.
+- Soil Type: Acidic latosols (oxisols), deep weathered red lateritic soils, and alluvial forest soils.
+- Soil Texture: Deep clayey or clay-loamy soils allowing deep root penetration.
+- Soil pH: pH 4.5 to 6.0 (prefers acidic soils).
+- Soil Organic Carbon: Moderate to high topsoil organic carbon (1.0% to 2.5%).
+- Soil Drainage: Well-drained to moderately drained soils; suffers root damage in waterlogged clay soils.
+
+=== SPECIES: PSIDIUM GUAJAVA (GUAVA) ===
+1. Habitat Information
+- Natural Habitat: Tropical lowland scrub, open woodlands, riverine margins, and disturbed agricultural land.
+- Forest Type: Tropical dry and moist deciduous orchard and homestead land.
+- Ecosystem: Homestead gardens, commercial agroforestry orchards, riverbanks, and village commons.
+- Preferred Elevation: Sea level up to 1,500 meters.
+- Moisture Requirements: Moderate moisture requirement; drought-hardy once established; tolerates brief waterlogging.
+
+2. Climate Preference
+- Climate Zone: Tropical and subtropical zones (Köppen: Aw, Cwa).
+- Average Temperature: Annual mean temperature of 18°C to 35°C; tolerates high heat up to 45°C; brief light frost down to 0°C.
+- Rainfall Range: Annual rainfall of 800mm to 2,500mm.
+- Humidity: Moderate relative humidity (45% to 75%).
+- Tolerances: High heat tolerance, good drought tolerance, moderate salinity tolerance; regenerates readily from root suckers.
+
+3. Soil Requirements
+- Soil Type: Highly adaptable: sandy loams, heavy alluvial clays, red gravelly soils, and mildly saline soils.
+- Soil Texture: Loamy to sandy-clay soils.
+- Soil pH: pH 5.0 to 7.8 (acidic to mildly alkaline).
+- Soil Organic Carbon: Benefits from organic compost (0.8% to 1.8%) for heavy fruit bearing.
+- Soil Drainage: Good drainage preferred; more tolerant of temporary standing water than mango or papaya.
+

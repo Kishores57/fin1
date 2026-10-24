@@ -3,57 +3,361 @@ Sources: Plants of the World Online (Kew), World Flora Online (WFO), ITIS, Catal
 
 === SPECIES: AZADIRACHTA INDICA (NEEM) ===
 1. Plant Taxonomy
-- Scientific Name: Azadirachta indica A.Juss. (Accepted by Kew Plants of the World Online and World Flora Online)
-- Common Names: Neem, Margosa tree, Indian lilac, Nim, Nimba.
-- Family: Meliaceae (Mahogany family)
+- Scientific Name: Azadirachta indica A.Juss.
+- Common Names: Neem, Margosa, Indian Lilac, Nim, Nimba, Arishta.
+- Family: Meliaceae
+- Order: Sapindales
 - Genus: Azadirachta
 - Species: Azadirachta indica
-- Botanical Description: A fast-growing evergreen tree reaching heights of 15–20 meters (occasionally 35–40m). It features a wide, spreading round crown, greyish-brown fissured bark, and pinnate leaves with serrated margins. Flowers are small, white, and fragrant, arranged in axillary panicles. Fruits are smooth, olive-like drupes that turn yellow upon ripening, containing one elongated seed.
-- Synonyms: Melia azadirachta L., Antelaea azadirachta (L.) Adelb.
+- Botanical Description: A fast-growing evergreen tree reaching 15–20m (up to 35m) with spreading rounded crown, greyish-brown fissured bark, pinnate leaves with serrated margins, fragrant small white flowers in axillary panicles, and smooth yellow drupe fruits.
+- Synonyms: Melia azadirachta L., Antelaea azadirachta (L.) Adelb..
 - Native Range: Indian subcontinent (India, Pakistan, Bangladesh, Nepal) and Myanmar.
-- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Sapindales; Family: Meliaceae; Genus: Azadirachta; Species: A. indica. (Verified by ITIS & Catalogue of Life).
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Sapindales; Family: Meliaceae; Genus: Azadirachta; Species: Azadirachta indica. (Verified by Kew POWO, ITIS & Catalogue of Life).
 
 2. Biodiversity & Geographic Distribution
-- Species Occurrence & Geographic Distribution: Extensively naturalized across tropical and subtropical regions of the world, including East and West Africa, the Caribbean, Central and South America, the Middle East, and northern Australia.
-- Biodiversity Hotspots: High occurrence density in the Western Ghats (India) and dry zone forests of Myanmar.
-- Observation Records: Over 150,000 georeferenced observations recorded globally on GBIF and iNaturalist, showing high urban clustering due to planting in parks, avenues, and domestic gardens.
-- Native and Invasive Status: Native to the Indian subcontinent. Considered an invasive or naturalized species in parts of Australia, South Africa, and several Caribbean islands, where it competes with native dry-forest flora.
-- Conservation Status: IUCN Red List Category: Least Concern (LC). The species is highly abundant, widely cultivated, and faces no immediate threat of global extinction.
+- Species Occurrence & Geographic Distribution: Extensively naturalized across tropical/subtropical Asia, Africa, Caribbean, and northern Australia.
+- Biodiversity Hotspots: High occurrence in Western Ghats, central Deccan plateau, and dry plains of Myanmar.
+- Observation Records: Over 150,000 georeferenced observations recorded on GBIF and iNaturalist globally.
+- Native and Invasive Status: Native to South Asia; naturalized or mildly invasive in parts of Australia and Caribbean scrublands.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
 
 === SPECIES: SARACA ASOCA (ASHOKA) ===
 1. Plant Taxonomy
-- Scientific Name: Saraca asoca (Roxb.) De Wilde (Accepted by Kew Plants of the World Online and World Flora Online)
-- Common Names: Ashoka, Asoca, Sorrowless tree, Jasundi.
-- Family: Fabaceae (Legume family) / Subfamily: Detarioideae
+- Scientific Name: Saraca asoca (Roxb.) De Wilde
+- Common Names: Ashoka, Sorrowless Tree, Sita Ashok, Jasundi, Asoka.
+- Family: Fabaceae
+- Order: Fabales
 - Genus: Saraca
 - Species: Saraca asoca
-- Botanical Description: A small to medium-sized evergreen tree growing up to 10 meters in height. It has a beautiful, dense foliage of dark green, compound, pinnate leaves that hang in copper-red pendulous tassels when young. Flowers are bright orange-yellow, turning red as they age, gathered in dense, fragrant corymbose inflorescences. Fruits are flat, leathery, oblong seed pods containing several seeds.
-- Synonyms: Saraca indica auct. non L., Jonesia asoca Roxb.
+- Botanical Description: A medium-sized evergreen tree reaching 8–12m with handsome dark green compound foliage hanging in coppery tassels when young, glorious orange-scarlet fragrant corymbose inflorescences, and flat oblong seed pods.
+- Synonyms: Saraca indica auct. non L., Jonesia asoca Roxb..
 - Native Range: Central and Western Ghats of India, Sri Lanka, Bangladesh, and Myanmar.
-- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Fabales; Family: Fabaceae; Genus: Saraca; Species: S. asoca. (Verified by ITIS & Catalogue of Life).
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Fabales; Family: Fabaceae; Genus: Saraca; Species: Saraca asoca. (Verified by Kew POWO, ITIS & Catalogue of Life).
 
 2. Biodiversity & Geographic Distribution
-- Species Occurrence & Geographic Distribution: Occurs primarily in wet evergreen and semi-evergreen forests, especially along stream banks and shady ravines in India (Western Ghats, Eastern Himalayas, Deccan Peninsula) and Sri Lanka.
-- Biodiversity Hotspots: Western Ghats (India) is the primary biodiversity hotspot for wild populations.
-- Observation Records: Roughly 12,000 verified observations on GBIF and iNaturalist, primarily clustered around reserve forests and sacred temple lands in southern and western India.
-- Native and Invasive Status: Native to South Asia. It is not listed as invasive anywhere in the world and is strictly a cultivated ornamental or protected wild species.
-- Conservation Status: IUCN Red List Category: Vulnerable (VU). Wild populations are highly fragmented and declining due to over-harvesting of its medicinal bark and destruction of riverine forest habitats.
+- Species Occurrence & Geographic Distribution: Endemic to wet evergreen tracts of Western Ghats, Eastern Himalayas, and Sri Lanka.
+- Biodiversity Hotspots: Western Ghats biodiversity hotspot represents the core natural genetic sanctuary.
+- Observation Records: Over 12,000 verified observation records on GBIF and iNaturalist primarily in southern and western India.
+- Native and Invasive Status: Native to South Asia; non-invasive and conservation-dependent in wild tracts.
+- Conservation Status: IUCN Red List Category: Vulnerable (VU).
 
-=== SPECIES: HEVEA BRASILIENSIS (RUBBER TREE) ===
+=== SPECIES: BAMBUSA VULGARIS (BAMBOO) ===
 1. Plant Taxonomy
-- Scientific Name: Hevea brasiliensis (Willd. ex A.Juss.) Müll.Arg. (Accepted by Kew Plants of the World Online and World Flora Online)
-- Common Names: Rubber tree, Para rubber tree, Sharinga, Hevea.
-- Family: Euphorbiaceae (Spurge family)
+- Scientific Name: Bambusa vulgaris Schrad. ex J.C.Wendl.
+- Common Names: Bamboo, Common Bamboo, Golden Bamboo, Bans, Velu.
+- Family: Poaceae
+- Order: Poales
+- Genus: Bambusa
+- Species: Bambusa vulgaris
+- Botanical Description: A giant clumping woody arborescent grass with robust culms growing 12–20m tall and 4–10cm diameter, bright green or golden-striped internodes, drooping feathery foliage, and persistent culm sheaths.
+- Synonyms: Bambusa surinamensis Rupr., Leleba vulgaris (Schrad. ex J.C.Wendl.) Nakai.
+- Native Range: Tropical Asia and widespread across tropical monsoon belts.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Poales; Family: Poaceae; Genus: Bambusa; Species: Bambusa vulgaris. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to tropical Asia; extensively naturalized across pantropical river valleys.
+- Biodiversity Hotspots: Indo-Burma biodiversity hotspot and Western Ghats riparian zones.
+- Observation Records: Over 85,000 occurrences on GBIF and iNaturalist across Asia, Africa, and Latin America.
+- Native and Invasive Status: Widely cultivated; can spread aggressively along disturbed watercourses but easily managed in clumps.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
+
+=== SPECIES: ARAUCARIA COLUMNARIS (CHRISTMAS) ===
+1. Plant Taxonomy
+- Scientific Name: Araucaria columnaris (Forst.) Hook.
+- Common Names: Christmas Tree, Cook Pine, New Caledonia Pine, Columnar Pine.
+- Family: Araucariaceae
+- Order: Pinales
+- Genus: Araucaria
+- Species: Araucaria columnaris
+- Botanical Description: A strikingly columnar evergreen conifer reaching 30–50m tall with a slender spire-like crown, horizontal branching with cord-like branchlets, scale-like overlapping leaves, and oblong cones. Systematically tilts towards the equator.
+- Synonyms: Cupressus columnaris G.Forst., Araucaria cookii R.Br. ex D.Don.
+- Native Range: New Caledonia (Loyalty Islands and Isle of Pines).
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Pinales; Family: Araucariaceae; Genus: Araucaria; Species: Araucaria columnaris. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to New Caledonia; cultivated extensively across tropical and subtropical cities globally.
+- Biodiversity Hotspots: New Caledonia botanical biodiversity hotspot.
+- Observation Records: Over 28,000 records on GBIF across global tropical botanical gardens and urban parks.
+- Native and Invasive Status: Cultivated ornamental; non-invasive in continental ecosystems.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
+
+=== SPECIES: HYOPHORBE LAGENICAULIS (PALM (BOTTLE PALM)) ===
+1. Plant Taxonomy
+- Scientific Name: Hyophorbe lagenicaulis (L.H.Bailey) H.E.Moore
+- Common Names: Bottle Palm, Palm, Champagne Palm, Swollen Trunk Palm.
+- Family: Arecaceae
+- Order: Arecales
+- Genus: Hyophorbe
+- Species: Hyophorbe lagenicaulis
+- Botanical Description: A slow-growing solitary palm reaching 3–4m tall with a distinctive swollen, bottle-shaped trunk when young, smooth grey trunk with prominent leaf ring scars, a compact crown of 4–8 stiff upward-arching pinnate fronds, and green crownshaft.
+- Synonyms: Mascarena lagenicaulis L.H.Bailey.
+- Native Range: Round Island, Mauritius.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Arecales; Family: Arecaceae; Genus: Hyophorbe; Species: Hyophorbe lagenicaulis. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native only to tiny Round Island in Mauritius; propagated pantropically as a prized architectural specimen.
+- Biodiversity Hotspots: Madagascar and Indian Ocean Islands biodiversity hotspot.
+- Observation Records: Over 14,000 occurrences on GBIF documented across tropical botanical institutions and landscaping.
+- Native and Invasive Status: Non-invasive; slow-growing cultivated ornamental.
+- Conservation Status: IUCN Red List Category: Critically Endangered (CR) in the wild; widely cultivated globally..
+
+=== SPECIES: COCOS NUCIFERA (COCONUT) ===
+1. Plant Taxonomy
+- Scientific Name: Cocos nucifera L.
+- Common Names: Coconut Palm, Coconut, Nariyal, Thengu, Shrifal, Kalpavriksha.
+- Family: Arecaceae
+- Order: Arecales
+- Genus: Cocos
+- Species: Cocos nucifera
+- Botanical Description: A tall graceful solitary palm reaching 20–30m tall with a curved grey ringed trunk swollen at base, dense fibrous root bowl, spreading crown of 25–35 pinnate fronds (4–6m long), and large fibrous drupes (coconuts).
+- Synonyms: Palma cocos Mill., Cocos indica Royle.
+- Native Range: Coastal tropical Indo-Pacific regions; pantropical cultivated distribution.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Arecales; Family: Arecaceae; Genus: Cocos; Species: Cocos nucifera. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Pantropical coastal distribution across Asia, Pacific, Africa, and the Americas.
+- Biodiversity Hotspots: Coastal Indo-Malayan and Pacific littoral zones.
+- Observation Records: Over 130,000 observation and specimen records on GBIF globally.
+- Native and Invasive Status: Naturalized and extensively cultivated across all tropical coasts; non-invasive.
+- Conservation Status: IUCN Red List Category: Least Concern (LC) / Extensively Cultivated.
+
+=== SPECIES: CINNAMOMUM TAMALA (TEJ PATTA) ===
+1. Plant Taxonomy
+- Scientific Name: Cinnamomum tamala (Buch.-Ham.) T.Nees & Eberm.
+- Common Names: Tej Patta, Indian Bay Leaf, Malabar Leaf, Tejpat, Tamalapatra.
+- Family: Lauraceae
+- Order: Laurales
+- Genus: Cinnamomum
+- Species: Cinnamomum tamala
+- Botanical Description: A medium-sized evergreen aromatic tree growing 10–15m tall, with smooth brown bark, lustrous ovate-lanceolate leaves with 3 prominent longitudinal veins, small yellowish-white flowers in terminal panicles, and small blackish-purple drupes.
+- Synonyms: Laurus tamala Buch.-Ham., Cinnamomum albiflorum Nees.
+- Native Range: Subtropical Himalayan foothills of India, Nepal, Bhutan, and Myanmar.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Laurales; Family: Lauraceae; Genus: Cinnamomum; Species: Cinnamomum tamala. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Himalayan foothills from Jammu & Kashmir eastwards to Sikkim, Assam, and Meghalaya.
+- Biodiversity Hotspots: Himalayan and Indo-Burma biodiversity hotspots.
+- Observation Records: Over 16,000 occurrences documented on GBIF and regional botanical herbaria.
+- Native and Invasive Status: Native to South Asia; sustainably managed non-timber forest species.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
+
+=== SPECIES: TERMINALIA CATAPPA (BADAM) ===
+1. Plant Taxonomy
+- Scientific Name: Terminalia catappa L.
+- Common Names: Indian Almond, Tropical Almond, Badam, Sea Almond, Desi Badam, Malabar Almond.
+- Family: Combretaceae
+- Order: Myrtales
+- Genus: Terminalia
+- Species: Terminalia catappa
+- Botanical Description: A large, spreading deciduous tree reaching 15–25m tall with distinctive horizontal pagoda-like tiered whorled branches, large obovate leathery leaves turning brilliant scarlet before shedding, small greenish-white flowers, and flattened almond-like drupes.
+- Synonyms: Terminalia badamia Tul., Phytolacca javanica Osbeck.
+- Native Range: Coastal tropical Asia, northern Australia, and Pacific Islands; pantropically cultivated.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Myrtales; Family: Combretaceae; Genus: Terminalia; Species: Terminalia catappa. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to coastal Asia and Pacific; planted across all tropical cities worldwide.
+- Biodiversity Hotspots: Sundaland, Wallacea, and Indo-Pacific coastal ecosystems.
+- Observation Records: Over 65,000 occurrences documented on GBIF and iNaturalist globally.
+- Native and Invasive Status: Widely naturalized along tropical sandy shores; non-destructive.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
+
+=== SPECIES: SAMANEA SAMAN (RAIN TREE) ===
+1. Plant Taxonomy
+- Scientific Name: Samanea saman (Jacq.) Merr.
+- Common Names: Rain Tree, Monkey Pod, Cow Tamarind, Vilayati Siris, Saman.
+- Family: Fabaceae
+- Order: Fabales
+- Genus: Samanea
+- Species: Samanea saman
+- Botanical Description: A colossal spreading deciduous tree reaching 20–30m tall with a mammoth parasol-shaped crown spanning up to 40–50m across, rough fissured dark bark, bipinnate leaves that fold at dusk or before rain, pink-and-white pompon-like flowers, and sweet pulpy black seed pods.
+- Synonyms: Albizia saman (Jacq.) F.Muell., Pithecellobium saman (Jacq.) Benth..
+- Native Range: Neotropics (Central and South America); naturalized and widespread across tropical Asia.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Fabales; Family: Fabaceae; Genus: Samanea; Species: Samanea saman. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Pantropical; extensively planted across Indian cities, Southeast Asia, and Pacific islands.
+- Biodiversity Hotspots: Neotropical and Indo-Malayan urban ecosystems.
+- Observation Records: Over 75,000 georeferenced records on GBIF globally.
+- Native and Invasive Status: Widely naturalized; valued for shade; rarely considered a destructive invasive in urban environments.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
+
+=== SPECIES: GREVILLEA ROBUSTA (SILVER OAK) ===
+1. Plant Taxonomy
+- Scientific Name: Grevillea robusta A.Cunn. ex R.Br.
+- Common Names: Silver Oak, Silky Oak, Southern Silky Oak.
+- Family: Proteaceae
+- Order: Proteales
+- Genus: Grevillea
+- Species: Grevillea robusta
+- Botanical Description: A fast-growing evergreen to semi-deciduous hardwood reaching 20–35m tall with dark grey fissured bark, attractive fern-like bipinnate leaves with silky silver-white undersides, and vibrant golden-orange toothbrush-like inflorescences rich in nectar.
+- Synonyms: Stylurus robustus (A.Cunn. ex R.Br.) O.Deg..
+- Native Range: Subtropical eastern coast of Australia (Queensland and New South Wales).
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Proteales; Family: Proteaceae; Genus: Grevillea; Species: Grevillea robusta. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to eastern Australia; extensively naturalized across hill agroforests in India, Sri Lanka, and East Africa.
+- Biodiversity Hotspots: Eastern Australian subtropical rainforests.
+- Observation Records: Over 55,000 records on GBIF globally with massive clusters in Indian hill agricultural belts.
+- Native and Invasive Status: Naturalized in subtropical hill ecosystems; cultivated companion tree.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
+
+=== SPECIES: MANGIFERA INDICA (MANGO) ===
+1. Plant Taxonomy
+- Scientific Name: Mangifera indica L.
+- Common Names: Mango, Aam, Amra, Rasala, Sahakara, King of Fruits.
+- Family: Anacardiaceae
+- Order: Sapindales
+- Genus: Mangifera
+- Species: Mangifera indica
+- Botanical Description: A large, stately evergreen tree growing 15–30m tall with a dense rounded spreading dome crown, dark grey-brown fissured bark, lustrous simple lanceolate leaves with aromatic resinous scent, large terminal panicles of small fragrant flowers, and fleshy edible drupes.
+- Synonyms: Mangifera domestica Gaertn., Mangifera kukula Blume.
+- Native Range: Indian subcontinent (India, Bangladesh) and Myanmar.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Sapindales; Family: Anacardiaceae; Genus: Mangifera; Species: Mangifera indica. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to South Asia; cultivated across all tropical and subtropical regions globally.
+- Biodiversity Hotspots: Western Ghats, Indo-Burma, and Northeastern India wild genetic reserves.
+- Observation Records: Over 110,000 occurrence records on GBIF globally across cultivated and naturalized zones.
+- Native and Invasive Status: Native to South Asia; cultivated worldwide; non-invasive.
+- Conservation Status: IUCN Red List Category: Data Deficient (DD) in wild; Least Concern (LC) cultivated..
+
+=== SPECIES: ARECA CATECHU (SUPARI) ===
+1. Plant Taxonomy
+- Scientific Name: Areca catechu L.
+- Common Names: Supari, Betel Nut Palm, Areca Palm, Areca Nut, Adakka, Pugiphala.
+- Family: Arecaceae
+- Order: Arecales
+- Genus: Areca
+- Species: Areca catechu
+- Botanical Description: A slender, unbranched solitary erect palm growing 15–25m tall with smooth grey trunk ringed by prominent leaf scars, compact crown of 8–12 pinnate fronds with crowded leaflets, branched inflorescences beneath the crownshaft, and orange-red fibrous ovoid drupes.
+- Synonyms: Areca faufel Gaertn., Areca hortensis Lour..
+- Native Range: Tropical Southeast Asia and coastal South Asia.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Arecales; Family: Arecaceae; Genus: Areca; Species: Areca catechu. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Extensively cultivated across South Asia, Southeast Asia, southern China, and East Africa.
+- Biodiversity Hotspots: Western Ghats and Indo-Malayan biodiversity hotspots.
+- Observation Records: Over 25,000 occurrence records on GBIF across tropical Asia.
+- Native and Invasive Status: Cultivated economic palm; non-invasive.
+- Conservation Status: IUCN Red List Category: Least Concern (LC) / Extensively Cultivated.
+
+=== SPECIES: ADANSONIA DIGITATA (AD) ===
+1. Plant Taxonomy
+- Scientific Name: Adansonia digitata L.
+- Common Names: Ad, Baobab, African Baobab, Tree of Life, Gorak Chinch, Khurasani Imli, Kalpavriksha.
+- Family: Malvaceae
+- Order: Malvales
+- Genus: Adansonia
+- Species: Adansonia digitata
+- Botanical Description: A colossal, long-lived deciduous tree reaching 15–25m tall with an astonishing swollen bottle-shaped trunk (up to 10–15m in diameter), smooth grey fibrous bark, digitate leaves with 5–7 leaflets, large pendulous nocturnal white flowers pollinated by fruit bats, and velvety woody capsule fruits containing tart vitamin-rich pulp.
+- Synonyms: Baobabus digitata (L.) Kuntze, Adansonia sphaerocarpa A.Chev..
+- Native Range: Sub-Saharan African savannahs; ancient historical introduction and naturalization in western India.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Malvales; Family: Malvaceae; Genus: Adansonia; Species: Adansonia digitata. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to African savannahs; ancient heritage trees flourish in Gujarat, Maharashtra (Nashik, Mumbai), and Madhya Pradesh.
+- Biodiversity Hotspots: African savannah and historic Indian Ocean trade route botanical heritage sites.
+- Observation Records: Over 45,000 records on GBIF documenting both wild African stands and monumental Indian heritage trees.
+- Native and Invasive Status: Exotic heritage tree in India; revered, non-invasive, and living historical monument.
+- Conservation Status: IUCN Red List Category: Least Concern (LC) globally; highly protected heritage status in India..
+
+=== SPECIES: AEGLE MARMELOS (BEL) ===
+1. Plant Taxonomy
+- Scientific Name: Aegle marmelos (L.) Corrêa
+- Common Names: Bel, Bael, Bilva, Bengal Quince, Golden Apple, Wood Apple, Shivaphala.
+- Family: Rutaceae
+- Order: Sapindales
+- Genus: Aegle
+- Species: Aegle marmelos
+- Botanical Description: A slow-growing medium-sized deciduous thorny tree growing 8–15m tall with flaking grey-brown corky bark, sharp axillary spines, trifoliate compound leaves with aromatic citrus scent, sweet-scented greenish-white flowers in clusters, and hard woody globular fruits with aromatic orange pulp.
+- Synonyms: Crataeva marmelos L., Cydonia marmelos (L.) Salisb..
+- Native Range: Indian subcontinent and Myanmar; widespread in dry deciduous forests across India.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Sapindales; Family: Rutaceae; Genus: Aegle; Species: Aegle marmelos. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native across the Indian subcontinent; cultivated in Sri Lanka, Bangladesh, Nepal, and Southeast Asia.
+- Biodiversity Hotspots: Central Indian dry deciduous forests and Western Ghats sacred groves.
+- Observation Records: Over 32,000 occurrences documented on GBIF and Indian botanical databases.
+- Native and Invasive Status: Native to South Asia; non-invasive and conservation-priority in wild tracts.
+- Conservation Status: IUCN Red List Category: Near Threatened (NT) in wild habitats; widely cultivated..
+
+=== SPECIES: FICUS BENGHALENSIS (BANYAN) ===
+1. Plant Taxonomy
+- Scientific Name: Ficus benghalensis L.
+- Common Names: Banyan, Vat Vriksha, Bargad, Bar, Indian Banyan, Nyagrodha.
+- Family: Moraceae
+- Order: Rosales
+- Genus: Ficus
+- Species: Ficus benghalensis
+- Botanical Description: A gargantuan evergreen to semi-deciduous tree reaching 20–30m tall and spreading indefinitely via woody aerial prop roots that drop from horizontal branches, thick grey-white bark, coriaceous elliptical leaves with prominent pale veins, and paired scarlet axillary figs.
+- Synonyms: Ficus indica L., Ficus banyana Oken.
+- Native Range: Indian subcontinent (India, Pakistan, Bangladesh, Nepal).
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Rosales; Family: Moraceae; Genus: Ficus; Species: Ficus benghalensis. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to India; planted and revered across tropical and subtropical Asia.
+- Biodiversity Hotspots: Indian subcontinent keystone biodiversity corridors.
+- Observation Records: Over 50,000 occurrences documented on GBIF across South Asia.
+- Native and Invasive Status: Native keystone species; non-invasive in its native range.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
+
+=== SPECIES: FICUS RELIGIOSA (PEEPAL) ===
+1. Plant Taxonomy
+- Scientific Name: Ficus religiosa L.
+- Common Names: Peepal, Sacred Fig, Bodhi Tree, Ashvattha, Pipal, Bo Tree.
+- Family: Moraceae
+- Order: Rosales
+- Genus: Ficus
+- Species: Ficus religiosa
+- Botanical Description: A large, majestic deciduous to semi-evergreen tree growing 20–30m tall with a wide spreading crown, greyish smooth flaking bark, distinctive cordate leaves with an elongated slender drip tip (acuminate tail) that rustles in the slightest breeze, and sessile purple figs.
+- Synonyms: Ficus superstitiosa Link, Urostigma religiosum (L.) Gasp..
+- Native Range: Indian subcontinent (India, Nepal, Bangladesh, Pakistan) and Indochina.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Rosales; Family: Moraceae; Genus: Ficus; Species: Ficus religiosa. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to South Asia; planted throughout tropical Asia and worldwide near Buddhist and Hindu temples.
+- Biodiversity Hotspots: Indian subcontinent sacred groves and deciduous forest reserves.
+- Observation Records: Over 60,000 occurrences on GBIF and regional botanical records globally.
+- Native and Invasive Status: Native to South Asia; highly protected cultural and ecological keystone tree.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
+
+=== SPECIES: HEVEA BRASILIENSIS (RUBBER) ===
+1. Plant Taxonomy
+- Scientific Name: Hevea brasiliensis (Willd. ex A.Juss.) Müll.Arg.
+- Common Names: Rubber Tree, Para Rubber Tree, Rubber, Sharinga, Hevea.
+- Family: Euphorbiaceae
+- Order: Malpighiales
 - Genus: Hevea
 - Species: Hevea brasiliensis
-- Botanical Description: A deciduous, large canopy tree reaching heights of 30–40 meters in the wild, though typically smaller (20–25m) in commercial plantations. It has smooth, greyish bark, trifoliate compound leaves, and small, pale-yellow flowers. The fruit is a large, explosive three-lobed capsule that bursts open when ripe, releasing large, mottled brown seeds. The bark produces a milky white latex containing natural polyisoprene rubber when tapped.
-- Synonyms: Siphonia brasiliensis Willd. ex A.Juss.
-- Native Range: The Amazon Basin (Brazil, Peru, Colombia, Ecuador, Bolivia, Venezuela).
-- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Malpighiales; Family: Euphorbiaceae; Genus: Hevea; Species: H. brasiliensis. (Verified by ITIS & Catalogue of Life).
+- Botanical Description: A large, fast-growing deciduous canopy tree reaching 25–40m tall with smooth greyish bark, trifoliate compound leaves with long petioles, small pale-yellow flowers, large explosive 3-lobed capsule fruits, and abundant milky white cis-1,4-polyisoprene latex in bark laticifers.
+- Synonyms: Siphonia brasiliensis Willd. ex A.Juss., Micrandra brasiliensis (Willd. ex A.Juss.) Baill..
+- Native Range: Amazon basin (Brazil, Peru, Colombia, Bolivia, Venezuela).
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Malpighiales; Family: Euphorbiaceae; Genus: Hevea; Species: Hevea brasiliensis. (Verified by Kew POWO, ITIS & Catalogue of Life).
 
 2. Biodiversity & Geographic Distribution
-- Species Occurrence & Geographic Distribution: Native to the lowland rainforests of South America. Cultivated extensively in large-scale commercial plantations throughout Southeast Asia (Thailand, Indonesia, Malaysia, Vietnam, India) and West Africa (Ivory Coast, Liberia, Nigeria).
-- Biodiversity Hotspots: The Amazon Rainforest remains the key native biodiversity genetic reserve.
-- Observation Records: Over 80,000 records on GBIF and iNaturalist, with massive concentrations in Southeast Asia where agroforestry and monoculture plantations dominate the landscape.
-- Native and Invasive Status: Native to the Amazon. Naturalized in many parts of Southeast Asia, where it occasionally establishes outside plantations but is rarely classified as a destructive invasive species.
-- Conservation Status: IUCN Red List Category: Least Concern (LC) globally due to its vast cultivated footprint, though wild native Amazonian genotypes face localized threats from deforestation.
+- Species Occurrence & Geographic Distribution: Native to Amazon basin; cultivated on tens of millions of hectares in Southeast Asia (Thailand, Indonesia, Malaysia, India).
+- Biodiversity Hotspots: Amazon Rainforest and Indo-Malayan plantation belts.
+- Observation Records: Over 80,000 occurrences recorded on GBIF across tropical production regions.
+- Native and Invasive Status: Widely cultivated economic crop; naturalized in plantation margins without severe invasive disruption.
+- Conservation Status: IUCN Red List Category: Least Concern (LC) globally; wild Amazonian genotypes vulnerable..
+
+=== SPECIES: PSIDIUM GUAJAVA (GUAVA) ===
+1. Plant Taxonomy
+- Scientific Name: Psidium guajava L.
+- Common Names: Guava, Amrood, Peru, Jamphal, Common Guava, Amrutaphala.
+- Family: Myrtaceae
+- Order: Myrtales
+- Genus: Psidium
+- Species: Psidium guajava
+- Botanical Description: A small to medium-sized evergreen tree or large shrub growing 4–10m tall with attractive smooth, peeling mottled greenish-copper bark, 4-angled branchlets, opposite elliptical aromatic leaves with prominent veins, fragrant white 5-petaled flowers with numerous stamens, and round to pyriform edible berries (guavas) with sweet pink or white pulp.
+- Synonyms: Guajava pyrifera (L.) Kuntze, Psidium cujavus L..
+- Native Range: Tropical America (Mexico to northern South America); pantropically naturalized and cultivated.
+- Accepted Classification: Kingdom: Plantae; Division: Tracheophyta; Class: Magnoliopsida; Order: Myrtales; Family: Myrtaceae; Genus: Psidium; Species: Psidium guajava. (Verified by Kew POWO, ITIS & Catalogue of Life).
+
+2. Biodiversity & Geographic Distribution
+- Species Occurrence & Geographic Distribution: Native to tropical America; cultivated and naturalized throughout India, Southeast Asia, Africa, and Mediterranean.
+- Biodiversity Hotspots: Neotropical genetic centers and Indian agricultural regions.
+- Observation Records: Over 90,000 occurrence records on GBIF globally across cultivated and naturalized sites.
+- Native and Invasive Status: Widely naturalized; can form dense thickets in abandoned pastures; highly valuable in homesteads.
+- Conservation Status: IUCN Red List Category: Least Concern (LC).
+

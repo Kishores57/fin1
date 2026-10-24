@@ -20,7 +20,7 @@ if (settings.GEMINI_API_KEY) {
 /**
  * Creates document_chunks table and populates it if empty
  */
-export async function ingestDocuments() {
+export async function ingestDocuments({ force = false } = {}) {
   try {
     await db.run(`
       CREATE TABLE IF NOT EXISTS document_chunks (
@@ -34,17 +34,20 @@ export async function ingestDocuments() {
 
     const row = await db.get('SELECT COUNT(*) as count FROM document_chunks');
     const count = row ? row.count : 0;
-    const newFileRow = await db.get(
-      "SELECT COUNT(*) as count FROM document_chunks WHERE id LIKE 'calculator_species_multisource_kb.txt%'"
+    
+    // Check if we have chunks for newly added species (e.g. Bamboo, Christmas, Bel)
+    const checkSample = await db.get(
+      "SELECT COUNT(*) as count FROM document_chunks WHERE text LIKE '%Bambusa vulgaris%' OR text LIKE '%Aegle marmelos%'"
     );
-    const isNewIngested = newFileRow ? newFileRow.count : 0;
-    if (count > 0 && isNewIngested > 0) {
-      console.log(`Document chunk collection already contains ${count} chunks.`);
+    const hasExpandedSpecies = checkSample ? checkSample.count > 0 : false;
+
+    if (!force && count > 50 && hasExpandedSpecies) {
+      console.log(`Document chunk collection already contains ${count} chunks covering all species.`);
       return;
-    } else if (count > 0 && isNewIngested === 0) {
-      console.log('New calculator species KB detected. Clearing and re-ingesting document chunks...');
-      await db.run('DELETE FROM document_chunks');
     }
+
+    console.log(`Clearing existing ${count} chunks to re-ingest all expanded multi-species documents...`);
+    await db.run('DELETE FROM document_chunks');
 
     console.log('Document chunk collection is empty. Ingesting documents...');
     const docDir = settings.RAG_DOCUMENT_DIR;
@@ -61,6 +64,7 @@ export async function ingestDocuments() {
     }
 
     let chunkCount = 0;
+    let remoteEmbeddingAvailable = !!ai;
     for (const filename of files) {
       const filePath = path.join(docDir, filename);
       try {
@@ -75,7 +79,7 @@ export async function ingestDocuments() {
           const id = `${filename}_chunk_${idx}`;
           let embeddingStr = null;
 
-          if (ai) {
+          if (remoteEmbeddingAvailable) {
             try {
               const embedResponse = await ai.models.embedContent({
                 model: 'text-embedding-004',
@@ -89,7 +93,10 @@ export async function ingestDocuments() {
                 embeddingStr = JSON.stringify(embedResponse.embedding.values);
               }
             } catch (embedError) {
-              console.error(`Error generating embedding for chunk ${id}:`, embedError);
+              remoteEmbeddingAvailable = false;
+              console.warn(
+                `Remote embedding model unavailable (${embedError.message || 'API error'}), falling back to offline keyword vectors for all document chunks.`
+              );
             }
           }
 
