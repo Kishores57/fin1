@@ -613,6 +613,64 @@ export default function MapAnalysis() {
     }, 1250);
   };
 
+  // Focus and inspect specific candidate plantation location on Leaflet map
+  const handleFocusCandidate = (cand) => {
+    if (!cand || !cand.coordinates) return;
+    setSelectedCandidate(cand);
+
+    if (!showRecommendations) {
+      setShowRecommendations(true);
+    }
+
+    // 1. Smoothly scroll page viewport directly up to the map
+    if (mapContainerRef.current) {
+      mapContainerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    if (!mapInstance.current) return;
+
+    // 2. Smoothly fly to the candidate location coordinates
+    mapInstance.current.flyTo([cand.coordinates.lat, cand.coordinates.lng], 19, {
+      animate: true,
+      duration: 1.2,
+    });
+
+    // 3. Highlight and open popup on the recommendation marker
+    setTimeout(() => {
+      if (recommendationsLayerRef.current) {
+        recommendationsLayerRef.current.eachLayer((layer) => {
+          if (layer.getLatLng) {
+            const pos = layer.getLatLng();
+            if (
+              Math.abs(pos.lat - cand.coordinates.lat) < 0.0001 &&
+              Math.abs(pos.lng - cand.coordinates.lng) < 0.0001
+            ) {
+              layer.openPopup();
+            }
+          }
+        });
+      }
+
+      // 4. Add animated glowing pulsating target ring
+      if (window.L && calloutsLayerRef.current) {
+        const pulse = window.L.circleMarker([cand.coordinates.lat, cand.coordinates.lng], {
+          radius: 30,
+          color: cand.priorityColor || '#f59e0b',
+          fillColor: cand.priorityColor || '#f59e0b',
+          fillOpacity: 0.35,
+          weight: 3.5,
+          dashArray: '4, 4',
+        }).addTo(calloutsLayerRef.current);
+
+        setTimeout(() => {
+          if (calloutsLayerRef.current) {
+            calloutsLayerRef.current.removeLayer(pulse);
+          }
+        }, 6000);
+      }
+    }, 1250);
+  };
+
   // 4. Update Leaflet Map Layers
   const updateMapLayers = (data, customGeometry = null) => {
     if (!mapInstance.current || !data) return;
@@ -1588,12 +1646,7 @@ export default function MapAnalysis() {
                           {analysisData.recommendations?.candidates?.map((cand) => (
                             <div
                               key={cand.id}
-                              onClick={() => {
-                                setSelectedCandidate(cand);
-                                if (mapInstance.current) {
-                                  mapInstance.current.setView([cand.coordinates.lat, cand.coordinates.lng], 19);
-                                }
-                              }}
+                              onClick={() => handleFocusCandidate(cand)}
                               className={`p-4 rounded-2xl border-2 transition-all cursor-pointer shadow-sm ${
                                 cand.priorityLevel === 'HIGH'
                                   ? 'border-l-8 border-l-rose-500'
@@ -1691,12 +1744,8 @@ export default function MapAnalysis() {
 
                             <button
                               type="button"
-                              onClick={() => {
-                                if (mapInstance.current) {
-                                  mapInstance.current.setView([selectedCandidate.coordinates.lat, selectedCandidate.coordinates.lng], 19);
-                                }
-                              }}
-                              className="w-full py-3 px-4 rounded-xl bg-[#047857] hover:bg-[#065f46] text-white text-xs font-black transition-all flex items-center justify-center gap-2 shadow-md"
+                              onClick={() => handleFocusCandidate(selectedCandidate)}
+                              className="w-full py-3 px-4 rounded-xl bg-[#047857] hover:bg-[#065f46] text-white text-xs font-black transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer active:scale-95"
                             >
                               <Crosshair className="w-4 h-4 text-emerald-200" />
                               Focus Site on Map
