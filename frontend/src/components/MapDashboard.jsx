@@ -66,7 +66,7 @@ const Icon = ({ name, size = 22, className = '' }) => {
 };
 
 // --- FULLSCREEN MAP COMPONENT ---
-const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeId }) => {
+const FullscreenMap = ({ trees, onSelectAiTree, onViewAnalysis, mapInstanceRef, highlightedTreeId, focusedTree }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const tileLayerRef = useRef(null);
@@ -76,9 +76,11 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
   const hasFittedRef = useRef(false);
   const treesRef = useRef(trees);
   const highlightedRef = useRef(highlightedTreeId);
+  const focusedRef = useRef(focusedTree);
 
   useEffect(() => { treesRef.current = trees; }, [trees]);
   useEffect(() => { highlightedRef.current = highlightedTreeId; }, [highlightedTreeId]);
+  useEffect(() => { focusedRef.current = focusedTree; }, [focusedTree]);
 
   const impactColor = (impact) => {
     if (impact === 'Critical') return '#EF4444';
@@ -136,7 +138,8 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
 
     validTrees.forEach((tree) => {
       existingIds.delete(tree.id);
-      const isHighlighted = highlightedRef.current && String(tree.id) === String(highlightedRef.current);
+      const isHighlighted = (highlightedRef.current && String(tree.id) === String(highlightedRef.current)) ||
+                            (focusedRef.current && String(tree.id) === String(focusedRef.current.id));
 
       let dot = dotMarkersRef.current[tree.id];
       if (!dot) {
@@ -146,7 +149,55 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
           bubblingMouseEvents: false,
         });
 
-        dot.on('click', () => { if (onSelectAiTree) onSelectAiTree(tree); });
+        const photoUrl = tree.photo || (tree.leaf_photo || tree.bark_photo || tree.height_photo
+          ? `${API_BASE_URL}/api/epicollect/media?type=photo&name=${encodeURIComponent(tree.leaf_photo || tree.bark_photo || tree.height_photo)}`
+          : null);
+        const color = impactColor(tree.impact);
+
+        const popupContent = `
+          <div class="custom-tree-popup-card">
+            <div class="custom-tree-popup-header">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: ${color}; box-shadow: 0 0 6px ${color};"></span>
+                <strong style="color: #047857; font-size: 13px;">${tree.species || tree.treeName}</strong>
+              </div>
+              <span class="custom-tree-popup-id">#${tree.id || tree.treeId}</span>
+            </div>
+
+            ${tree.scientificName ? `<div style="font-size: 10px; font-style: italic; color: #64748b; margin-top: -3px; margin-bottom: 6px;">${tree.scientificName}</div>` : ''}
+
+            ${photoUrl ? `
+              <div style="width: 100%; height: 110px; border-radius: 8px; overflow: hidden; margin-bottom: 8px; background: #f1f5f9; border: 1px solid #e2e8f0;">
+                <img src="${photoUrl}" alt="${tree.species}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none'" />
+              </div>
+            ` : ''}
+
+            <div class="custom-tree-popup-grid">
+              <div><span style="color: #64748b;">GBH:</span> <strong>${tree.circumference || tree.gbh || 'N/A'} cm</strong></div>
+              <div><span style="color: #64748b;">Height:</span> <strong>${tree.height || 'N/A'} m</strong></div>
+              <div><span style="color: #64748b;">Est. Age:</span> <strong>~${tree.age || 1} yrs</strong></div>
+              <div><span style="color: #64748b;">CO₂:</span> <strong>${Math.round(tree.co2 || 0).toLocaleString()} kg</strong></div>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: space-between; font-size: 10px; color: #64748b; margin-bottom: 8px;">
+              <span>📍 Lat: ${Number(tree.lat).toFixed(5)}, Lng: ${Number(tree.lng).toFixed(5)}</span>
+              <span style="font-weight: 700; color: ${color}; text-transform: uppercase;">${tree.impact || 'Normal'}</span>
+            </div>
+
+            <div style="display: flex; gap: 6px; border-top: 1px solid #f1f5f9; padding-top: 6px;">
+              <button
+                type="button"
+                class="popup-report-btn"
+                data-tree-id="${tree.id}"
+                style="flex: 1; padding: 6px 8px; font-size: 11px; font-weight: 700; background: #047857; color: white; border: none; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.2s;"
+              >
+                🌳 Full AI Report
+              </button>
+            </div>
+          </div>
+        `;
+
+        dot.bindPopup(popupContent, { maxWidth: 280, className: 'custom-tree-popup-wrapper' });
 
         dot.on('mouseover', function () {
           const z = mapInstance.current ? mapInstance.current.getZoom() : zoom;
@@ -156,7 +207,8 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
 
         dot.on('mouseout', function () {
           const z = mapInstance.current ? mapInstance.current.getZoom() : zoom;
-          const hl = highlightedRef.current && String(tree.id) === String(highlightedRef.current);
+          const hl = (highlightedRef.current && String(tree.id) === String(highlightedRef.current)) ||
+                     (focusedRef.current && String(tree.id) === String(focusedRef.current.id));
           const normalIcon = getTreeIcon(tree, z, hl);
           this.setIcon(normalIcon);
         });
@@ -179,21 +231,23 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
       mapInstance.current.removeLayer(highlightRingRef.current);
       highlightRingRef.current = null;
     }
-    if (!highlightedRef.current || !mapInstance.current) return;
+    const targetId = highlightedRef.current || (focusedRef.current ? focusedRef.current.id : null);
+    if (!targetId || !mapInstance.current) return;
 
     const tree = treesRef.current.find(
-      (t) => String(t.id) === String(highlightedRef.current)
-    );
+      (t) => String(t.id) === String(targetId)
+    ) || (focusedRef.current && String(focusedRef.current.id) === String(targetId) ? focusedRef.current : null);
+
     if (!tree || !tree.lat || !tree.lng) return;
 
     // eslint-disable-next-line no-undef
     highlightRingRef.current = L.circleMarker([tree.lat, tree.lng], {
-      radius:      22,
-      color:       impactColor(tree.impact),
-      weight:      2,
-      fill:        false,
-      opacity:     0.7,
-      className:   'highlight-ring',
+      radius:      26,
+      color:       '#10b981',
+      weight:      3,
+      fillColor:   '#34d399',
+      fillOpacity: 0.35,
+      className:   'highlight-ring-animated',
       interactive: false,
     }).addTo(mapInstance.current);
   };
@@ -204,7 +258,8 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
     Object.entries(dotMarkersRef.current).forEach(([id, dot]) => {
       const tree = treesRef.current.find((t) => String(t.id) === String(id));
       if (tree) {
-        const hl = highlightedRef.current && String(id) === String(highlightedRef.current);
+        const hl = (highlightedRef.current && String(id) === String(highlightedRef.current)) ||
+                   (focusedRef.current && String(id) === String(focusedRef.current.id));
         dot.setIcon(getTreeIcon(tree, zoom, hl));
       }
     });
@@ -224,6 +279,55 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
     }).addTo(mapInstance.current);
     tileLayerRef.current.bringToBack();
   }, [mapTheme]);
+
+  // Open marker popup when a tree is highlighted or targeted
+  useEffect(() => {
+    const targetId = highlightedTreeId || (focusedTree ? focusedTree.id : null);
+    if (!targetId || !mapInstance.current) return;
+
+    updateHighlightRing();
+
+    const timer = setTimeout(() => {
+      const marker = dotMarkersRef.current[targetId];
+      if (marker && mapInstance.current) {
+        marker.openPopup();
+      } else {
+        const t = treesRef.current.find((x) => String(x.id) === String(targetId)) || focusedTree;
+        if (t && t.lat && t.lng && mapInstance.current) {
+          const color = impactColor(t.impact);
+          // eslint-disable-next-line no-undef
+          L.popup({ maxWidth: 280, className: 'custom-tree-popup-wrapper' })
+            .setLatLng([t.lat, t.lng])
+            .setContent(`
+              <div class="custom-tree-popup-card">
+                <div class="custom-tree-popup-header">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background-color: ${color};"></span>
+                    <strong style="color: #047857; font-size: 13px;">${t.species || t.treeName}</strong>
+                  </div>
+                  <span class="custom-tree-popup-id">#${t.id || t.treeId}</span>
+                </div>
+                <div style="font-size: 11px; margin-top: 4px; color: #334155;">📍 Pointed Specimen at K.K. Wagh Campus</div>
+                <div style="font-size: 10px; color: #64748b; margin-top: 2px;">GPS: ${Number(t.lat).toFixed(5)}, ${Number(t.lng).toFixed(5)}</div>
+                <div style="display: flex; gap: 6px; border-top: 1px solid #f1f5f9; padding-top: 6px; margin-top: 6px;">
+                  <button
+                    type="button"
+                    class="popup-report-btn"
+                    data-tree-id="${t.id || ''}"
+                    style="flex: 1; padding: 6px 8px; font-size: 11px; font-weight: 700; background: #047857; color: white; border: none; border-radius: 8px; cursor: pointer; text-align: center;"
+                  >
+                    🌳 Full AI Report
+                  </button>
+                </div>
+              </div>
+            `)
+            .openOn(mapInstance.current);
+        }
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [highlightedTreeId, focusedTree]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -249,6 +353,20 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
       }).addTo(mapInstance.current);
 
       mapInstance.current.on('zoomend', handleZoom);
+
+      // Handle popup action button clicks
+      mapInstance.current.on('popupopen', (e) => {
+        const el = e.popup.getElement();
+        if (!el) return;
+        const reportBtn = el.querySelector('.popup-report-btn');
+        if (reportBtn) {
+          reportBtn.onclick = () => {
+            const id = reportBtn.getAttribute('data-tree-id');
+            const t = treesRef.current.find((x) => String(x.id) === String(id)) || focusedRef.current;
+            if (t && onSelectAiTree) onSelectAiTree(t);
+          };
+        }
+      });
     }
 
     if (mapInstanceRef) mapInstanceRef.current = mapInstance.current;
@@ -265,13 +383,17 @@ const FullscreenMap = ({ trees, onSelectAiTree, mapInstanceRef, highlightedTreeI
     updateHighlightRing();
 
     if (trees.length > 0 && !hasFittedRef.current) {
-      const validTrees = trees.filter((t) => t.lat && t.lng);
-      if (validTrees.length > 0) {
-        // eslint-disable-next-line no-undef
-        const bounds = L.latLngBounds(validTrees.map((t) => [t.lat, t.lng]));
-        if (bounds.isValid()) {
-          mapInstance.current.fitBounds(bounds, { padding: [60, 60], maxZoom: 18 });
-          hasFittedRef.current = true;
+      if (highlightedRef.current || focusedRef.current) {
+        hasFittedRef.current = true;
+      } else {
+        const validTrees = trees.filter((t) => t.lat && t.lng);
+        if (validTrees.length > 0) {
+          // eslint-disable-next-line no-undef
+          const bounds = L.latLngBounds(validTrees.map((t) => [t.lat, t.lng]));
+          if (bounds.isValid()) {
+            mapInstance.current.fitBounds(bounds, { padding: [60, 60], maxZoom: 18 });
+            hasFittedRef.current = true;
+          }
         }
       }
     }
@@ -639,7 +761,13 @@ const AiInsightModal = ({ tree, onClose, onDeleteMongoTree }) => {
 };
 
 // --- MAIN INTEGRATED MAP DASHBOARD TAB ---
-export const MapDashboard = ({ refreshKey = 0, onViewAnalysis }) => {
+export const MapDashboard = ({
+  refreshKey = 0,
+  onViewAnalysis,
+  targetTree = null,
+  onTargetTreeHandled,
+  onReturnToSurvey,
+}) => {
   const [trees, setTrees] = useState([]);
   const [loadingTrees, setLoadingTrees] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -647,6 +775,7 @@ export const MapDashboard = ({ refreshKey = 0, onViewAnalysis }) => {
   const [selectedMongoTree, setSelectedMongoTree] = useState(null);
   const mapInstanceRef = useRef(null);
   const [highlightedTreeId, setHighlightedTreeId] = useState(null);
+  const [focusedTree, setFocusedTree] = useState(null);
 
   useEffect(() => {
     async function loadLiveTrees() {
@@ -708,13 +837,44 @@ export const MapDashboard = ({ refreshKey = 0, onViewAnalysis }) => {
     loadLiveTrees();
   }, [refreshKey]);
 
+  // Handle incoming targetTree from Epicollect Survey or external navigations
+  useEffect(() => {
+    if (!targetTree || !targetTree.lat || !targetTree.lng) return;
+
+    setFocusedTree(targetTree);
+    setHighlightedTreeId(targetTree.id);
+
+    if (mapInstanceRef.current) {
+      mapInstanceRef.current.flyTo([targetTree.lat, targetTree.lng], 19, { duration: 1.2 });
+    }
+
+    if (onTargetTreeHandled) {
+      onTargetTreeHandled();
+    }
+  }, [targetTree]);
+
+  // When trees finish loading, if a tree was targeted, match with full details from trees list
+  useEffect(() => {
+    if (focusedTree && trees.length > 0) {
+      const match = trees.find((t) =>
+        (focusedTree.id && String(t.id) === String(focusedTree.id)) ||
+        (focusedTree.uuid && String(t.uuid) === String(focusedTree.uuid)) ||
+        (Math.abs(t.lat - focusedTree.lat) < 0.00008 && Math.abs(t.lng - focusedTree.lng) < 0.00008)
+      );
+      if (match) {
+        setFocusedTree(match);
+        setHighlightedTreeId(match.id);
+      }
+    }
+  }, [trees]);
+
   const handleFocusTree = (tree) => {
-    if (!tree.lat || !tree.lng) return;
+    if (!tree || !tree.lat || !tree.lng) return;
+    setFocusedTree(tree);
     setHighlightedTreeId(tree.id);
     if (mapInstanceRef.current) {
       mapInstanceRef.current.flyTo([tree.lat, tree.lng], 19, { duration: 1.2 });
     }
-    setTimeout(() => setHighlightedTreeId(null), 4000);
   };
 
   const handleAddTree = (newTree) => {
@@ -736,12 +896,139 @@ export const MapDashboard = ({ refreshKey = 0, onViewAnalysis }) => {
         </div>
       )}
 
+      {/* Floating Focus HUD pill when a tree is pointed */}
+      {focusedTree && (
+        <div style={{
+          position: 'absolute',
+          top: '16px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 600,
+          background: 'rgba(11, 25, 38, 0.94)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          border: '1.5px solid rgba(52, 211, 153, 0.5)',
+          borderRadius: '18px',
+          boxShadow: '0 16px 40px rgba(0,0,0,0.45), 0 0 25px rgba(52, 211, 153, 0.25)',
+          padding: '10px 18px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '14px',
+          color: '#ffffff',
+          maxWidth: 'min(92vw, 560px)',
+          pointerEvents: 'auto',
+          animation: 'slide-down 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}>
+          <div style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '12px',
+            background: 'rgba(16, 185, 129, 0.2)',
+            border: '1px solid rgba(52, 211, 153, 0.4)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#34d399',
+            flexShrink: 0,
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontWeight: 800, fontSize: '0.92rem', color: '#6ee7b7' }} className="truncate">
+                {focusedTree.species || focusedTree.treeName}
+              </span>
+              <span style={{
+                fontSize: '10px',
+                fontWeight: 800,
+                background: 'rgba(16, 185, 129, 0.25)',
+                color: '#a7f3d0',
+                padding: '1px 6px',
+                borderRadius: '6px',
+                border: '1px solid rgba(52, 211, 153, 0.35)',
+              }}>
+                EPIC-{focusedTree.id || focusedTree.treeId}
+              </span>
+            </div>
+            <div style={{ fontSize: '11px', color: '#94a3b8', marginTop: '1px' }}>
+              GPS: {Number(focusedTree.lat).toFixed(5)}, {Number(focusedTree.lng).toFixed(5)} · {focusedTree.age ? `~${focusedTree.age} yrs` : 'Live Specimen'}
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => setSelectedAiTree(focusedTree)}
+              style={{
+                background: '#10b981',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '6px 12px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.4)',
+                transition: 'all 0.2s',
+              }}
+            >
+              AI Report
+            </button>
+            {onReturnToSurvey && (
+              <button
+                type="button"
+                onClick={onReturnToSurvey}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  color: '#e2e8f0',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  borderRadius: '10px',
+                  padding: '6px 10px',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+                title="Return to Epicollect Survey list"
+              >
+                Survey ➔
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                setFocusedTree(null);
+                setHighlightedTreeId(null);
+              }}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#94a3b8',
+                padding: '4px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                lineHeight: 1,
+              }}
+              title="Close indicator"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Fullscreen Map */}
       <FullscreenMap
         trees={trees}
         onSelectAiTree={handleSelectTree}
+        onViewAnalysis={onViewAnalysis}
         mapInstanceRef={mapInstanceRef}
         highlightedTreeId={highlightedTreeId}
+        focusedTree={focusedTree}
       />
 
       {/* Floating Map Search Bar */}

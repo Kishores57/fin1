@@ -104,6 +104,8 @@ export default function App() {
   const [showAdminConsole, setShowAdminConsole] = useState(false);
   const [pendingTab, setPendingTab]             = useState('register');
   const [selectedPermitId, setSelectedPermitId] = useState(null);
+  const [targetLiveMapTree, setTargetLiveMapTree] = useState(null);
+  const [analysisInitialTab, setAnalysisInitialTab] = useState('overview');
 
   const enterApp = (tab = 'register', authedUser = null) => {
     const target = tab === 'calculator' ? 'register' : tab;
@@ -136,6 +138,12 @@ export default function App() {
     if (!mapped) return;
     setSelectedResult(mapped);
     setActiveTab('register');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLocateTreeOnLiveMap = (tree) => {
+    setTargetLiveMapTree(tree);
+    setActiveTab('map');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -413,9 +421,22 @@ export default function App() {
           ) : activeTab === 'history' ? (
             <HistoryLog refreshTrigger={historyRefreshTrigger} onSelectTree={handleSelectHistoryTree} />
           ) : activeTab === 'map' ? (
-            <MapDashboard refreshKey={mapRefreshKey} onViewAnalysis={handleMapTreeAnalysis} />
+            <MapDashboard
+              refreshKey={mapRefreshKey}
+              onViewAnalysis={handleMapTreeAnalysis}
+              targetTree={targetLiveMapTree}
+              onTargetTreeHandled={() => setTargetLiveMapTree(null)}
+              onReturnToSurvey={() => {
+                setAnalysisInitialTab('epicollect');
+                setActiveTab('analysis');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
           ) : activeTab === 'analysis' ? (
-            <MapAnalysis />
+            <MapAnalysis
+              onNavigateToLiveMap={handleLocateTreeOnLiveMap}
+              initialTab={analysisInitialTab}
+            />
           ) : (
             <TreeCuttingModule
               initialAppId={selectedPermitId}

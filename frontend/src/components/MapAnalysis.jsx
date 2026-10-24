@@ -62,7 +62,7 @@ const BASEMAP_TILES = {
   },
 };
 
-export default function MapAnalysis() {
+export default function MapAnalysis({ onNavigateToLiveMap, initialTab = 'overview' }) {
   const mapContainerRef = useRef(null);
   const mapInstance = useRef(null);
   const tileLayerRef = useRef(null);
@@ -78,10 +78,16 @@ export default function MapAnalysis() {
   // State
   const [zones, setZones] = useState([]);
   const [selectedZoneId, setSelectedZoneId] = useState('');
-  const [activeTab, setActiveTab] = useState('overview'); // overview, recommendations, distribution, green_zone, priority, climate, planning, report, epicollect
+  const [activeTab, setActiveTab] = useState(initialTab || 'overview'); // overview, recommendations, distribution, green_zone, priority, climate, planning, report, epicollect
   const [analysisData, setAnalysisData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
 
   // Epicollect Data State
   const [epicollectTrees, setEpicollectTrees] = useState([]);
@@ -415,6 +421,17 @@ export default function MapAnalysis() {
   }, [epicollectTrees, showEpicollect, epicollectFilter, epicollectSearch]);
 
   const handleLocateEpicollectTree = (tree) => {
+    if (!tree || !tree.lat || !tree.lng) return;
+
+    if (onNavigateToLiveMap) {
+      onNavigateToLiveMap(tree);
+      return;
+    }
+
+    handleLocateLocalLayer(tree);
+  };
+
+  const handleLocateLocalLayer = (tree) => {
     if (!mapInstance.current || !tree || !tree.lat || !tree.lng) return;
 
     if (!showEpicollect) {
@@ -2291,10 +2308,20 @@ export default function MapAnalysis() {
                             <button
                               type="button"
                               onClick={() => handleLocateEpicollectTree(tree)}
-                              className="flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold bg-emerald-700 text-white hover:bg-emerald-800 transition-colors flex items-center justify-center gap-1 shadow-xs"
+                              className="flex-1 py-1.5 px-2 rounded-xl text-[11px] font-bold bg-emerald-700 text-white hover:bg-emerald-800 transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                              title="Redirect to Live GIS Map and point directly to this tree"
                             >
-                              <MapPin className="w-3 h-3" />
-                              <span>Locate Map</span>
+                              <MapPin className="w-3.5 h-3.5 text-emerald-200" />
+                              <span>Locate on Live Map</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleLocateLocalLayer(tree)}
+                              className="py-1.5 px-2 rounded-xl text-[11px] font-semibold bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200 transition-colors flex items-center justify-center gap-1"
+                              title="Focus on this Map Analysis Layer"
+                            >
+                              <Layers className="w-3 h-3 text-emerald-600" />
+                              <span>Layer</span>
                             </button>
                             <button
                               type="button"
