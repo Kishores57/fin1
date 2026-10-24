@@ -209,6 +209,7 @@ router.post('/analyze', async (req, res) => {
           lat: parseFloat(centerLat.toFixed(6)),
           lng: parseFloat(centerLng.toFixed(6)),
         },
+        geometry: targetGeometry,
       },
       campusForestIntelligence,
       treeStatistics: {

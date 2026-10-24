@@ -33,6 +33,9 @@ import {
   Database,
   Search,
   Filter,
+  PenTool,
+  Undo2,
+  X,
 } from 'lucide-react';
 import { mapAnalysisApi, API_BASE_URL } from '../services/api';
 import UnifiedTreeReport from './UnifiedTreeReport';
@@ -70,6 +73,7 @@ export default function MapAnalysis() {
   const recommendationsLayerRef = useRef(null);
   const calloutsLayerRef = useRef(null);
   const epicollectLayerRef = useRef(null);
+  const drawingLayerRef = useRef(null);
 
   // State
   const [zones, setZones] = useState([]);
@@ -100,6 +104,28 @@ export default function MapAnalysis() {
   const [candidateFilter, setCandidateFilter] = useState('ALL'); // ALL, HIGH, MODERATE, POTENTIAL
   const [drawMode, setDrawMode] = useState(false);
   const [drawnPoints, setDrawnPoints] = useState([]);
+
+  // Refs for event listener closures (ensures Leaflet map click always sees latest draw state)
+  const drawModeRef = useRef(drawMode);
+  const drawnPointsRef = useRef(drawnPoints);
+
+  useEffect(() => {
+    drawModeRef.current = drawMode;
+    if (mapInstance.current) {
+      if (drawMode) {
+        mapInstance.current.doubleClickZoom.disable();
+      } else {
+        mapInstance.current.doubleClickZoom.enable();
+      }
+    }
+    if (mapContainerRef.current) {
+      mapContainerRef.current.style.cursor = drawMode ? 'crosshair' : '';
+    }
+  }, [drawMode]);
+
+  useEffect(() => {
+    drawnPointsRef.current = drawnPoints;
+  }, [drawnPoints]);
 
   // Simulator State
   const [proposedTrees, setProposedTrees] = useState(20);
@@ -172,17 +198,27 @@ export default function MapAnalysis() {
       recommendationsLayerRef.current = window.L.layerGroup().addTo(map);
       calloutsLayerRef.current = window.L.layerGroup().addTo(map);
       epicollectLayerRef.current = window.L.layerGroup().addTo(map);
+      drawingLayerRef.current = window.L.layerGroup().addTo(map);
 
       // Live Mouse Telemetry
       map.on('mousemove', (e) => {
         setCurrentCoords({ lat: e.latlng.lat, lng: e.latlng.lng });
       });
 
-      // Click event for polygon drawing
+      // Click event for polygon drawing (uses drawModeRef to avoid stale closure)
       map.on('click', (e) => {
-        if (!drawMode) return;
+        if (!drawModeRef.current) return;
         const { lat, lng } = e.latlng;
         setDrawnPoints((prev) => [...prev, [lng, lat]]);
+      });
+
+      // Double-click event to finish polygon drawing
+      map.on('dblclick', (e) => {
+        if (!drawModeRef.current) return;
+        window.L.DomEvent.preventDefault(e);
+        if (drawnPointsRef.current.length >= 3) {
+          handleCustomDrawComplete();
+        }
       });
 
       mapInstance.current = map;
@@ -205,6 +241,79 @@ export default function MapAnalysis() {
     }).addTo(mapInstance.current);
     tileLayerRef.current.bringToBack();
   }, [mapTheme]);
+
+  // ── Reactive Visual Feedback for Custom Polygon Drawing ──
+  useEffect(() => {
+    if (!mapInstance.current || !drawingLayerRef.current || !window.L) return;
+    const L = window.L;
+    drawingLayerRef.current.clearLayers();
+
+    if (!drawMode && drawnPoints.length === 0) return;
+
+    // Draw vertex markers with sequence numbers
+    drawnPoints.forEach(([lng, lat], idx) => {
+      const isFirst = idx === 0;
+      const markerHtml = `
+        <div style="
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: ${isFirst ? '#10b981' : '#f59e0b'};
+          border: 2px solid #ffffff;
+          box-shadow: 0 0 10px rgba(0,0,0,0.6), 0 0 14px ${isFirst ? '#10b981' : '#f59e0b'};
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: 900;
+          font-size: 11px;
+          cursor: pointer;
+        ">
+          ${idx + 1}
+        </div>
+      `;
+      const icon = L.divIcon({
+        html: markerHtml,
+        className: 'custom-draw-vertex',
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+      });
+
+      const marker = L.marker([lat, lng], { icon }).addTo(drawingLayerRef.current);
+
+      if (isFirst && drawnPoints.length >= 3) {
+        marker.bindTooltip('Click Point 1 to close & analyze polygon', {
+          permanent: false,
+          direction: 'top',
+        });
+        marker.on('click', (e) => {
+          L.DomEvent.stopPropagation(e);
+          handleCustomDrawComplete();
+        });
+      }
+    });
+
+    // Draw connecting dashed edges and preview polygon
+    if (drawnPoints.length >= 2) {
+      const latlngs = drawnPoints.map(([lng, lat]) => [lat, lng]);
+
+      if (drawnPoints.length >= 3) {
+        L.polygon(latlngs, {
+          color: '#f59e0b',
+          weight: 2.5,
+          dashArray: '6, 6',
+          fillColor: '#d97706',
+          fillOpacity: 0.22,
+        }).addTo(drawingLayerRef.current);
+      } else {
+        L.polyline(latlngs, {
+          color: '#f59e0b',
+          weight: 2.5,
+          dashArray: '6, 6',
+        }).addTo(drawingLayerRef.current);
+      }
+    }
+  }, [drawnPoints, drawMode]);
 
   // ── Render Epicollect Field Survey Trees Layer ──
   useEffect(() => {
@@ -386,16 +495,20 @@ export default function MapAnalysis() {
   };
 
   const handleCustomDrawComplete = async () => {
-    if (drawnPoints.length < 3) {
+    const pointsToUse = drawnPointsRef.current.length >= 3 ? drawnPointsRef.current : drawnPoints;
+    if (pointsToUse.length < 3) {
       alert('Please click at least 3 points on the map to define a polygon boundary.');
       return;
     }
     setLoading(true);
     setError('');
     setDrawMode(false);
+    if (drawingLayerRef.current) {
+      drawingLayerRef.current.clearLayers();
+    }
 
     try {
-      const closedCoords = [...drawnPoints, drawnPoints[0]];
+      const closedCoords = [...pointsToUse, pointsToUse[0]];
       const geometry = {
         type: 'Polygon',
         coordinates: [closedCoords],
@@ -405,7 +518,7 @@ export default function MapAnalysis() {
         areaName: 'User-Drawn Custom Area',
       });
       setAnalysisData(data);
-      updateMapLayers(data);
+      updateMapLayers(data, geometry);
       runSimulation(data, proposedTrees);
     } catch (err) {
       console.error('Custom polygon analysis error:', err);
@@ -419,13 +532,16 @@ export default function MapAnalysis() {
     setLoading(true);
     setError('');
     setDrawMode(false);
+    if (drawingLayerRef.current) {
+      drawingLayerRef.current.clearLayers();
+    }
     try {
       const data = await mapAnalysisApi.analyzeArea({
         geometry,
         areaName: areaName || 'Custom Geographic Area',
       });
       setAnalysisData(data);
-      updateMapLayers(data);
+      updateMapLayers(data, geometry);
       runSimulation(data, proposedTrees);
     } catch (err) {
       console.error('Custom area analysis error:', err);
@@ -438,6 +554,9 @@ export default function MapAnalysis() {
   const handleResetDrawing = () => {
     setDrawnPoints([]);
     setDrawMode(false);
+    if (drawingLayerRef.current) {
+      drawingLayerRef.current.clearLayers();
+    }
     if (selectedZoneId) {
       runZoneAnalysis(selectedZoneId);
     }
@@ -495,27 +614,29 @@ export default function MapAnalysis() {
   };
 
   // 4. Update Leaflet Map Layers
-  const updateMapLayers = (data) => {
+  const updateMapLayers = (data, customGeometry = null) => {
     if (!mapInstance.current || !data) return;
     const L = window.L;
     if (!L) return;
 
     // A. Update Selected Boundary Polygon
     polygonLayerRef.current.clearLayers();
-    if (data.areaSummary?.zoneId) {
-      const zone = zones.find((z) => z.id === data.areaSummary.zoneId);
-      if (zone) {
-        const poly = L.geoJSON(zone.boundary, {
-          style: {
-            color: '#38bdf8',
-            weight: 3,
-            fillColor: '#0284c7',
-            fillOpacity: 0.12,
-            dashArray: '4, 6',
-          },
-        }).addTo(polygonLayerRef.current);
-        mapInstance.current.fitBounds(poly.getBounds(), { padding: [30, 30] });
-      }
+    const geom =
+      customGeometry ||
+      data.areaSummary?.geometry ||
+      (data.areaSummary?.zoneId && zones.find((z) => z.id === data.areaSummary.zoneId)?.boundary);
+
+    if (geom) {
+      const poly = L.geoJSON(geom, {
+        style: {
+          color: data.areaSummary?.zoneId ? '#38bdf8' : '#f59e0b',
+          weight: 3,
+          fillColor: data.areaSummary?.zoneId ? '#0284c7' : '#d97706',
+          fillOpacity: 0.15,
+          dashArray: '4, 6',
+        },
+      }).addTo(polygonLayerRef.current);
+      mapInstance.current.fitBounds(poly.getBounds(), { padding: [30, 30] });
     } else if (drawnPoints.length >= 3) {
       const latlngs = drawnPoints.map(([lng, lat]) => [lat, lng]);
       const poly = L.polygon(latlngs, {
@@ -839,6 +960,69 @@ export default function MapAnalysis() {
           {/* Main Leaflet Map Canvas */}
           <div ref={mapContainerRef} className="w-full h-full z-0" />
 
+          {/* ── Interactive Drawing Floating HUD Banner ── */}
+          {drawMode && (
+            <div className="absolute top-20 sm:top-16 left-1/2 -translate-x-1/2 z-[1000] bg-slate-900/95 backdrop-blur-md border-2 border-amber-400/90 rounded-2xl p-3 sm:p-3.5 shadow-2xl text-white flex flex-col sm:flex-row items-center gap-3 animate-fadeIn max-w-xl w-[94%] sm:w-auto">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-400/50 flex items-center justify-center shrink-0">
+                  <PenTool className="w-4 h-4 animate-pulse" />
+                </div>
+                <div>
+                  <div className="text-xs font-black text-amber-300 flex items-center gap-2">
+                    <span>POLYGON DRAWING MODE</span>
+                    <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-mono text-[10px] border border-amber-400/30">
+                      {drawnPoints.length} vertices
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-300">
+                    {drawnPoints.length === 0 && 'Click anywhere on the map to set your 1st corner point.'}
+                    {drawnPoints.length === 1 && 'Click on the map to set your 2nd corner point.'}
+                    {drawnPoints.length === 2 && 'Click map to place 3rd point to enclose a polygon.'}
+                    {drawnPoints.length >= 3 && 'Boundary defined! Click "Analyze Area", double-click, or click Point 1.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end pt-1 sm:pt-0 border-t sm:border-t-0 border-slate-700">
+                {drawnPoints.length >= 3 && (
+                  <button
+                    type="button"
+                    onClick={handleCustomDrawComplete}
+                    className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-900/50 cursor-pointer active:scale-95 transition-all"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
+                    <span>Analyze Area</span>
+                  </button>
+                )}
+
+                {drawnPoints.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setDrawnPoints((prev) => prev.slice(0, -1))}
+                    className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700 flex items-center gap-1 cursor-pointer"
+                    title="Undo last point"
+                  >
+                    <Undo2 className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Undo</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDrawMode(false);
+                    setDrawnPoints([]);
+                  }}
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-red-900/60 text-slate-300 hover:text-red-200 text-xs font-semibold border border-slate-700 flex items-center gap-1 cursor-pointer"
+                  title="Cancel Drawing"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Cancel</span>
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ── Top Left Floating HUD Pod: Area Selector & Basemap Mode ── */}
           <div className="absolute top-4 left-4 z-10 flex flex-wrap items-center gap-2 max-w-[92%] sm:max-w-none">
             <div className="bg-[#0b1926]/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-1.5 sm:p-2 shadow-2xl flex items-center gap-2">
@@ -866,26 +1050,30 @@ export default function MapAnalysis() {
               <button
                 type="button"
                 onClick={() => {
-                  setDrawMode(!drawMode);
-                  if (!drawMode) setDrawnPoints([]);
+                  const next = !drawMode;
+                  setDrawMode(next);
+                  if (!next) setDrawnPoints([]);
                 }}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
                   drawMode
-                    ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-300'
-                    : 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700'
+                    ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-300 animate-pulse'
+                    : 'bg-slate-800 text-slate-300 hover:text-white border border-slate-700 hover:border-amber-400'
                 }`}
+                title="Click on the map to draw custom polygon boundary vertices"
               >
-                <MapPin className="w-3.5 h-3.5" />
-                <span>{drawMode ? 'Drawing...' : 'Custom Polygon'}</span>
+                <PenTool className="w-3.5 h-3.5 text-amber-400" />
+                <span>{drawMode ? 'Drawing Active' : 'Custom Polygon'}</span>
               </button>
 
               {drawMode && drawnPoints.length >= 3 && (
                 <button
                   type="button"
                   onClick={handleCustomDrawComplete}
-                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-500 transition-all flex items-center gap-1"
+                  className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center gap-1 shadow-md cursor-pointer animate-bounce"
+                  title="Complete polygon and perform environmental analysis"
                 >
-                  Analyze ({drawnPoints.length} pts)
+                  <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
+                  <span>Analyze ({drawnPoints.length} pts)</span>
                 </button>
               )}
 
@@ -893,8 +1081,8 @@ export default function MapAnalysis() {
                 <button
                   type="button"
                   onClick={handleResetDrawing}
-                  className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white border border-slate-700"
-                  title="Reset Polygon"
+                  className="p-1.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white border border-slate-700 cursor-pointer"
+                  title="Reset Polygon Drawing"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>

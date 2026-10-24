@@ -858,7 +858,12 @@ export default function LocationEnvironmentalDashboard({
 
               <button
                 type="button"
-                onClick={() => setDrawMode && setDrawMode(true)}
+                onClick={() => {
+                  if (setDrawMode) setDrawMode(true);
+                  if (mapInstance && mapInstance.getContainer) {
+                    mapInstance.getContainer().scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }}
                 className="px-4 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 flex items-center gap-1.5 transition-all cursor-pointer"
                 title="Draw custom polygon on the map"
               >
