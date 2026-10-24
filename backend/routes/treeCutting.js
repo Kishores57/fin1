@@ -732,17 +732,19 @@ router.get('/applications/:id/votes', optionalToken, async (req, res) => {
     adminStats.rejectPercent = adminStats.total > 0 ? Math.round((adminStats.reject / adminStats.total) * 100) : 0;
     adminStats.abstainPercent = adminStats.total > 0 ? Math.round((adminStats.abstain / adminStats.total) * 100) : 0;
 
-    // Return non-confidential rationale list
-    const rationaleList = votes
-      .filter((v) => v.justification && v.justification.trim())
+    // Return all votes with their opinions / justifications
+    const allVotesList = votes
       .map((v) => ({
         id: v._id,
-        role: v.voterRole,
+        role: v.voterRole || 'public',
         voteType: v.voteType,
-        justification: v.justification,
-        userName: v.userName,
+        justification: v.justification || '',
+        userName: v.userName || (v.voterRole === 'admin' ? 'Tree Authority Official' : 'Citizen Reviewer'),
+        voteModified: v.voteModified || false,
         createdAt: v.createdAt,
-      }));
+        updatedAt: v.updatedAt,
+      }))
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     // Find current authenticated user's active vote if any
     let userVote = null;
@@ -754,7 +756,8 @@ router.get('/applications/:id/votes', optionalToken, async (req, res) => {
       applicationId: app.applicationId,
       publicStats,
       adminStats,
-      recentRationales: rationaleList.slice(-20),
+      allVotes: allVotesList,
+      recentRationales: allVotesList,
       userVote,
       votingStatus: app.status === 'Voting Open' ? 'Active' : 'Closed',
     });

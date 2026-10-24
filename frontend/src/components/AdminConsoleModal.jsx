@@ -50,6 +50,15 @@ export default function AdminConsoleModal({ isOpen, onClose }) {
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleRoleToggle = async (targetUser) => {
@@ -103,9 +112,12 @@ export default function AdminConsoleModal({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0d1f15]/75 backdrop-blur-md animate-fadeIn">
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-[#0d1f15]/75 backdrop-blur-md overflow-y-auto animate-fadeIn"
+      onClick={onClose}
+    >
       <div
-        className="relative w-full max-w-4xl bg-[#fdfcf9] rounded-3xl shadow-2xl border border-[rgba(20,46,31,0.12)] overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-4xl bg-[#fdfcf9] rounded-3xl shadow-2xl border border-[rgba(20,46,31,0.12)] overflow-hidden flex flex-col max-h-[90vh] my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Banner */}
@@ -113,7 +125,9 @@ export default function AdminConsoleModal({ isOpen, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 z-20 p-2.5 rounded-full text-white/80 hover:text-white bg-white/10 hover:bg-white/20 transition-all cursor-pointer shadow-sm border border-white/15"
+            aria-label="Close modal"
+            title="Close modal (Esc)"
           >
             <X className="w-5 h-5" />
           </button>

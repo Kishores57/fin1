@@ -40,6 +40,7 @@ import { API_BASE_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
 import AdminConsoleModal from './AdminConsoleModal';
+import OverviewTreeLab from './OverviewTreeLab';
 import L, { createTileLayer } from '../utils/mapConfig';
 import './LandingPage.css';
 
@@ -852,6 +853,19 @@ export default function LandingPage({ onEnterApp }) {
 
             <button
               type="button"
+              className="lp-pill-link"
+              onClick={() => {
+                if (view !== 'home') setView('home');
+                setTimeout(() => {
+                  document.getElementById('overview-story')?.scrollIntoView({ behavior: 'smooth' });
+                }, 50);
+              }}
+            >
+              AI Tree Lab
+            </button>
+
+            <button
+              type="button"
               className={`lp-pill-link ${view === 'who_we_are' ? 'active' : ''}`}
               onClick={() => navTo('who_we_are')}
             >
@@ -1119,10 +1133,20 @@ export default function LandingPage({ onEnterApp }) {
                 <button
                   type="button"
                   className="btn-forest-primary"
+                  onClick={() => {
+                    document.getElementById('overview-story')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  <Sparkles className="w-4 h-4 text-emerald-200" />
+                  <span>AI Tree &amp; Age Lab</span>
+                </button>
+                <button
+                  type="button"
+                  className="btn-forest-secondary text-white border-white/60 hover:bg-white/10 hover:text-white"
                   onClick={() => goTab('map')}
                 >
                   <Map className="w-4 h-4" />
-                  <span>Explore Interactive GIS Map</span>
+                  <span>Explore Live Map</span>
                 </button>
                 <button
                   type="button"
@@ -1209,47 +1233,8 @@ export default function LandingPage({ onEnterApp }) {
             </a>
           </header>
 
-          {/* ════ SECTION 1: EDITORIAL PHOTOGRAPHIC STORYTELLING ════ */}
-          <section id="overview-story" className="py-24 bg-[#fbf9f4]">
-            <div className="lp-container">
-              <div className="lp-editorial-grid">
-                <div className="lp-reveal">
-                  <span className="lp-section-kicker">Our Mission &amp; Purpose</span>
-                  <h2 className="lp-section-title">
-                    Technology &amp; Nature Working as One.
-                  </h2>
-                  <p className="text-base text-[#44594c] leading-relaxed mb-6">
-                    Rapid urban expansion often views mature trees as obstacles rather than irreplaceable ecological assets.
-                    VanJeevan provides planners, researchers, and campus administrators with geographic truth:
-                    pinpointing where trees stand, quantifying their carbon vaults, and identifying the most suitable locations to plant new ones.
-                  </p>
-                  <div className="flex flex-wrap gap-3">
-                    <button
-                      type="button"
-                      onClick={() => navTo('who_we_are')}
-                      className="btn-forest-primary"
-                    >
-                      <span>Read Who We Are</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => navTo('conservation')}
-                      className="btn-forest-secondary"
-                    >
-                      <span>Why Trees Matter</span>
-                    </button>
-                  </div>
-                </div>
-                <div className="lp-photo-frame h-[460px] lp-reveal">
-                  <img src={PHOTO_CANOPY_SUN} alt="Lush green tree canopy with sunlight filtering through" />
-                  <div className="lp-photo-caption">
-                    Overhead canopy cools ambient air by up to 3.5°C through shade and evapotranspiration.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+          {/* ════ SECTION 1: AI TREE VISION & AGE LAB OVERVIEW ════ */}
+          <OverviewTreeLab onEnterApp={goTab} />
 
           {/* ════ SECTION 2: BENTO GRID PLATFORM ARCHITECTURE (Exact Match to 3rd Image) ════ */}
           <section className="py-20 md:py-28 bg-[#131f2d] text-white">

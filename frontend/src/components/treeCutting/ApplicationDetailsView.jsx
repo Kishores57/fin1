@@ -47,6 +47,7 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
   const [voteJustification, setVoteJustification] = useState('');
   const [voteSubmitting, setVoteSubmitting] = useState(false);
   const [voteMessage, setVoteMessage] = useState('');
+  const [voteFilter, setVoteFilter] = useState('ALL'); // ALL, approve, reject, abstain, admin
 
   // Admin status transition state
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -258,6 +259,16 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
       return;
     }
 
+    const isDivergent =
+      (decisionChoice === 'Approved' && publicMajorityStance === 'REJECT') ||
+      (decisionChoice === 'Rejected' && publicMajorityStance === 'APPROVE');
+    if (isDivergent && (!divergenceJustification || divergenceJustification.trim().length < 15)) {
+      alert(
+        'Statutory Divergence Justification (minimum 15 characters) is mandatory when the administrative ruling diverges from the public majority vote.'
+      );
+      return;
+    }
+
     setDecisionSubmitting(true);
     try {
       await treeCuttingApi.recordDecision(app.applicationId, {
@@ -274,6 +285,53 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
     } finally {
       setDecisionSubmitting(false);
     }
+  };
+
+  // Quick Action: Admin opens voting window
+  const handleOpenVotingQuick = async () => {
+    setStatusUpdating(true);
+    try {
+      const updated = await treeCuttingApi.updateStatus(app.applicationId, {
+        status: 'Voting Open',
+        votingDays: 14,
+      });
+      setApp(updated);
+      loadFullDetails();
+      if (onStatusUpdated) onStatusUpdated(updated);
+    } catch (err) {
+      alert(err.response?.data?.detail || 'Failed to open voting.');
+    } finally {
+      setStatusUpdating(false);
+    }
+  };
+
+  // Quick Action: Admin bases decision on community data
+  const handlePreFillDecision = (choice) => {
+    const pubTotal = votesData?.publicStats?.total || 0;
+    const pubReject = votesData?.publicStats?.reject || 0;
+    const pubRejectPct = votesData?.publicStats?.rejectPercent || 0;
+    const allVotesList = votesData?.allVotes || votesData?.recentRationales || [];
+    const topObjection = allVotesList.find((v) => v.voteType === 'reject' && v.justification)?.justification || '';
+
+    setDecisionChoice(choice);
+    if (choice === 'Rejected') {
+      setOfficialReasoning(
+        `Having thoroughly reviewed public civic deliberations and the community voting consensus (${pubRejectPct}% Reject across ${pubTotal} citizen votes), the Municipal Tree Authority orders this felling permit REJECTED to preserve mature ecological canopy.${topObjection ? ` Top citizen objection recorded: "${topObjection}".` : ''}`
+      );
+      setDivergenceJustification('');
+    } else if (choice === 'Approved') {
+      setOfficialReasoning(
+        `The proposed civic infrastructure works are deemed essential public necessity. Permit is APPROVED subject to strict execution of 1:${compensatoryRatio} compensatory afforestation (${(app.details?.estimatedTreesAffected || 1) * compensatoryRatio} native saplings) and 3-year statutory survivability monitoring under Maharashtra Tree Act 1975.`
+      );
+      if (pubReject > (votesData?.publicStats?.approve || 0)) {
+        setDivergenceJustification(
+          `While ${pubRejectPct}% of citizen reviewers objected to tree felling, municipal engineering evaluations demonstrated that no viable alternative routing exists without severe structural compromise. Compensatory replanting has been mandated at a strict 1:${compensatoryRatio} ratio.`
+        );
+      } else {
+        setDivergenceJustification('');
+      }
+    }
+    setShowDecisionModal(true);
   };
 
   // Handle Document Verification Toggle (Admin)
@@ -378,6 +436,22 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
   const pubVotes = votesData?.publicStats || { total: 0, approve: 0, reject: 0, abstain: 0, approvePercent: 0, rejectPercent: 0, abstainPercent: 0 };
   const admVotes = votesData?.adminStats || { total: 0, approve: 0, reject: 0, abstain: 0, approvePercent: 0, rejectPercent: 0, abstainPercent: 0 };
   const mandatedSaplings = (app.details?.estimatedTreesAffected || 1) * 5;
+
+  const allVotes = votesData?.allVotes || votesData?.recentRationales || [];
+  const filteredVotes = allVotes.filter((v) => {
+    if (voteFilter === 'approve') return v.voteType === 'approve';
+    if (voteFilter === 'reject') return v.voteType === 'reject';
+    if (voteFilter === 'abstain') return v.voteType === 'abstain';
+    if (voteFilter === 'admin') return v.role === 'admin';
+    return true;
+  });
+
+  const publicMajorityStance =
+    pubVotes.reject > pubVotes.approve
+      ? 'REJECT'
+      : pubVotes.approve > pubVotes.reject
+      ? 'APPROVE'
+      : 'TIED';
 
   return (
     <div className="space-y-6">
@@ -868,18 +942,48 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
 
             {/* Voting Submission Form */}
             <div className="tc-app-card space-y-4">
-              <div className="pb-2 border-b border-[rgba(20,46,31,0.08)]">
-                <h4 className="text-sm font-bold text-[#142e1f]">Cast or Modify Your Vote</h4>
-                <p className="text-xs text-[#708477]">
-                  {app.status === 'Voting Open'
-                    ? 'Voting is active. One vote per registered user is enforced by cryptographically signed identity.'
-                    : `Voting is currently ${app.status} for this application.`}
-                </p>
+              <div className="pb-2 border-b border-[rgba(20,46,31,0.08)] flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-[#142e1f] flex items-center gap-1.5">
+                    <Vote className="w-4 h-4 text-emerald-700" />
+                    <span>Cast or Modify Your Stance</span>
+                  </h4>
+                  <p className="text-xs text-[#708477]">
+                    {app.status === 'Voting Open'
+                      ? 'Voting is active. One vote per registered user is enforced by cryptographically signed identity.'
+                      : `Voting is currently ${app.status} for this application.`}
+                  </p>
+                </div>
+                {isAdmin && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-300 flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3 text-purple-700" />
+                    <span>Admin Mode</span>
+                  </span>
+                )}
               </div>
 
               {voteMessage && (
-                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 font-semibold">
+                <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 font-semibold animate-fadeIn">
                   {voteMessage}
+                </div>
+              )}
+
+              {/* If voting is closed but user is admin, allow 1-click opening */}
+              {app.status !== 'Voting Open' && isAdmin && (
+                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 space-y-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-amber-900">
+                    <AlertTriangle className="w-4 h-4 text-amber-700 shrink-0" />
+                    <span>Voting is currently closed for citizens and reviewers.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleOpenVotingQuick}
+                    disabled={statusUpdating}
+                    className="w-full py-2 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                  >
+                    <Vote className="w-3.5 h-3.5" />
+                    <span>{statusUpdating ? 'Opening Window...' : 'Open Public Voting Period (14 Days)'}</span>
+                  </button>
                 </div>
               )}
 
@@ -893,7 +997,7 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
                       <button
                         type="button"
                         onClick={() => setVoteType('approve')}
-                        className={`p-2.5 rounded-xl text-xs font-bold border transition-all text-center ${
+                        className={`p-2.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
                           voteType === 'approve'
                             ? 'bg-[#d8f3dc] text-[#1b4332] border-[#2d6a4f] shadow-sm ring-2 ring-emerald-200'
                             : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
@@ -905,7 +1009,7 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
                       <button
                         type="button"
                         onClick={() => setVoteType('reject')}
-                        className={`p-2.5 rounded-xl text-xs font-bold border transition-all text-center ${
+                        className={`p-2.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
                           voteType === 'reject'
                             ? 'bg-red-50 text-red-800 border-red-600 shadow-sm ring-2 ring-red-200'
                             : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
@@ -917,7 +1021,7 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
                       <button
                         type="button"
                         onClick={() => setVoteType('abstain')}
-                        className={`p-2.5 rounded-xl text-xs font-bold border transition-all text-center ${
+                        className={`p-2.5 rounded-xl text-xs font-bold border transition-all text-center cursor-pointer ${
                           voteType === 'abstain'
                             ? 'bg-gray-200 text-gray-800 border-gray-400 shadow-sm ring-2 ring-gray-300'
                             : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
@@ -930,32 +1034,32 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
 
                   <div>
                     <label className="block text-xs font-bold text-[#142e1f] mb-1">
-                      Vote Rationale &amp; Civic Justification <span className="text-red-500">*</span>
+                      Civic Opinion &amp; Rationale Justification <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       rows={3}
                       value={voteJustification}
                       onChange={(e) => setVoteJustification(e.target.value)}
-                      placeholder="Explain your reasoning based on tree species, carbon loss, compensatory adequacy, or alternative alignments..."
+                      placeholder="Explain your civic opinion based on canopy loss, tree age, biodiversity, alternative road alignments, or compensatory planting..."
                       className="w-full px-3 py-2 text-xs rounded-xl border border-[rgba(20,46,31,0.18)] bg-white focus:outline-none focus:ring-2 focus:ring-[#2d6a4f]"
                     />
                   </div>
 
-                  <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center justify-between pt-1 flex-wrap gap-2">
                     <span className="text-[11px] text-[#708477]">
-                      Voting as: <strong>{user?.name}</strong> ({isAdmin ? 'Administrator' : 'Citizen Reviewer'})
+                      Voting as: <strong>{user?.name}</strong> ({isAdmin ? 'Tree Authority Official' : 'Citizen Reviewer'})
                     </span>
                     <button
                       type="submit"
                       disabled={voteSubmitting || app.status !== 'Voting Open'}
-                      className={`px-5 py-2 rounded-full text-xs font-bold transition-all shadow-md flex items-center gap-1.5 ${
+                      className={`px-5 py-2 rounded-full text-xs font-bold transition-all shadow-md flex items-center gap-1.5 cursor-pointer ${
                         app.status !== 'Voting Open'
                           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                           : 'bg-[#142e1f] text-white hover:bg-[#1b3d2b]'
                       }`}
                     >
                       <Vote className="w-3.5 h-3.5" />
-                      <span>{votesData?.userVote ? 'Update Vote Rationale' : 'Cast Official Vote'}</span>
+                      <span>{votesData?.userVote ? 'Update Vote & Opinion' : 'Cast Official Vote'}</span>
                     </button>
                   </div>
                 </form>
@@ -965,40 +1069,183 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
                 </div>
               )}
             </div>
+
+            {/* Administrator Deliberation & Decision Action Banner */}
+            {isAdmin && !app.decision && (
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-emerald-50 border-2 border-emerald-300 space-y-3 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Scale className="w-5 h-5 text-emerald-800 shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#142e1f]">
+                        Tree Authority Decision Center
+                      </h4>
+                      <p className="text-[11px] text-[#2d6a4f]">
+                        Render official ruling based on this citizen deliberation &amp; voting data.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 shrink-0">
+                    {publicMajorityStance === 'REJECT'
+                      ? `Public Consensus: ${pubVotes.rejectPercent}% Reject`
+                      : publicMajorityStance === 'APPROVE'
+                      ? `Public Consensus: ${pubVotes.approvePercent}% Approve`
+                      : 'Public Consensus: Tied'}
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => handlePreFillDecision('Rejected')}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-red-700 hover:bg-red-800 text-white flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  >
+                    <XCircle className="w-3.5 h-3.5" />
+                    <span>Adopt Public Vote: Reject &amp; Preserve</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handlePreFillDecision('Approved')}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    <span>Approve with 1:5 Mandate</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveSubTab('decision');
+                      setShowDecisionModal(true);
+                    }}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#142e1f] hover:bg-[#1a3d29] text-white flex items-center gap-1.5 transition-all shadow-xs sm:ml-auto cursor-pointer"
+                  >
+                    <Scale className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Formal Ruling Modal</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Right: Public Rationale Stream */}
+          {/* Right: Public Rationale & All Recorded Votes Stream */}
           <div className="tc-app-card space-y-4">
-            <div className="pb-2 border-b border-[rgba(20,46,31,0.08)]">
-              <h4 className="text-sm font-bold text-[#142e1f]">Community Discussion &amp; Rationales</h4>
-              <p className="text-[11px] text-[#708477]">Recent evidence-based perspectives.</p>
+            <div className="pb-2 border-b border-[rgba(20,46,31,0.08)] flex items-center justify-between">
+              <div>
+                <h4 className="text-sm font-bold text-[#142e1f] flex items-center gap-1.5">
+                  <MessageSquare className="w-4 h-4 text-emerald-700" />
+                  <span>All Recorded Votes &amp; Civic Opinions</span>
+                </h4>
+                <p className="text-[11px] text-[#708477]">Verified citizen rationales and administrative reviews.</p>
+              </div>
+              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                {allVotes.length} Total
+              </span>
             </div>
 
-            {(!votesData?.recentRationales || votesData.recentRationales.length === 0) ? (
-              <div className="text-center py-8 text-xs text-[#708477]">
-                No public rationales recorded yet. Be the first to cast a vote!
+            {/* Filter Pills */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+              {[
+                { id: 'ALL', label: `All (${allVotes.length})` },
+                { id: 'approve', label: `Approve (${pubVotes.approve + admVotes.approve})` },
+                { id: 'reject', label: `Reject (${pubVotes.reject + admVotes.reject})` },
+                { id: 'abstain', label: `Abstain (${pubVotes.abstain + admVotes.abstain})` },
+                { id: 'admin', label: `Admin (${admVotes.total})` },
+              ].map((pill) => (
+                <button
+                  key={pill.id}
+                  type="button"
+                  onClick={() => setVoteFilter(pill.id)}
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-full border transition-all cursor-pointer ${
+                    voteFilter === pill.id
+                      ? 'bg-[#142e1f] text-white border-[#142e1f] shadow-2xs'
+                      : 'bg-white text-stone-600 border-stone-200 hover:border-emerald-600 hover:text-emerald-800'
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              ))}
+            </div>
+
+            {filteredVotes.length === 0 ? (
+              <div className="text-center py-10 text-xs text-[#708477] bg-stone-50 rounded-2xl border border-dashed border-stone-200 p-4">
+                No votes matching &ldquo;{voteFilter}&rdquo; recorded yet. Cast your vote to be heard!
               </div>
             ) : (
-              <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
-                {votesData.recentRationales.map((r) => (
-                  <div key={r.id} className="p-3 rounded-xl bg-[#f8f6f0] border border-[rgba(20,46,31,0.06)] space-y-1.5">
+              <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                {filteredVotes.map((r) => (
+                  <div
+                    key={r.id}
+                    className={`p-3.5 rounded-2xl border transition-all space-y-2 shadow-2xs ${
+                      r.role === 'admin'
+                        ? 'bg-gradient-to-br from-indigo-50/70 to-purple-50/40 border-indigo-200'
+                        : r.voteType === 'reject'
+                        ? 'bg-gradient-to-br from-red-50/60 to-white border-red-200'
+                        : r.voteType === 'approve'
+                        ? 'bg-gradient-to-br from-emerald-50/60 to-white border-emerald-200'
+                        : 'bg-stone-50 border-stone-200'
+                    }`}
+                  >
                     <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-bold text-[#142e1f]">{r.userName || 'Citizen'}</span>
-                      <span className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
-                        r.voteType === 'approve'
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : r.voteType === 'reject'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-gray-200 text-gray-700'
-                      }`}>
-                        {r.voteType.toUpperCase()}
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-[#142e1f]">{r.userName || 'Citizen'}</span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                            r.role === 'admin'
+                              ? 'bg-purple-100 text-purple-900 border-purple-300 flex items-center gap-1'
+                              : 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                          }`}
+                        >
+                          {r.role === 'admin' ? (
+                            <>
+                              <ShieldCheck className="w-3 h-3 text-purple-700" />
+                              <span>Tree Authority Official</span>
+                            </>
+                          ) : (
+                            'Citizen Reviewer'
+                          )}
+                        </span>
+                        {r.voteModified && (
+                          <span className="text-[9px] font-semibold text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-200">
+                            Edited
+                          </span>
+                        )}
+                      </div>
+
+                      <span
+                        className={`text-[10px] font-extrabold px-2 py-0.5 rounded-md uppercase tracking-wider ${
+                          r.voteType === 'approve'
+                            ? 'bg-emerald-700 text-white'
+                            : r.voteType === 'reject'
+                            ? 'bg-red-700 text-white'
+                            : 'bg-gray-400 text-white'
+                        }`}
+                      >
+                        {r.voteType}
                       </span>
                     </div>
-                    <p className="text-xs text-[#142e1f] leading-relaxed italic">
-                      &ldquo;{r.justification}&rdquo;
-                    </p>
-                    <div className="text-[10px] text-[#708477] text-right">
-                      {new Date(r.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+
+                    <div className="text-xs text-[#142e1f] leading-relaxed bg-white/70 p-2.5 rounded-xl border border-stone-200/60">
+                      {r.justification ? (
+                        <p className="italic">
+                          &ldquo;{r.justification}&rdquo;
+                        </p>
+                      ) : (
+                        <p className="italic text-stone-400">
+                          Vote cast without written commentary.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="text-[10px] text-[#708477] text-right font-medium">
+                      {new Date(r.createdAt).toLocaleString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
                     </div>
                   </div>
                 ))}
@@ -1032,6 +1279,35 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
                   {app.decision.decision}
                 </span>
               </div>
+
+              {/* Community Voting Snapshot at Time of Decision */}
+              {app.decision.publicVoteSnapshot && (
+                <div className="p-4 rounded-2xl bg-[#f8f6f0] border border-[rgba(20,46,31,0.1)] space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-[#142e1f] flex items-center gap-1.5">
+                      <Vote className="w-4 h-4 text-[#2d6a4f]" />
+                      Community Deliberation Snapshot at Time of Ruling
+                    </span>
+                    <span className="text-[11px] font-bold text-[#2d6a4f]">
+                      {app.decision.publicVoteSnapshot.total} Total Citizen Votes
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div className="bg-red-50 text-red-800 p-2 rounded-xl border border-red-200">
+                      <div className="font-extrabold text-base">{app.decision.publicVoteSnapshot.reject}</div>
+                      <div className="text-[10px] uppercase font-bold text-red-600">Reject Votes</div>
+                    </div>
+                    <div className="bg-emerald-50 text-emerald-800 p-2 rounded-xl border border-emerald-200">
+                      <div className="font-extrabold text-base">{app.decision.publicVoteSnapshot.approve}</div>
+                      <div className="text-[10px] uppercase font-bold text-emerald-600">Approve Votes</div>
+                    </div>
+                    <div className="bg-gray-100 text-gray-800 p-2 rounded-xl border border-gray-200">
+                      <div className="font-extrabold text-base">{app.decision.publicVoteSnapshot.abstain}</div>
+                      <div className="text-[10px] uppercase font-bold text-gray-600">Abstain Votes</div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Statutory Legal Reasoning */}
               <div className="space-y-2">
@@ -1093,26 +1369,202 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
               </div>
             </div>
           ) : (
-            <div className="tc-app-card text-center py-16 space-y-4">
-              <Scale className="w-12 h-12 text-[#708477] mx-auto opacity-60" />
-              <div>
-                <h4 className="text-lg font-bold text-[#142e1f]">Ruling Pending</h4>
-                <p className="text-xs text-[#708477] max-w-md mx-auto mt-1">
-                  The Municipal Tree Authority has not issued the formal regulatory ruling yet.
-                  Public review, document verification, and voting are actively ongoing.
-                </p>
-              </div>
+            <div className="space-y-6">
+              {/* Civic Deliberation & Voting Synthesis Card */}
+              <div className="tc-app-card space-y-5 border-l-4 border-l-emerald-600">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[rgba(20,46,31,0.08)]">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#2d6a4f]">
+                      Citizen Deliberation &amp; Tree Authority Dashboard
+                    </span>
+                    <h3 className="text-xl font-bold font-['Fraunces'] text-[#142e1f]">
+                      Civic Voting Synthesis &amp; Decision Pre-Alignment
+                    </h3>
+                    <p className="text-xs text-[#708477] mt-0.5">
+                      The Tree Authority weighs recorded citizen opinions and public ballots before rendering a binding regulatory order.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300">
+                      {publicMajorityStance === 'REJECT'
+                        ? `Citizen Stance: ${pubVotes.rejectPercent}% Reject`
+                        : publicMajorityStance === 'APPROVE'
+                        ? `Citizen Stance: ${pubVotes.approvePercent}% Approve`
+                        : 'Citizen Stance: Even / In Progress'}
+                    </span>
+                  </div>
+                </div>
 
-              {isAdmin && (
-                <button
-                  type="button"
-                  onClick={() => setShowDecisionModal(true)}
-                  className="px-5 py-2.5 rounded-full text-xs font-bold bg-[#142e1f] text-white hover:bg-[#1b3d2b] transition-all shadow-md inline-flex items-center gap-2"
-                >
-                  <Scale className="w-4 h-4 text-[#95d5b2]" />
-                  <span>Issue Official Regulatory Ruling Now</span>
-                </button>
-              )}
+                {/* Vote Statistics Cards */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-center">
+                    <div className="text-2xl font-bold text-[#142e1f]">{allVotes.length}</div>
+                    <div className="text-[10px] uppercase font-bold text-[#708477]">Total Recorded Votes</div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-center">
+                    <div className="text-2xl font-bold text-red-700">{pubVotes.reject}</div>
+                    <div className="text-[10px] uppercase font-bold text-red-600">
+                      Public Objections ({pubVotes.rejectPercent}%)
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-center">
+                    <div className="text-2xl font-bold text-emerald-700">{pubVotes.approve}</div>
+                    <div className="text-[10px] uppercase font-bold text-emerald-600">
+                      Public Approvals ({pubVotes.approvePercent}%)
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-center">
+                    <div className="text-2xl font-bold text-stone-700">{pubVotes.abstain}</div>
+                    <div className="text-[10px] uppercase font-bold text-stone-600">
+                      Abstentions ({pubVotes.abstainPercent}%)
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stance Progress Bar */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold text-[#142e1f]">
+                    <span>Civic Consensus Distribution</span>
+                    <span>{pubVotes.total} Citizen Ballots</span>
+                  </div>
+                  <div className="h-3 w-full bg-stone-100 rounded-full overflow-hidden flex shadow-inner">
+                    <div
+                      style={{ width: `${pubVotes.rejectPercent}%` }}
+                      className="bg-red-600 h-full transition-all duration-500"
+                      title={`Reject: ${pubVotes.rejectPercent}%`}
+                    />
+                    <div
+                      style={{ width: `${pubVotes.approvePercent}%` }}
+                      className="bg-emerald-600 h-full transition-all duration-500"
+                      title={`Approve: ${pubVotes.approvePercent}%`}
+                    />
+                    <div
+                      style={{ width: `${pubVotes.abstainPercent}%` }}
+                      className="bg-stone-400 h-full transition-all duration-500"
+                      title={`Abstain: ${pubVotes.abstainPercent}%`}
+                    />
+                  </div>
+                  <div className="flex justify-between text-[10px] text-[#708477]">
+                    <span className="text-red-700 font-bold flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-red-600 inline-block" />
+                      Reject {pubVotes.rejectPercent}%
+                    </span>
+                    <span className="text-emerald-700 font-bold flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-emerald-600 inline-block" />
+                      Approve {pubVotes.approvePercent}%
+                    </span>
+                    <span className="text-stone-600 font-bold flex items-center gap-1">
+                      <span className="w-2 h-2 rounded-full bg-stone-400 inline-block" />
+                      Abstain {pubVotes.abstainPercent}%
+                    </span>
+                  </div>
+                </div>
+
+                {/* Top Citizen Opinions */}
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-[#142e1f] uppercase tracking-wider flex items-center gap-1.5">
+                      <MessageSquare className="w-3.5 h-3.5 text-emerald-700" />
+                      Key Civic Opinions Submitted by the Public
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => setActiveSubTab('voting')}
+                      className="text-xs font-bold text-emerald-800 hover:text-emerald-900 underline cursor-pointer"
+                    >
+                      View All in Voting Room &rarr;
+                    </button>
+                  </div>
+
+                  {allVotes.filter((v) => v.justification).length === 0 ? (
+                    <div className="p-3 rounded-xl bg-stone-50 text-stone-500 text-xs text-center italic">
+                      No written civic rationales recorded yet. Citizens can submit opinions in the Voting Room.
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+                      {allVotes
+                        .filter((v) => v.justification)
+                        .slice(0, 3)
+                        .map((v) => (
+                          <div
+                            key={v._id}
+                            className="p-3 rounded-xl bg-white border border-stone-200/80 shadow-2xs space-y-1 text-xs"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-[#142e1f]">{v.voter?.name || 'Citizen Reviewer'}</span>
+                              <span
+                                className={`text-[10px] font-extrabold px-2 py-0.5 rounded uppercase tracking-wider ${
+                                  v.voteType === 'reject'
+                                    ? 'bg-red-700 text-white'
+                                    : v.voteType === 'approve'
+                                    ? 'bg-emerald-700 text-white'
+                                    : 'bg-stone-500 text-white'
+                                }`}
+                              >
+                                {v.voteType}
+                              </span>
+                            </div>
+                            <p className="italic text-[#142e1f]">&ldquo;{v.justification}&rdquo;</p>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Tree Authority Decision Action Center */}
+                {isAdmin ? (
+                  <div className="pt-3 border-t border-[rgba(20,46,31,0.08)] space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-[#142e1f] flex items-center gap-1.5">
+                        <Scale className="w-4 h-4 text-emerald-700" />
+                        Tree Authority Actions (Based on Community Feedback)
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handlePreFillDecision('Rejected')}
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-red-700 hover:bg-red-800 text-white flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                      >
+                        <XCircle className="w-3.5 h-3.5" />
+                        <span>Adopt Public Consensus: Reject Permit</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handlePreFillDecision('Approved')}
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Approve with 1:5 Replanting Mandate</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowDecisionModal(true)}
+                        className="px-4 py-2 rounded-xl text-xs font-bold bg-[#142e1f] hover:bg-[#1b3d2b] text-white flex items-center gap-1.5 transition-all shadow-xs sm:ml-auto cursor-pointer"
+                      >
+                        <Scale className="w-3.5 h-3.5 text-emerald-400" />
+                        <span>Formal Regulatory Ruling Modal</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="pt-2 border-t border-[rgba(20,46,31,0.08)] flex items-center justify-between">
+                    <span className="text-xs text-[#708477]">
+                      Tree Authority ruling is pending final deliberation while citizen voting window is active.
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveSubTab('voting')}
+                      className="px-4 py-1.5 rounded-full text-xs font-bold bg-emerald-700 hover:bg-emerald-800 text-white transition-all cursor-pointer"
+                    >
+                      Cast Your Vote Now &rarr;
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -1241,30 +1693,95 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
               <button
                 type="button"
                 onClick={() => setShowDecisionModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-sm font-bold"
+                className="text-gray-400 hover:text-gray-600 text-sm font-bold cursor-pointer"
               >
                 &times;
               </button>
             </div>
 
+            {/* Civic Deliberation & Community Voting Synthesis in Modal */}
+            <div className="p-3.5 rounded-xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-emerald-950 flex items-center gap-1.5">
+                  <Vote className="w-3.5 h-3.5 text-emerald-700" />
+                  Community Deliberation Data
+                </span>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-200/80 text-emerald-900">
+                  {publicMajorityStance === 'REJECT'
+                    ? `Consensus: ${pubVotes.rejectPercent}% Reject`
+                    : publicMajorityStance === 'APPROVE'
+                    ? `Consensus: ${pubVotes.approvePercent}% Approve`
+                    : 'Consensus: Even / Tied'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-[#2d6a4f] pt-0.5">
+                <span>
+                  <strong>{pubVotes.total}</strong> citizen votes: {pubVotes.reject} Reject ({pubVotes.rejectPercent}%), {pubVotes.approve} Approve ({pubVotes.approvePercent}%), {pubVotes.abstain} Abstain
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 pt-1 border-t border-emerald-200/60">
+                <button
+                  type="button"
+                  onClick={() => handlePreFillDecision('Rejected')}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-red-700 hover:bg-red-800 text-white flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                >
+                  <XCircle className="w-3 h-3" />
+                  <span>Pre-fill: Adopt Citizen Consensus (Reject)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePreFillDecision('Approved')}
+                  className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-700 hover:bg-emerald-800 text-white flex items-center gap-1 shadow-2xs transition-all cursor-pointer"
+                >
+                  <CheckCircle2 className="w-3 h-3" />
+                  <span>Pre-fill: Conditional Approval</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Statutory Divergence Notice if Decision differs from public stance */}
+            {((decisionChoice === 'Approved' && publicMajorityStance === 'REJECT') ||
+              (decisionChoice === 'Rejected' && publicMajorityStance === 'APPROVE')) && (
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-[11px] space-y-1">
+                <div className="font-bold flex items-center gap-1.5 text-amber-950">
+                  <Scale className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                  Statutory Divergence Notice (Section 8(4) Requirement)
+                </div>
+                <p className="leading-snug">
+                  Your proposed ruling ({decisionChoice}) diverges from the majority public vote (
+                  {publicMajorityStance === 'REJECT'
+                    ? `${pubVotes.rejectPercent}% voted to Reject`
+                    : `${pubVotes.approvePercent}% voted to Approve`}
+                  ). Maharashtra Tree Act mandates recording a detailed divergence justification below.
+                </p>
+              </div>
+            )}
+
             <form onSubmit={handleDecisionSubmit} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-[#142e1f] mb-1">Formal Decision</label>
+                <label className="block font-bold text-[#142e1f] mb-1">Formal Regulatory Ruling</label>
                 <select
                   value={decisionChoice}
                   onChange={(e) => setDecisionChoice(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white font-medium"
                 >
                   <option value="Approved">Approved (Subject to Compensatory Plantation)</option>
-                  <option value="Rejected">Rejected (Severe Ecological Harm)</option>
+                  <option value="Rejected">Rejected (Severe Ecological Harm / Citizen Consensus)</option>
                   <option value="Returned for Revision">Returned for Revision</option>
                 </select>
               </div>
 
               <div>
-                <label className="block font-bold text-[#142e1f] mb-1">
-                  Official Legal Reasoning (Min 20 characters) <span className="text-red-500">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold text-[#142e1f]">
+                    Official Legal Reasoning <span className="text-red-500">*</span>
+                  </label>
+                  <span className={`text-[10px] ${officialReasoning.trim().length >= 20 ? 'text-emerald-700 font-bold' : 'text-stone-400'}`}>
+                    {officialReasoning.trim().length}/20 min chars
+                  </span>
+                </div>
                 <textarea
                   rows={4}
                   value={officialReasoning}
@@ -1275,15 +1792,33 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
               </div>
 
               <div>
-                <label className="block font-bold text-[#142e1f] mb-1">
-                  Divergence Justification (Mandatory if ruling differs from majority public vote)
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="font-bold text-[#142e1f]">
+                    Statutory Divergence Justification
+                    {((decisionChoice === 'Approved' && publicMajorityStance === 'REJECT') ||
+                      (decisionChoice === 'Rejected' && publicMajorityStance === 'APPROVE')) && (
+                      <span className="text-red-600 font-bold ml-1">* Mandatory</span>
+                    )}
+                  </label>
+                  {((decisionChoice === 'Approved' && publicMajorityStance === 'REJECT') ||
+                    (decisionChoice === 'Rejected' && publicMajorityStance === 'APPROVE')) && (
+                    <span className={`text-[10px] ${divergenceJustification.trim().length >= 15 ? 'text-emerald-700 font-bold' : 'text-red-600 font-bold'}`}>
+                      {divergenceJustification.trim().length}/15 min chars
+                    </span>
+                  )}
+                </div>
                 <textarea
                   rows={2}
                   value={divergenceJustification}
                   onChange={(e) => setDivergenceJustification(e.target.value)}
                   placeholder="Explain why the regulatory decision deviates from public majority sentiment..."
-                  className="w-full px-3 py-2 rounded-xl border border-gray-300 bg-white"
+                  className={`w-full px-3 py-2 rounded-xl border bg-white ${
+                    ((decisionChoice === 'Approved' && publicMajorityStance === 'REJECT') ||
+                      (decisionChoice === 'Rejected' && publicMajorityStance === 'APPROVE')) &&
+                    divergenceJustification.trim().length < 15
+                      ? 'border-amber-400 bg-amber-50/20'
+                      : 'border-gray-300'
+                  }`}
                 />
               </div>
 
@@ -1314,16 +1849,16 @@ export default function ApplicationDetailsView({ applicationId, onBack, onStatus
                 <button
                   type="button"
                   onClick={() => setShowDecisionModal(false)}
-                  className="px-4 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-100"
+                  className="px-4 py-2 rounded-full font-bold text-gray-600 hover:bg-gray-100 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={decisionSubmitting}
-                  className="px-5 py-2 rounded-full font-bold bg-[#142e1f] text-white hover:bg-[#1b3d2b]"
+                  className="px-5 py-2 rounded-full font-bold bg-[#142e1f] text-white hover:bg-[#1b3d2b] cursor-pointer shadow-sm disabled:opacity-50"
                 >
-                  {decisionSubmitting ? 'Recording...' : 'Render Official Order'}
+                  {decisionSubmitting ? 'Recording Order...' : 'Render Official Order'}
                 </button>
               </div>
             </form>

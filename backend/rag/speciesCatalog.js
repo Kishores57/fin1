@@ -65,6 +65,31 @@ export const SPECIES_CATALOG = {
     family: 'Rutaceae',
     aliases: ['Bael', 'Bengal quince', 'Wood apple', 'Bel'],
   },
+  Neem: {
+    scientific: 'Azadirachta indica',
+    family: 'Meliaceae',
+    aliases: ['Neem', 'Indian Lilac', 'Margosa', 'Nim'],
+  },
+  Banyan: {
+    scientific: 'Ficus benghalensis',
+    family: 'Moraceae',
+    aliases: ['Banyan', 'Vat Vriksha', 'Bargad', 'Indian Banyan'],
+  },
+  Peepal: {
+    scientific: 'Ficus religiosa',
+    family: 'Moraceae',
+    aliases: ['Peepal', 'Bodhi Tree', 'Sacred Fig', 'Ashvattha'],
+  },
+  Rubber: {
+    scientific: 'Ficus elastica',
+    family: 'Moraceae',
+    aliases: ['Rubber', 'India Rubber Fig', 'Rubber Tree'],
+  },
+  Guava: {
+    scientific: 'Psidium guajava',
+    family: 'Myrtaceae',
+    aliases: ['Guava', 'Amrood', 'Peru', 'Common Guava'],
+  },
 };
 
 export function resolveSpeciesMeta(speciesName) {

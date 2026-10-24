@@ -20,9 +20,14 @@ const analysisCache = new Map();
  * Returns available predefined geographical study zones
  */
 router.get('/zones', (req, res) => {
+  const sortedZones = [...STUDY_ZONES].sort((a, b) => {
+    if (a.id === 'zone-kkwagh-full-campus') return -1;
+    if (b.id === 'zone-kkwagh-full-campus') return 1;
+    return 0;
+  });
   res.json({
-    zones: STUDY_ZONES,
-    totalZones: STUDY_ZONES.length,
+    zones: sortedZones,
+    totalZones: sortedZones.length,
     description: 'Predefined survey study zones in Nashik region for rapid GIS area assessment',
   });
 });

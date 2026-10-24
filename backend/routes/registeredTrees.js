@@ -75,7 +75,17 @@ function serializeTree(doc) {
 }
 
 async function lookupSpecies(speciesName) {
-  return db.get('SELECT * FROM species WHERE name = ? COLLATE NOCASE', [speciesName]);
+  const row = await db.get('SELECT * FROM species WHERE name = ? COLLATE NOCASE', [speciesName]);
+  if (row) return row;
+  const meta = resolveSpeciesMeta(speciesName);
+  if (meta && meta.common) {
+    return {
+      name: meta.common,
+      mai: meta.mai || 1.15,
+      wood_density: meta.woodDensity || 0.65,
+    };
+  }
+  return null;
 }
 
 /** Preview calculations + AI analysis without saving (Add Tree persists later). */

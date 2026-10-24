@@ -8,6 +8,7 @@ import AuthModal from './components/AuthModal';
 import AdminConsoleModal from './components/AdminConsoleModal';
 import TreeCuttingModule from './components/treeCutting/TreeCuttingModule';
 import NotificationBell from './components/treeCutting/NotificationBell';
+import OverviewTreeLab from './components/OverviewTreeLab';
 import { useAuth } from './context/AuthContext';
 import { mapRegisteredTreeToCalculatorResult } from './utils/mapTreeToCalculatorResult';
 import {
@@ -27,6 +28,7 @@ import {
   LogOut,
   LogIn,
   Scale,
+  Sparkles,
 } from 'lucide-react';
 import { API_BASE_URL } from './services/api';
 import './App.css';
@@ -163,6 +165,11 @@ export default function App() {
   }
 
   const TAB_INFO = {
+    overview: {
+      tag: 'Interactive AI Lab',
+      title: 'Tree Species & Allometric Age Lab',
+      description: 'Upload any tree photo (leaves, canopy, or bark) and enter trunk girth (GBH) to predict species, age, and carbon allometry in real-time.',
+    },
     register: {
       tag: 'Tree Inventory & AI Evaluation',
       title: 'Tree Registration & Carbon Calculator',
@@ -231,9 +238,18 @@ export default function App() {
               type="button"
               onClick={() => setShowLanding(true)}
               className="app-nav-btn"
+              title="Return to Landing Page"
             >
               <Home className="w-3.5 h-3.5" />
-              <span>Overview</span>
+              <span>Home</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('overview')}
+              className={`app-nav-btn ${activeTab === 'overview' ? 'active' : ''}`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span>AI Tree Lab</span>
             </button>
             <button
               type="button"
@@ -386,7 +402,9 @@ export default function App() {
 
         {/* View Component */}
         <div className="mt-4">
-          {activeTab === 'register' ? (
+          {activeTab === 'overview' ? (
+            <OverviewTreeLab onEnterApp={(target) => setActiveTab(target || 'register')} />
+          ) : activeTab === 'register' ? (
             <TreeRegistration
               onError={handleError}
               initialResult={selectedResult}

@@ -115,6 +115,18 @@ export function buildRegistrationAnalysis(species, calculations) {
       pruningSchedule: 'Prune dead/diseased wood in dormant or post-monsoon windows; avoid heavy cuts during flowering.',
       diseaseMonitoring: pick('diseases_pests', 'Inspect canopy and trunk seasonally.'),
     },
+    diseasesPests: {
+      summary: pick('diseases_pests', ''),
+      details: climate?.diseases_pests || null,
+      monitoring: pick('diseases_pests', 'Inspect canopy and trunk seasonally.'),
+    },
+    otherAdvantages: {
+      airScrubbing: `${calculations.airPollutionRemoval} kg/yr`,
+      carbonCapture: `${calculations.co2Sequestration} kg lifetime CO₂`,
+      stormwaterInterception: `${calculations.rainwaterInterception} L/yr`,
+      shadeCooling: `${calculations.shadeArea} m² canopy footprint`,
+      heatIslandScore: `${calculations.heatIslandReduction}/100 cooling index`,
+    },
     researchPipeline: climate?.research_pipeline || [
       'FAO',
       'ICRAF',

@@ -45,6 +45,18 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
     }
   }, [isOpen, initialTab]);
 
+  // Close modal on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleQuickLogin = async (roleToUse) => {
@@ -130,9 +142,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0d1f15]/70 backdrop-blur-md animate-fadeIn">
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-[#0d1f15]/75 backdrop-blur-md overflow-y-auto animate-fadeIn"
+      onClick={onClose}
+    >
       <div
-        className="relative w-full max-w-lg bg-[#fdfcf9] rounded-3xl shadow-2xl border border-[rgba(20,46,31,0.12)] overflow-hidden transition-all transform scale-100"
+        className="relative w-full max-w-lg bg-[#fdfcf9] rounded-3xl shadow-2xl border border-[rgba(20,46,31,0.12)] overflow-hidden transition-all transform scale-100 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Decorative Nature Banner */}
@@ -141,12 +156,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
           <div className="absolute -top-12 -right-12 w-40 h-40 bg-emerald-500/20 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-amber-500/20 rounded-full blur-2xl pointer-events-none" />
 
-          {/* Close Button */}
+          {/* Close Button - Prominent & accessible */}
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full text-white/70 hover:text-white hover:bg-white/10 transition-colors"
+            className="absolute top-4 right-4 sm:top-5 sm:right-5 z-30 p-2.5 rounded-full text-white/90 hover:text-white bg-white/10 hover:bg-white/20 active:scale-95 transition-all cursor-pointer shadow-sm border border-white/15"
             aria-label="Close modal"
+            title="Close modal (Esc)"
           >
             <X className="w-5 h-5" />
           </button>
@@ -442,9 +458,18 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialTab =
             </button>
           </form>
 
-          {/* Footer note */}
-          <div className="pt-2 text-center text-xs text-[#708477]">
-            Protected by VanJeevan Secure Key Cryptography &middot; Role Verified
+          {/* Footer actions & note */}
+          <div className="pt-2 text-center flex flex-col items-center gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="text-xs font-semibold text-[#2d6a4f] hover:text-[#142e1f] hover:underline cursor-pointer transition-colors py-1 px-3 rounded-lg hover:bg-[#142e1f]/5"
+            >
+              Cancel &amp; Continue as Guest
+            </button>
+            <span className="text-[11px] text-[#708477]">
+              Protected by VanJeevan Secure Key Cryptography &middot; Role Verified
+            </span>
           </div>
         </div>
       </div>
