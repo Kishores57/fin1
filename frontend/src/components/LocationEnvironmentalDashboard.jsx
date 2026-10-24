@@ -264,8 +264,7 @@ export default function LocationEnvironmentalDashboard({
 
   // Filter state for dashboard
   const [speciesFilter, setSpeciesFilter] = useState('ALL');
-  const [healthFilter, setHealthFilter] = useState('ALL');
-  const [maturityFilter, setMaturityFilter] = useState('ALL');
+  const [ageFilter, setAgeFilter] = useState('ALL');
   const [sortBy, setSortBy] = useState('carbon_desc'); // carbon_desc, height_desc, gbh_desc, age_desc
 
   // Tree Detail Modal state
@@ -361,6 +360,26 @@ export default function LocationEnvironmentalDashboard({
     });
   }, [analysisData, epicollectTrees]);
 
+  // Dynamic age breakdown counts for age-wise filter
+  const ageCounts = useMemo(() => {
+    let under5 = 0;
+    let from5to10 = 0;
+    let from11to20 = 0;
+    let from21to30 = 0;
+    let over30 = 0;
+
+    enrichedTrees.forEach((t) => {
+      const a = parseInt(t.age, 10) || 0;
+      if (a < 5) under5++;
+      else if (a <= 10) from5to10++;
+      else if (a <= 20) from11to20++;
+      else if (a <= 30) from21to30++;
+      else over30++;
+    });
+
+    return { under5, from5to10, from11to20, from21to30, over30 };
+  }, [enrichedTrees]);
+
   // Filtered and sorted trees
   const filteredTrees = useMemo(() => {
     let result = [...enrichedTrees];
@@ -369,15 +388,22 @@ export default function LocationEnvironmentalDashboard({
       result = result.filter((t) => t.species === speciesFilter);
     }
 
-    if (healthFilter !== 'ALL') {
-      result = result.filter((t) => t.health === healthFilter);
-    }
-
-    if (maturityFilter !== 'ALL') {
-      if (maturityFilter === 'young') result = result.filter((t) => t.age < 5);
-      else if (maturityFilter === 'canopy') result = result.filter((t) => t.age >= 5 && t.age <= 15);
-      else if (maturityFilter === 'mature') result = result.filter((t) => t.age > 15 && t.age <= 30);
-      else if (maturityFilter === 'heritage') result = result.filter((t) => t.age > 30);
+    if (ageFilter !== 'ALL') {
+      if (ageFilter === '<5' || ageFilter === 'young') {
+        result = result.filter((t) => (t.age || 0) < 5);
+      } else if (ageFilter === '5-10') {
+        result = result.filter((t) => (t.age || 0) >= 5 && (t.age || 0) <= 10);
+      } else if (ageFilter === '11-20') {
+        result = result.filter((t) => (t.age || 0) >= 11 && (t.age || 0) <= 20);
+      } else if (ageFilter === 'canopy') {
+        result = result.filter((t) => (t.age || 0) >= 5 && (t.age || 0) <= 15);
+      } else if (ageFilter === '21-30') {
+        result = result.filter((t) => (t.age || 0) >= 21 && (t.age || 0) <= 30);
+      } else if (ageFilter === 'mature') {
+        result = result.filter((t) => (t.age || 0) > 15 && (t.age || 0) <= 30);
+      } else if (ageFilter === '>30' || ageFilter === 'heritage') {
+        result = result.filter((t) => (t.age || 0) > 30);
+      }
     }
 
     // Sort
@@ -387,7 +413,7 @@ export default function LocationEnvironmentalDashboard({
     else if (sortBy === 'age_desc') result.sort((a, b) => b.age - a.age);
 
     return result;
-  }, [enrichedTrees, speciesFilter, healthFilter, maturityFilter, sortBy]);
+  }, [enrichedTrees, speciesFilter, ageFilter, sortBy]);
 
   // Aggregate Metrics for Selected Area
   const aggregateStats = useMemo(() => {
@@ -1252,29 +1278,19 @@ export default function LocationEnvironmentalDashboard({
                   ))}
                 </select>
 
-                {/* Health Filter */}
+                {/* Age-Wise Filter (Replaced Health Condition filter) */}
                 <select
-                  value={healthFilter}
-                  onChange={(e) => setHealthFilter(e.target.value)}
-                  className="px-3 py-1.5 rounded-xl border border-stone-300 bg-white font-semibold text-xs focus:ring-2 focus:ring-emerald-700 cursor-pointer"
+                  value={ageFilter}
+                  onChange={(e) => setAgeFilter(e.target.value)}
+                  className="px-3 py-1.5 rounded-xl border border-stone-300 bg-white font-semibold text-xs focus:ring-2 focus:ring-emerald-700 cursor-pointer shadow-xs"
+                  title="Filter trees by age bracket"
                 >
-                  <option value="ALL">All Health Conditions</option>
-                  <option value="Healthy">Healthy (Optimal)</option>
-                  <option value="Fair">Fair (Mild Stress)</option>
-                  <option value="Stressed">Stressed (Water Need)</option>
-                </select>
-
-                {/* Age Filter */}
-                <select
-                  value={maturityFilter}
-                  onChange={(e) => setMaturityFilter(e.target.value)}
-                  className="px-3 py-1.5 rounded-xl border border-stone-300 bg-white font-semibold text-xs focus:ring-2 focus:ring-emerald-700 cursor-pointer"
-                >
-                  <option value="ALL">All Maturity Cohorts</option>
-                  <option value="young">Young Saplings (&lt; 5 yr)</option>
-                  <option value="canopy">Canopy Builders (5–15 yr)</option>
-                  <option value="mature">Mature Vaults (15–30 yr)</option>
-                  <option value="heritage">Heritage Giants (&gt; 30 yr)</option>
+                  <option value="ALL">All Tree Ages ({enrichedTrees.length})</option>
+                  <option value="<5">&lt; 5 Years · Young Saplings ({ageCounts.under5})</option>
+                  <option value="5-10">5–10 Years · Juvenile Trees ({ageCounts.from5to10})</option>
+                  <option value="11-20">11–20 Years · Canopy Builders ({ageCounts.from11to20})</option>
+                  <option value="21-30">21–30 Years · Mature Canopy ({ageCounts.from21to30})</option>
+                  <option value=">30">&gt; 30 Years · Heritage Giants ({ageCounts.over30})</option>
                 </select>
               </div>
 
@@ -1649,7 +1665,7 @@ export default function LocationEnvironmentalDashboard({
                 <div
                   key={cohort.id}
                   onClick={() => {
-                    setMaturityFilter(cohort.id);
+                    setAgeFilter(cohort.id);
                     setActiveSubView('overview');
                   }}
                   className="p-5 rounded-3xl bg-white border-2 border-stone-200 hover:border-emerald-600 hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between space-y-3"
