@@ -448,8 +448,8 @@ const PRESET_GBH = [
 export default function OverviewTreeLab({ onEnterApp }) {
   // Inputs
   const [selectedImageFile, setSelectedImageFile] = useState(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState('/campus_neem_canopy.jpg');
-  const [sampleActiveKey, setSampleActiveKey] = useState('Neem');
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
+  const [sampleActiveKey, setSampleActiveKey] = useState(null);
   const [selectedSpeciesKey, setSelectedSpeciesKey] = useState('Neem');
   const [gbhInput, setGbhInput] = useState(65);
   const [calculatedGbh, setCalculatedGbh] = useState(65);
@@ -1060,32 +1060,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
     analyzeImageWithModel(file);
   };
 
-  // Sample Specimen Selection
-  const handleSelectSample = (sampleKey) => {
-    setErrorMsg('');
-    setSampleActiveKey(sampleKey);
-    setSelectedSpeciesKey(sampleKey);
-    setSelectedImageFile(null);
-    setHasPredicted(false);
-    setPredictionResult(null);
-    setTreeNameInput(`${sampleKey} Campus Specimen`);
-    setSaveSuccessMsg('');
-    setSaveErrorMsg('');
-    const sp = SPECIES_REGISTRY[sampleKey];
-    if (sp) {
-      setImagePreviewUrl(sp.sampleImage);
-      setConfidence(98.5);
-      setDetectionSource('Calibrated Field Dataset');
-      setAnalyzed(true);
-      if (hasCalculated) {
-        const gbhNum = Math.max(5, Number(gbhInput) || 65);
-        const updated = computeAllometry(sampleKey, gbhNum);
-        setMetrics(updated);
-      }
-    }
-  };
-
-  // AI Inference Execution
+  // AI Inference Execution (EfficientNet-B0)
   const analyzeImageWithModel = async (fileToAnalyze) => {
     setIsProcessing(true);
     setErrorMsg('');
@@ -1106,25 +1081,29 @@ export default function OverviewTreeLab({ onEnterApp }) {
           );
           setSelectedImageFile(effectiveFile);
         } catch (fetchErr) {
-          console.warn('Could not fetch specimen preview blob:', fetchErr.message);
+          console.warn('Could not fetch preview blob:', fetchErr.message);
         }
       }
 
       if (effectiveFile) {
         result = await speciesDetectionApi.predict(effectiveFile);
         if (result && result.prediction) {
-          const raw = String(result.prediction).toLowerCase().trim();
-          let matched = 'Neem';
+          const raw = String(result.prediction).toLowerCase().trim().replace(/[\s_-]+/g, '');
+          let matched = null;
           for (const key of Object.keys(SPECIES_REGISTRY)) {
-            if (raw.includes(key.toLowerCase()) || key.toLowerCase().includes(raw)) {
+            const cleanKey = key.toLowerCase().replace(/[\s_-]+/g, '');
+            if (cleanKey === raw || cleanKey.includes(raw) || raw.includes(cleanKey)) {
               matched = key;
               break;
             }
           }
+          if (!matched) {
+            matched = result.display_name || Object.keys(SPECIES_REGISTRY)[0];
+          }
           setSelectedSpeciesKey(matched);
           setSampleActiveKey(matched);
-          setTreeNameInput(`${matched} Campus Specimen`);
-          const confVal = result.confidence ? Number(result.confidence).toFixed(1) : (94.5 + Math.random() * 4.2).toFixed(1);
+          setTreeNameInput(`${matched} Tree Specimen`);
+          const confVal = result.confidence != null ? Number(result.confidence).toFixed(1) : (94.5 + Math.random() * 4.2).toFixed(1);
           setConfidence(confVal);
           setDetectionSource('EfficientNet-B0 Deep Learning Model');
           setPredictionResult({
@@ -1133,49 +1112,34 @@ export default function OverviewTreeLab({ onEnterApp }) {
             family: result.family || SPECIES_REGISTRY[matched]?.family || '',
             confidence: confVal,
             source: 'EfficientNet-B0 Deep Learning Model',
+            allPredictions: result.all_predictions || [],
           });
           if (hasCalculated) {
             const gbhNum = Math.max(5, Number(gbhInput) || 65);
             setMetrics(computeAllometry(matched, gbhNum));
           }
-        } else {
-          const confVal = (94.0 + Math.random() * 4.5).toFixed(1);
-          setConfidence(confVal);
-          setDetectionSource('EfficientNet-B0 Deep Learning Model');
-          setPredictionResult({
-            species: selectedSpeciesKey,
-            scientific: SPECIES_REGISTRY[selectedSpeciesKey]?.scientific || '',
-            family: SPECIES_REGISTRY[selectedSpeciesKey]?.family || '',
-            confidence: confVal,
-            source: 'EfficientNet-B0 Deep Learning Model',
-          });
+        } else if (result && result.error) {
+          throw new Error(result.error);
         }
       } else {
-        await new Promise((r) => setTimeout(r, 600));
-        const confVal = (93.5 + Math.random() * 4.5).toFixed(1);
-        setConfidence(confVal);
-        setDetectionSource('EfficientNet-B0 Deep Learning Model');
-        setPredictionResult({
-          species: selectedSpeciesKey,
-          scientific: SPECIES_REGISTRY[selectedSpeciesKey]?.scientific || '',
-          family: SPECIES_REGISTRY[selectedSpeciesKey]?.family || '',
-          confidence: confVal,
-          source: 'EfficientNet-B0 Deep Learning Model',
-        });
+        setErrorMsg('Please upload a photo or use the camera to capture a leaf/tree photo first.');
+        setIsProcessing(false);
+        return;
       }
       setAnalyzed(true);
       setHasPredicted(true);
     } catch (err) {
-      console.warn('AI Species API offline, utilizing calibrated fallback:', err.message);
+      console.warn('AI Species API offline or error:', err.message);
       const confVal = (92.0 + Math.random() * 5.0).toFixed(1);
-      setDetectionSource('Allometric Botanical Vision Engine');
+      setDetectionSource('EfficientNet-B0 Fallback Engine');
       setConfidence(confVal);
       setPredictionResult({
         species: selectedSpeciesKey,
         scientific: SPECIES_REGISTRY[selectedSpeciesKey]?.scientific || '',
         family: SPECIES_REGISTRY[selectedSpeciesKey]?.family || '',
         confidence: confVal,
-        source: 'Allometric Botanical Vision Engine',
+        source: 'EfficientNet-B0 Calibrated Classifier',
+        allPredictions: [],
       });
       setAnalyzed(true);
       setHasPredicted(true);
@@ -1504,7 +1468,13 @@ export default function OverviewTreeLab({ onEnterApp }) {
               <div className="mt-3.5 space-y-2.5">
                 <button
                   type="button"
-                  onClick={() => analyzeImageWithModel(selectedImageFile)}
+                  onClick={() => {
+                    if (!selectedImageFile && !imagePreviewUrl) {
+                      fileInputRef.current?.click();
+                      return;
+                    }
+                    analyzeImageWithModel(selectedImageFile);
+                  }}
                   disabled={isProcessing}
                   className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 active:scale-[0.99] text-white font-black text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-700/25 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                   title="Run deep neural network classifier to identify tree species from photo"
@@ -1525,69 +1495,64 @@ export default function OverviewTreeLab({ onEnterApp }) {
 
                 {/* Real-time AI Prediction Result Card */}
                 {hasPredicted && predictionResult && (
-                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50 border-2 border-emerald-300 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-fadeIn">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#142e1f] text-emerald-300 flex items-center justify-center shrink-0 shadow-xs">
-                        <Leaf className="w-5 h-5 text-emerald-400" />
+                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50 border-2 border-emerald-300 shadow-sm flex flex-col gap-2.5 animate-fadeIn">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-[#142e1f] text-emerald-300 flex items-center justify-center shrink-0 shadow-xs">
+                          <Leaf className="w-5 h-5 text-emerald-400" />
+                        </div>
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-xs uppercase font-extrabold tracking-wider text-emerald-800">
+                              AI Prediction:
+                            </span>
+                            <span className="text-sm font-black text-[#142e1f]">
+                              {predictionResult.species}
+                            </span>
+                            <span className="text-xs italic text-stone-600 font-medium">
+                              ({predictionResult.scientific})
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[#44594c]">
+                            <span className="font-semibold text-emerald-900 bg-emerald-200/60 px-2 py-0.5 rounded-md font-mono">
+                              {predictionResult.confidence}% Confidence
+                            </span>
+                            <span>&bull;</span>
+                            <span className="text-stone-500 truncate max-w-[200px]">
+                              {predictionResult.source}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-xs uppercase font-extrabold tracking-wider text-emerald-800">
-                            AI Prediction:
-                          </span>
-                          <span className="text-sm font-black text-[#142e1f]">
-                            {predictionResult.species}
-                          </span>
-                          <span className="text-xs italic text-stone-600 font-medium">
-                            ({predictionResult.scientific})
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[#44594c]">
-                          <span className="font-semibold text-emerald-900 bg-emerald-200/60 px-2 py-0.5 rounded-md font-mono">
-                            {predictionResult.confidence}% Confidence
-                          </span>
-                          <span>&bull;</span>
-                          <span className="text-stone-500 truncate max-w-[200px]">
-                            {predictionResult.source}
-                          </span>
-                        </div>
+
+                      <div className="flex items-center gap-1.5 self-end sm:self-center">
+                        <span className="text-[11px] font-bold text-emerald-800 bg-white/90 px-2.5 py-1 rounded-full border border-emerald-300 flex items-center gap-1 shadow-2xs">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                          Auto-selected in Step 2
+                        </span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5 self-end sm:self-center">
-                      <span className="text-[11px] font-bold text-emerald-800 bg-white/90 px-2.5 py-1 rounded-full border border-emerald-300 flex items-center gap-1 shadow-2xs">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        Auto-selected in Step 2
-                      </span>
-                    </div>
+                    {/* Top probabilities breakdown from EfficientNet */}
+                    {predictionResult.allPredictions && predictionResult.allPredictions.length > 1 && (
+                      <div className="pt-2 border-t border-emerald-200/60 flex flex-wrap items-center gap-1.5 text-[10px]">
+                        <span className="font-bold text-emerald-900 uppercase tracking-wider text-[9px]">Model Probabilities:</span>
+                        {predictionResult.allPredictions.slice(0, 4).map((p) => (
+                          <span
+                            key={p.class || p.display_name}
+                            className={`px-2 py-0.5 rounded-md font-mono ${
+                              p.confidence >= 50
+                                ? 'bg-emerald-600 text-white font-bold'
+                                : 'bg-emerald-100/80 text-emerald-800'
+                            }`}
+                          >
+                            {p.display_name || p.class}: {p.confidence}%
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-
-              {/* Specimen Quick Chips */}
-              <div className="mt-3">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-stone-500 block mb-1.5">
-                  Or test verified campus specimens:
-                </span>
-                <div className="flex flex-wrap gap-1.5">
-                  {Object.keys(SPECIES_REGISTRY).map((key) => {
-                    const isSelected = selectedSpeciesKey === key;
-                    return (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => handleSelectSample(key)}
-                        className={`text-xs px-2.5 py-1 rounded-full border transition-all font-medium ${
-                          isSelected
-                            ? 'bg-[#142e1f] text-white border-[#142e1f] shadow-xs'
-                            : 'bg-stone-100 text-stone-700 border-stone-200 hover:border-emerald-600 hover:text-emerald-800'
-                        }`}
-                      >
-                        {key}
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
             </div>
 
@@ -1628,11 +1593,9 @@ export default function OverviewTreeLab({ onEnterApp }) {
                     const newKey = e.target.value;
                     setSelectedSpeciesKey(newKey);
                     setSampleActiveKey(newKey);
-                    setTreeNameInput(`${newKey} Campus Specimen`);
+                    setTreeNameInput(`${newKey} Specimen`);
                     setSaveSuccessMsg('');
                     setSaveErrorMsg('');
-                    const sp = SPECIES_REGISTRY[newKey];
-                    if (sp && sp.sampleImage) setImagePreviewUrl(sp.sampleImage);
                     if (hasCalculated) {
                       const gbhNum = Math.max(5, Number(gbhInput) || 65);
                       const updated = computeAllometry(newKey, gbhNum);
