@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { RegisteredTree } from '../models/RegisteredTree.js';
 import { isMongoReady, ensureMongo } from '../database/mongo.js';
+import { estimateTreeAge } from '../routes/epicollect.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,8 +37,8 @@ export async function getAllUnifiedTrees() {
               scientificName: doc.scientificName || '',
               height: doc.height || null,
               gbh: doc.gbh || null,
-              dbh: doc.dbh || null,
-              age: doc.age || null,
+              dbh: doc.dbh || (doc.gbh ? Number(doc.gbh) / Math.PI : null),
+              age: doc.gbh ? estimateTreeAge(doc.gbh, doc.species) : (doc.age && doc.age <= 28 ? Number(doc.age) : 22),
               healthStatus: doc.healthStatus || 'Healthy',
               lat,
               lng,
@@ -78,7 +79,7 @@ export async function getAllUnifiedTrees() {
                 height: item.height || null,
                 gbh: item.circumference || null,
                 dbh: item.circumference ? (item.circumference / Math.PI) : null,
-                age: item.age || null,
+                age: item.circumference ? estimateTreeAge(item.circumference, item.species) : (item.age && item.age <= 28 ? Number(item.age) : 22),
                 healthStatus: 'Healthy',
                 impact: item.impact || 'Normal',
                 lat,

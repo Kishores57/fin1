@@ -29,7 +29,16 @@ function getFallbackTrees() {
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {
       try {
-        return JSON.parse(fs.readFileSync(p, 'utf-8'));
+        const trees = JSON.parse(fs.readFileSync(p, 'utf-8'));
+        return trees.map((t) => {
+          const age = estimateTreeAge(t.circumference || t.gbh, t.species);
+          return {
+            ...t,
+            age,
+            co2: age * 22,
+            impact: age >= 26 ? 'Critical' : age >= 22 ? 'High' : age >= 10 ? 'Moderate' : 'Developing',
+          };
+        });
       } catch (e) {
         console.warn('Error reading fallback trees:', e.message);
       }
@@ -56,21 +65,47 @@ const MAI_VALUES = {
   'Moringa': 1.40
 };
 
-/** Nashik survey stands are ~≤28 years. Scale MAI so large trunks map near that ceiling. */
-const MAX_TREE_AGE = 28;
-const AGE_MAI_SCALE = 2.05;
+export const SPECIES_GROWTH_FACTOR = {
+  'Child Palm': 0.16,
+  'Chinese Palm': 0.18,
+  'Palm Tree': 0.38,
+  'Rain Tree': 0.36,
+  'Coconut Tree': 0.37,
+  'Ashok Tree': 0.44,
+  'Bamboo Tree': 0.20,
+  'Guava Tree': 0.38,
+  'Neem': 0.38,
+  'Banyan': 0.35,
+  'Peepal': 0.35,
+  'Mango': 0.38
+};
 
-function estimateTreeAge(gbhCm, species) {
-  const mai = MAI_VALUES[species] || 1.0;
-  const dbh = (parseFloat(gbhCm) || 0) / Math.PI;
-  const age = Math.round(dbh / (mai * AGE_MAI_SCALE));
-  return Math.max(1, Math.min(MAX_TREE_AGE, age || 1));
+/** 
+ * Proper allometric formula: Age = (GBH / pi) * growthRate
+ * - Mature campus trees: above 20 and below 28 years (20 – 28)
+ * - Small trunk trees (Child Palm, saplings, GBH < 70cm): between 6 and 10 years
+ */
+export function estimateTreeAge(gbhCm, species) {
+  const numGbh = parseFloat(gbhCm) || 80;
+  const dbh = numGbh / Math.PI;
+  const isSmall = (species && (species.toLowerCase().includes('child') || species.toLowerCase().includes('chinese') || species.toLowerCase().includes('sapling'))) || numGbh < 70;
+  
+  if (isSmall) {
+    const growthRate = SPECIES_GROWTH_FACTOR[species] || 0.16;
+    const raw = Math.round(dbh * growthRate);
+    return Math.max(6, Math.min(10, raw));
+  } else {
+    const growthRate = SPECIES_GROWTH_FACTOR[species] || 0.38;
+    const raw = Math.round(dbh * growthRate);
+    return Math.max(20, Math.min(28, raw));
+  }
 }
 
 function impactFromAge(age) {
-  if (age >= 22) return 'Critical';
-  if (age >= 14) return 'High';
-  return 'Moderate';
+  if (age >= 26) return 'Critical';
+  if (age >= 22) return 'High';
+  if (age >= 10) return 'Moderate';
+  return 'Developing';
 }
 
 const HABITAT_VALUES = {

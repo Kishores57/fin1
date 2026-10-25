@@ -11,6 +11,8 @@
  * 6. All-Tree Campus Forest Ledger (Aggregate carbon, oxygen, rainwater, species leaderboard across ALL trees)
  */
 
+import { estimateTreeAge } from '../routes/epicollect.js';
+
 export function getSpeciesTraits(speciesName = '') {
   const s = String(speciesName).toLowerCase();
   if (s.includes('rain')) {
@@ -174,17 +176,20 @@ export function computeCampusForestStory(treesInside, areaSqM, allTrees = []) {
 
   const speciesStats = {};
   const maturityBins = {
-    young: 0,      // < 50 yrs
-    maturing: 0,   // 50 - 120 yrs
-    mature: 0,     // 120 - 200 yrs
-    heritage: 0,   // > 200 yrs
+    young: 0,      // 6 - 10 yrs
+    maturing: 0,   // 11 - 20 yrs
+    mature: 0,     // 21 - 25 yrs
+    heritage: 0,   // 26 - 28 yrs
   };
 
   const enrichedTrees = treesInside.map((tree) => {
     const traits = getSpeciesTraits(tree.species);
     const dbh = Number(tree.dbh) || (tree.gbh ? Number(tree.gbh) / Math.PI : 25);
     const height = Number(tree.height) || Math.min(22, Math.max(5.5, dbh * 0.38 + 2.5));
-    const age = Number(tree.age) || Math.round(dbh / 0.7);
+    const gbhVal = tree.gbh || (tree.dbh ? Number(tree.dbh) * Math.PI : null);
+    const age = (tree.age && Number(tree.age) <= 28 && Number(tree.age) >= 6)
+      ? Number(tree.age)
+      : (gbhVal ? estimateTreeAge(gbhVal, tree.species) : 22);
 
     // Crown diameter & Canopy area
     const crownDiameter = Math.max(
@@ -236,10 +241,10 @@ export function computeCampusForestStory(treesInside, areaSqM, allTrees = []) {
     speciesStats[sp].canopySqM += canopyArea;
     speciesStats[sp].heights.push(height);
 
-    // Maturity binning
-    if (age < 50) maturityBins.young++;
-    else if (age <= 120) maturityBins.maturing++;
-    else if (age <= 200) maturityBins.mature++;
+    // Maturity binning (calibrated for 20-28 yr mature, 6-10 yr young)
+    if (age <= 10) maturityBins.young++;
+    else if (age <= 20) maturityBins.maturing++;
+    else if (age <= 25) maturityBins.mature++;
     else maturityBins.heritage++;
 
     return {
@@ -453,28 +458,28 @@ export function computeCampusForestStory(treesInside, areaSqM, allTrees = []) {
     // Maturity profile
     maturityProfile: [
       {
-        tier: 'Young & Growing (< 50 yrs)',
+        tier: 'Young & Growing (6 – 10 yrs)',
         count: maturityBins.young,
         percentage: parseFloat(((maturityBins.young / totalTrees) * 100).toFixed(1)),
-        description: 'Rapid carbon absorption phase and future canopy replacement.',
+        description: 'Juvenile trees, saplings, and child palms actively establishing root systems.',
       },
       {
-        tier: 'Maturing Canopy (50 – 120 yrs)',
+        tier: 'Maturing Canopy (11 – 20 yrs)',
         count: maturityBins.maturing,
         percentage: parseFloat(((maturityBins.maturing / totalTrees) * 100).toFixed(1)),
-        description: 'Prime ecological peak for shade, leaf biomass, and oxygen release.',
+        description: 'Vigorous adolescent canopy expanding shade and photosynthetic volume.',
       },
       {
-        tier: 'Mature Guardians (120 – 200 yrs)',
+        tier: 'Mature Trees (21 – 25 yrs)',
         count: maturityBins.mature,
         percentage: parseFloat(((maturityBins.mature / totalTrees) * 100).toFixed(1)),
-        description: 'Deep carbon vaults with sprawling root networks and high biodiversity value.',
+        description: 'Prime ecological peak for shade, leaf biomass, and carbon sequestration.',
       },
       {
-        tier: 'Heritage Veterans (> 200 yrs)',
+        tier: 'Campus Heritage Veterans (26 – 28 yrs)',
         count: maturityBins.heritage,
         percentage: parseFloat(((maturityBins.heritage / totalTrees) * 100).toFixed(1)),
-        description: 'Living historical monuments on campus providing maximum ecological stability.',
+        description: 'Founding generation trees planted during campus establishment.',
       },
     ],
   };

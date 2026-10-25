@@ -395,6 +395,59 @@ export const treeCuttingApi = {
   },
 };
 
+export const projectApi = {
+  getProjects: async () => {
+    const res = await API.get('/projects');
+    return res.data;
+  },
+  getProject: async (id) => {
+    const res = await API.get(`/projects/${id}`);
+    return res.data;
+  },
+  createProject: async (payload) => {
+    const res = await API.post('/projects', payload);
+    return res.data;
+  },
+  updateProject: async (id, payload) => {
+    const res = await API.put(`/projects/${id}`, payload);
+    return res.data;
+  },
+  deleteProject: async (id) => {
+    const res = await API.delete(`/projects/${id}`);
+    return res.data;
+  },
+  previewFile: async (formData) => {
+    const res = await API.post('/projects/preview-file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return res.data;
+  },
+  fetchEpicollect: async (payload) => {
+    const res = await API.post('/projects/epicollect-fetch', payload);
+    return res.data;
+  },
+  importTrees: async (projectId, payload) => {
+    const res = await API.post(`/projects/${projectId}/import`, payload);
+    return res.data;
+  },
+  getTrees: async (projectId, params = {}) => {
+    const res = await API.get(`/projects/${projectId}/trees`, { params });
+    return res.data;
+  },
+  getStats: async (projectId) => {
+    const res = await API.get(`/projects/${projectId}/stats`);
+    return res.data;
+  },
+  getReport: async (projectId) => {
+    const res = await API.get(`/projects/${projectId}/report`);
+    return res.data;
+  },
+  clearTrees: async (projectId) => {
+    const res = await API.delete(`/projects/${projectId}/trees`);
+    return res.data;
+  },
+};
+
 export default {
   authApi,
   treeApi,
@@ -402,6 +455,7 @@ export default {
   speciesDetectionApi,
   mapAnalysisApi,
   treeCuttingApi,
+  projectApi,
   API_BASE_URL,
   mediaBaseUrl,
 };

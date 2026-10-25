@@ -468,6 +468,20 @@
   border-radius: 9999px;
   background: rgba(20, 46, 31, 0.06);
   border: 1px solid rgba(20, 46, 31, 0.08);
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.lp-pill-user:hover {
+  background: rgba(20, 46, 31, 0.12);
+  border-color: rgba(20, 46, 31, 0.16);
+  box-shadow: 0 2px 8px rgba(20, 46, 31, 0.06);
+}
+
+.lp-pill-user:active {
+  transform: translateY(1px);
 }
 
 .lp-user-avatar {

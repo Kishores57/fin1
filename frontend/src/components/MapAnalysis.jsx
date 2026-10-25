@@ -108,6 +108,27 @@ export default function MapAnalysis({ onNavigateToLiveMap, initialTab = 'overvie
   const [showRecommendations, setShowRecommendations] = useState(true);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [candidateFilter, setCandidateFilter] = useState('ALL'); // ALL, HIGH, MODERATE, POTENTIAL
+
+  // Accurate allometric age formula: Age = (GBH / pi) * growthRate
+  // - Mature trees: 20 to 28 years
+  // - Small trunk / young trees (Child Palm, saplings, GBH < 70): 6 to 10 years
+  const getAccurateAge = (tree) => {
+    if (!tree) return 22;
+    const rawAge = Number(tree.age);
+    if (rawAge >= 6 && rawAge <= 28) return Math.round(rawAge);
+    
+    const gbh = parseFloat(tree.circumference || tree.gbh) || 80;
+    const dbh = gbh / Math.PI;
+    const sp = String(tree.species || '').toLowerCase();
+    const isSmall = sp.includes('child') || sp.includes('chinese') || sp.includes('sapling') || gbh < 70;
+    
+    if (isSmall) {
+      const raw = Math.round(dbh * 0.16);
+      return Math.max(6, Math.min(10, raw));
+    }
+    const raw = Math.round(dbh * 0.38);
+    return Math.max(20, Math.min(28, raw));
+  };
   const [drawMode, setDrawMode] = useState(false);
   const [drawnPoints, setDrawnPoints] = useState([]);
 
@@ -163,7 +184,11 @@ export default function MapAnalysis({ onNavigateToLiveMap, initialTab = 'overvie
         if (epicRes.ok && !cancelled) {
           const list = await epicRes.json();
           if (Array.isArray(list)) {
-            setEpicollectTrees(list);
+            const calibratedList = list.map((t) => {
+              const age = getAccurateAge(t);
+              return { ...t, age, co2: age * 22 };
+            });
+            setEpicollectTrees(calibratedList);
           }
         }
       } catch (epicErr) {
@@ -403,8 +428,8 @@ export default function MapAnalysis({ onNavigateToLiveMap, initialTab = 'overvie
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 11px; margin-bottom: 6px;">
             <div><strong>GBH:</strong> ${tree.circumference || tree.gbh || 'N/A'} cm</div>
             <div><strong>Height:</strong> ${tree.height || 'N/A'} m</div>
-            <div><strong>Est. Age:</strong> ~${tree.age || 1} yrs</div>
-            <div><strong>CO₂ Abs:</strong> ${(tree.co2 || 0).toLocaleString()} kg</div>
+            <div><strong>Est. Age:</strong> ~${getAccurateAge(tree)} yrs</div>
+            <div><strong>CO₂ Abs:</strong> ${(getAccurateAge(tree) * 22).toLocaleString()} kg</div>
           </div>
           <div style="font-size: 10px; color: #64748b; margin-bottom: 4px;">
             <strong>Habitat:</strong> ${tree.habitat || 'Campus canopy'}
@@ -414,7 +439,13 @@ export default function MapAnalysis({ onNavigateToLiveMap, initialTab = 'overvie
             <span style="color: ${color}; text-transform: uppercase;">${tree.impact || 'Normal'}</span>
           </div>
         </div>
-      `, { maxWidth: 270 });
+      `, {
+        maxWidth: 280,
+        maxHeight: 350,
+        autoPan: true,
+        autoPanPaddingTopLeft: L.point(30, 95),
+        autoPanPaddingBottomRight: L.point(30, 80),
+      });
 
       epicollectLayerRef.current.addLayer(marker);
     });
@@ -775,9 +806,15 @@ export default function MapAnalysis({ onNavigateToLiveMap, initialTab = 'overvie
             <div><strong>Source:</strong> ${tree.source}</div>
             ${tree.height ? `<div><strong>Height:</strong> ${tree.height}m</div>` : ''}
             ${tree.gbh ? `<div><strong>GBH:</strong> ${tree.gbh}cm</div>` : ''}
-            ${tree.age ? `<div><strong>Est. Age:</strong> ~${tree.age} yrs</div>` : ''}
+            <div><strong>Est. Age:</strong> ~${getAccurateAge(tree)} yrs</div>
           </div>
-        `);
+        `, {
+          maxWidth: 280,
+          maxHeight: 350,
+          autoPan: true,
+          autoPanPaddingTopLeft: L.point(30, 95),
+          autoPanPaddingBottomRight: L.point(30, 80),
+        });
         markersLayerRef.current.addLayer(marker);
       });
     }
@@ -905,7 +942,14 @@ export default function MapAnalysis({ onNavigateToLiveMap, initialTab = 'overvie
           </div>
         `;
 
-        marker.bindPopup(popupContent, { maxWidth: 320 });
+        marker.bindPopup(popupContent, {
+          maxWidth: 320,
+          maxHeight: 350,
+          autoPan: true,
+          autoPanPaddingTopLeft: L.point(30, 95),
+          autoPanPaddingBottomRight: L.point(30, 80),
+          className: 'rec-custom-leaflet-popup',
+        });
         marker.on('click', () => setSelectedCandidate(cand));
         recommendationsLayerRef.current.addLayer(marker);
       });
@@ -1113,7 +1157,7 @@ export default function MapAnalysis({ onNavigateToLiveMap, initialTab = 'overvie
                   setDrawnPoints([]);
                 }}
                 disabled={drawMode || loading}
-                className="px-4 py-2 text-xs font-black rounded-xl bg-slate-900 border-2 border-slate-600 hover:border-emerald-400 focus:border-emerald-400 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 cursor-pointer max-w-[220px] sm:max-w-none truncate shadow-md"
+                className="px-3 py-1.5 text-xs font-bold rounded-xl bg-slate-900 border-2 border-slate-600 hover:border-emerald-400 focus:border-emerald-400 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40 cursor-pointer max-w-[210px] sm:max-w-[260px] md:max-w-[290px] truncate shadow-md"
               >
                 {zones.map((z) => (
                   <option key={z.id} value={z.id} className="bg-slate-900 text-white font-bold py-1">
@@ -2299,8 +2343,8 @@ export default function MapAnalysis({ onNavigateToLiveMap, initialTab = 'overvie
                             <div className="grid grid-cols-2 gap-1 text-[11px] text-[#44594c] mb-3">
                               <div>GBH: <strong>{tree.circumference || tree.gbh || 'N/A'} cm</strong></div>
                               <div>Height: <strong>{tree.height || 'N/A'} m</strong></div>
-                              <div>Age: <strong>~{tree.age || 1} yrs</strong></div>
-                              <div>CO₂: <strong>{(tree.co2 || 0).toLocaleString()} kg</strong></div>
+                              <div>Age: <strong>~{getAccurateAge(tree)} yrs</strong></div>
+                              <div>CO₂: <strong>{(getAccurateAge(tree) * 22).toLocaleString()} kg</strong></div>
                             </div>
                           </div>
 

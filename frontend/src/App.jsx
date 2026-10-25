@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import HistoryLog from './components/HistoryLog';
+import React, { useState, useEffect, useRef } from 'react';
 import MapDashboard from './components/MapDashboard';
 import TreeRegistration from './components/TreeRegistration';
 import MapAnalysis from './components/MapAnalysis';
@@ -9,10 +8,10 @@ import AdminConsoleModal from './components/AdminConsoleModal';
 import TreeCuttingModule from './components/treeCutting/TreeCuttingModule';
 import NotificationBell from './components/treeCutting/NotificationBell';
 import OverviewTreeLab from './components/OverviewTreeLab';
+import CommunityPathModule from './components/path/CommunityPathModule';
 import { useAuth } from './context/AuthContext';
 import { mapRegisteredTreeToCalculatorResult } from './utils/mapTreeToCalculatorResult';
 import {
-  Database,
   AlertTriangle,
   X,
   Map,
@@ -29,6 +28,8 @@ import {
   LogIn,
   Scale,
   Sparkles,
+  Settings,
+  ChevronDown,
 } from 'lucide-react';
 import { API_BASE_URL } from './services/api';
 import './App.css';
@@ -99,18 +100,39 @@ export default function App() {
   const [selectedResult, setSelectedResult]     = useState(null);
   const [mapRefreshKey, setMapRefreshKey]        = useState(0);
   const [error, setError]                       = useState('');
-  const [historyRefreshTrigger, setHistoryRefreshTrigger] = useState(0);
   const [showAuthModal, setShowAuthModal]       = useState(false);
   const [showAdminConsole, setShowAdminConsole] = useState(false);
   const [pendingTab, setPendingTab]             = useState('register');
   const [selectedPermitId, setSelectedPermitId] = useState(null);
   const [targetLiveMapTree, setTargetLiveMapTree] = useState(null);
   const [analysisInitialTab, setAnalysisInitialTab] = useState('overview');
+  const [profileMenuOpen, setProfileMenuOpen]   = useState(false);
+  const profileMenuRef                          = useRef(null);
+
+  // Close profile dropdown when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target)) {
+        setProfileMenuOpen(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setProfileMenuOpen(false);
+    };
+    if (profileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [profileMenuOpen]);
 
   const enterApp = (tab = 'register', authedUser = null) => {
     const target = tab === 'calculator' ? 'register' : tab;
     const isAuthed = Boolean(authedUser) || isAuthenticated || Boolean(localStorage.getItem('vanjeevan_auth_token'));
-    if (!isAuthed && target !== 'permits' && target !== 'map') {
+    if (!isAuthed && target !== 'permits' && target !== 'map' && target !== 'overview') {
       setPendingTab(target);
       setShowAuthModal(true);
       return;
@@ -125,12 +147,6 @@ export default function App() {
     setActiveTab(pendingTab || tab || 'register');
     setShowLanding(false);
     window.scrollTo(0, 0);
-  };
-
-  const handleSelectHistoryTree = (tree) => {
-    setSelectedResult(tree);
-    setActiveTab('register');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleMapTreeAnalysis = (registeredTree) => {
@@ -151,7 +167,6 @@ export default function App() {
 
   const handleProtectedTreeSaved = () => {
     setMapRefreshKey((k) => k + 1);
-    setHistoryRefreshTrigger((prev) => prev + 1);
   };
 
   if (showLanding) {
@@ -174,19 +189,14 @@ export default function App() {
 
   const TAB_INFO = {
     overview: {
-      tag: 'Interactive AI Lab',
-      title: 'Tree Species & Allometric Age Lab',
-      description: 'Upload any tree photo (leaves, canopy, or bark) and enter trunk girth (GBH) to predict species, age, and carbon allometry in real-time.',
+      tag: 'Interactive AI Classification',
+      title: 'Species Identification',
+      description: 'Upload leaf or bark photographs for neural network classification, then input trunk girth (GBH) to predict species, calculate age, and evaluate tree impact in real-time.',
     },
     register: {
       tag: 'Tree Inventory & AI Evaluation',
       title: 'Tree Registration & Carbon Calculator',
       description: 'Accurately register individual trees with mandatory GPS coordinates, GBH, height, and health condition. Calculate biomass, carbon sequestration, and generate ecological conservation reasons.',
-    },
-    history: {
-      tag: 'Verified Records Archive',
-      title: 'Tree Inventory Logs',
-      description: 'Explore the centralized catalog of registered trees, cumulative carbon storage metrics, and detailed species records across monitored zones.',
     },
     map: {
       tag: 'Interactive Cartography',
@@ -202,6 +212,11 @@ export default function App() {
       tag: 'Transparent Civic Governance',
       title: 'Tree-Cutting Permits, Verification & Public Voting Portal',
       description: 'Inspect public felling applications with GIS impact zones, verify mandatory environmental documentation, cast verified community votes, and monitor statutory 1:5 compensatory afforestation compliance under Maharashtra Tree Act 1975.',
+    },
+    path: {
+      tag: 'Community Tree Inventory & Project Setup',
+      title: 'Path · Community Forest Setup & Environmental Analysis',
+      description: 'Set up tree inventory projects for your college, community, NGO, or city. Connect Epicollect5 mobile survey or upload existing datasets, display GIS trees at real coordinates, and generate evidence-based climate reports.',
     },
   };
 
@@ -257,7 +272,7 @@ export default function App() {
               className={`app-nav-btn ${activeTab === 'overview' ? 'active' : ''}`}
             >
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              <span>AI Tree Lab</span>
+              <span>Species Identification</span>
             </button>
             <button
               type="button"
@@ -285,14 +300,6 @@ export default function App() {
             </button>
             <button
               type="button"
-              onClick={() => setActiveTab('history')}
-              className={`app-nav-btn ${activeTab === 'history' ? 'active' : ''}`}
-            >
-              <Database className="w-3.5 h-3.5" />
-              <span>Inventory Logs</span>
-            </button>
-            <button
-              type="button"
               onClick={() => {
                 setSelectedPermitId(null);
                 setActiveTab('permits');
@@ -301,6 +308,15 @@ export default function App() {
             >
               <Scale className="w-3.5 h-3.5" />
               <span>Cutting Permits &amp; Voting</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('path')}
+              className={`app-nav-btn ${activeTab === 'path' ? 'active' : ''}`}
+              title="Community Tree Inventory & Project Setup"
+            >
+              <Compass className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Path</span>
             </button>
           </nav>
 
@@ -315,56 +331,129 @@ export default function App() {
               }}
             />
 
-            {isAdmin && (
+            {/* Interactive Profile Capsule with Popover Dropdown */}
+            <div className="relative" ref={profileMenuRef}>
               <button
                 type="button"
-                onClick={() => setShowAdminConsole(true)}
-                className="px-3 py-1.5 rounded-full text-xs font-bold text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition-all flex items-center gap-1.5 shadow-sm"
-                title="Open Administrative Governance Console"
+                onClick={() => setProfileMenuOpen((prev) => !prev)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white hover:bg-[#f8f6f0] border border-[rgba(20,46,31,0.12)] shadow-sm text-xs cursor-pointer transition-all focus:outline-none select-none"
+                aria-expanded={profileMenuOpen}
+                aria-haspopup="true"
+                title="Account options & settings"
               >
-                <Crown className="w-3.5 h-3.5 text-amber-600" />
-                <span className="hidden sm:inline">Admin Console</span>
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[11px] ${
+                    isAdmin
+                      ? 'bg-amber-500 text-white shadow-sm'
+                      : 'bg-emerald-700 text-white shadow-sm'
+                  }`}
+                >
+                  {user?.name?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div className="hidden md:block text-left">
+                  <div className="font-bold text-[#142e1f] leading-tight truncate max-w-[120px]">
+                    {user?.name || 'Researcher'}
+                  </div>
+                  <div className="text-[10px] text-[#708477] uppercase tracking-wider font-semibold">
+                    {user?.role === 'admin' ? 'Administrator' : 'Field Researcher'}
+                  </div>
+                </div>
+                <span
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                    isAdmin ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                  }`}
+                >
+                  {isAdmin ? 'ADMIN' : 'USER'}
+                </span>
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-[#708477] transition-transform duration-200 ${
+                    profileMenuOpen ? 'rotate-180' : ''
+                  }`}
+                />
               </button>
-            )}
 
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-[rgba(20,46,31,0.12)] shadow-sm text-xs">
-              <div
-                className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[11px] ${
-                  isAdmin
-                    ? 'bg-amber-500 text-white shadow-sm'
-                    : 'bg-emerald-700 text-white shadow-sm'
-                }`}
-              >
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
-              </div>
-              <div className="hidden md:block text-left">
-                <div className="font-bold text-[#142e1f] leading-tight truncate max-w-[120px]">
-                  {user?.name || 'Researcher'}
+              {/* Popover Dropdown Menu */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-72 bg-[#fdfcf9] rounded-2xl shadow-2xl border border-[rgba(20,46,31,0.12)] p-2 z-[9999] animate-fadeIn text-[#142e1f]">
+                  {/* User Profile Summary */}
+                  <div className="px-3 py-2.5 rounded-xl bg-[#f3efe6]/80 mb-1 border border-[rgba(20,46,31,0.06)]">
+                    <div className="flex items-center gap-2.5 mb-1">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 ${
+                          isAdmin ? 'bg-amber-600 shadow-sm' : 'bg-emerald-700 shadow-sm'
+                        }`}
+                      >
+                        {user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                      <div className="overflow-hidden">
+                        <div className="font-bold text-xs text-[#142e1f] truncate leading-tight">
+                          {user?.name || 'Researcher'}
+                        </div>
+                        <div className="text-[11px] text-[#708477] truncate font-mono">
+                          {user?.email || 'user@vanjeevan.org'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-[rgba(20,46,31,0.06)] text-[10px]">
+                      <span className="text-[#708477] font-medium">Role:</span>
+                      <span
+                        className={`font-bold px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider ${
+                          isAdmin
+                            ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                            : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                        }`}
+                      >
+                        {isAdmin ? 'Administrator' : 'Field Researcher'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Menu Options */}
+                  <div className="space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileMenuOpen(false);
+                        setShowAdminConsole(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold text-[#142e1f] hover:bg-[#f3efe6] transition-colors group cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                        <Settings className="w-4 h-4 text-[#2d6a4f]" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-[#142e1f]">Settings</div>
+                        <div className="text-[10px] text-[#708477] font-normal">
+                          Account profile &amp; system console
+                        </div>
+                      </div>
+                    </button>
+
+                    <div className="h-px bg-[rgba(20,46,31,0.08)] my-1" />
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileMenuOpen(false);
+                        logout();
+                        setShowLanding(true);
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-semibold text-red-700 hover:bg-red-50 hover:text-red-800 transition-colors group cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-lg bg-red-50 text-red-600 border border-red-200 flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                        <LogOut className="w-4 h-4 text-red-600" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-red-700">Log Out</div>
+                        <div className="text-[10px] text-red-500 font-normal">
+                          Sign out of this session
+                        </div>
+                      </div>
+                    </button>
+                  </div>
                 </div>
-                <div className="text-[10px] text-[#708477] uppercase tracking-wider font-semibold">
-                  {user?.role === 'admin' ? 'Administrator' : 'Field Researcher'}
-                </div>
-              </div>
-              <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                  isAdmin ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                }`}
-              >
-                {isAdmin ? 'ADMIN' : 'USER'}
-              </span>
+              )}
             </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                logout();
-                setShowLanding(true);
-              }}
-              title="Sign Out"
-              className="p-2 rounded-full text-[#708477] hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-all"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </header>
@@ -388,25 +477,27 @@ export default function App() {
           </div>
         )}
 
-        {/* Dashboard Stat Strip for Map & History tabs */}
-        {(activeTab === 'map' || activeTab === 'history') && (
+        {/* Dashboard Stat Strip for Map tab */}
+        {activeTab === 'map' && (
           <DashboardStats />
         )}
 
         {/* Section Header */}
-        <div className="app-page-header">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="nature-chip nature-chip-forest">
-              {TAB_INFO[activeTab]?.tag}
-            </span>
+        {activeTab !== 'overview' && (
+          <div className="app-page-header">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="nature-chip nature-chip-forest">
+                {TAB_INFO[activeTab]?.tag}
+              </span>
+            </div>
+            <h2 className="app-page-heading">
+              {TAB_INFO[activeTab]?.title}
+            </h2>
+            <p className="app-page-description">
+              {TAB_INFO[activeTab]?.description}
+            </p>
           </div>
-          <h2 className="app-page-heading">
-            {TAB_INFO[activeTab]?.title}
-          </h2>
-          <p className="app-page-description">
-            {TAB_INFO[activeTab]?.description}
-          </p>
-        </div>
+        )}
 
         {/* View Component */}
         <div className="mt-4">
@@ -418,8 +509,6 @@ export default function App() {
               initialResult={selectedResult}
               onTreeSaved={handleProtectedTreeSaved}
             />
-          ) : activeTab === 'history' ? (
-            <HistoryLog refreshTrigger={historyRefreshTrigger} onSelectTree={handleSelectHistoryTree} />
           ) : activeTab === 'map' ? (
             <MapDashboard
               refreshKey={mapRefreshKey}
@@ -436,6 +525,10 @@ export default function App() {
             <MapAnalysis
               onNavigateToLiveMap={handleLocateTreeOnLiveMap}
               initialTab={analysisInitialTab}
+            />
+          ) : activeTab === 'path' ? (
+            <CommunityPathModule
+              onNavigateTab={(target) => setActiveTab(target)}
             />
           ) : (
             <TreeCuttingModule

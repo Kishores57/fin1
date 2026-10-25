@@ -44,6 +44,8 @@ import {
   X,
   RefreshCw,
   ScanLine,
+  TreePine,
+  Loader2,
 } from 'lucide-react';
 import { speciesDetectionApi, registeredTreeApi } from '../services/api';
 import { SPECIES_EXTENDED_KNOWLEDGE } from '../data/speciesRagKnowledge';
@@ -458,6 +460,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
   const [latitude, setLatitude] = useState('20.013100');
   const [longitude, setLongitude] = useState('73.821316');
   const [geoLoading, setGeoLoading] = useState(false);
+  const [geoStatus, setGeoStatus] = useState(null);
 
   // Model & Processing
   const [isProcessing, setIsProcessing] = useState(false);
@@ -501,6 +504,19 @@ export default function OverviewTreeLab({ onEnterApp }) {
   const [cameraError, setCameraError] = useState('');
   const [isShutterFlashing, setIsShutterFlashing] = useState(false);
   const [isCameraStarting, setIsCameraStarting] = useState(false);
+
+  // AI Vision Studio & Bark Age Analysis State
+  const [detectionServerUp, setDetectionServerUp] = useState(null);
+  const [activeAiTab, setActiveAiTab] = useState('species'); // 'species' | 'age'
+  const [barkAgeImage, setBarkAgeImage] = useState(null);
+  const [barkAgePreview, setBarkAgePreview] = useState(null);
+  const [barkAgeResult, setBarkAgeResult] = useState(null);
+  const [predictingAge, setPredictingAge] = useState(false);
+  const [barkCameraOpen, setBarkCameraOpen] = useState(false);
+  const barkVideoRef = useRef(null);
+  const barkStreamRef = useRef(null);
+  const barkCanvasRef = useRef(null);
+  const barkFileInputRef = useRef(null);
 
   /**
    * Complete Allometric & Extended Environmental Calculation Engine
@@ -657,26 +673,116 @@ export default function OverviewTreeLab({ onEnterApp }) {
     }
   };
 
-  // Geolocation handler
-  const handleGetLocation = () => {
+  // Fallback IP-based geolocation (fast city-level coordinates when device GPS / permissions are blocked)
+  const fetchLocationViaIp = async () => {
+    try {
+      const res = await fetch('https://ipwho.is/');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && data.latitude && data.longitude) {
+          const lat = Number(data.latitude).toFixed(6);
+          const lng = Number(data.longitude).toFixed(6);
+          const cityInfo = [data.city, data.region, data.country].filter(Boolean).join(', ');
+          return { lat, lng, source: 'network', cityInfo };
+        }
+      }
+    } catch (e1) {
+      console.warn('ipwho.is fallback failed:', e1.message);
+    }
+
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.latitude && data.longitude) {
+          const lat = Number(data.latitude).toFixed(6);
+          const lng = Number(data.longitude).toFixed(6);
+          const cityInfo = [data.city, data.region, data.country_name].filter(Boolean).join(', ');
+          return { lat, lng, source: 'network', cityInfo };
+        }
+      }
+    } catch (e2) {
+      console.warn('ipapi.co fallback failed:', e2.message);
+    }
+
+    return null;
+  };
+
+  // Robust Geolocation handler with automatic IP fallback
+  const handleGetLocation = async () => {
+    setGeoLoading(true);
+    setGeoStatus({ type: 'info', message: 'Requesting device GPS location...' });
+    setErrorMsg('');
+
+    const tryIpFallback = async (reason) => {
+      setGeoStatus({ type: 'info', message: 'Device GPS unavailable. Fetching network/IP location...' });
+      const ipResult = await fetchLocationViaIp();
+      if (ipResult) {
+        setLatitude(ipResult.lat);
+        setLongitude(ipResult.lng);
+        setGeoStatus({
+          type: 'fallback',
+          message: `Network location detected: ${ipResult.cityInfo || 'Local Region'} (${ipResult.lat}, ${ipResult.lng}). Allow browser GPS permission for meter-level accuracy.`,
+        });
+      } else {
+        setGeoStatus({
+          type: 'error',
+          message: `${reason || 'Unable to retrieve location'}. Please enter coordinates manually.`,
+        });
+        setErrorMsg('Unable to retrieve automatic location. You can enter coordinates manually.');
+      }
+      setGeoLoading(false);
+    };
+
     if (!navigator.geolocation) {
-      setErrorMsg('Geolocation is not supported by your browser.');
+      await tryIpFallback('Geolocation is not supported by this browser');
       return;
     }
-    setGeoLoading(true);
-    setErrorMsg('');
+
+    let isResolved = false;
+    const fallbackTimer = setTimeout(() => {
+      if (!isResolved) {
+        isResolved = true;
+        tryIpFallback('Device GPS request timed out');
+      }
+    }, 9000);
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLatitude(pos.coords.latitude.toFixed(6));
-        setLongitude(pos.coords.longitude.toFixed(6));
+        if (isResolved) return;
+        isResolved = true;
+        clearTimeout(fallbackTimer);
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        const acc = pos.coords.accuracy ? ` (±${Math.round(pos.coords.accuracy)}m)` : '';
+        setLatitude(lat);
+        setLongitude(lng);
+        setGeoStatus({
+          type: 'success',
+          message: `Device GPS coordinates acquired${acc}: ${lat}, ${lng}`,
+        });
         setGeoLoading(false);
       },
-      (err) => {
-        console.warn('Geolocation error:', err.message);
-        setErrorMsg('Unable to retrieve automatic location. You can enter coordinates manually.');
-        setGeoLoading(false);
+      async (err) => {
+        if (isResolved) return;
+        isResolved = true;
+        clearTimeout(fallbackTimer);
+        let reason = 'Device GPS failed';
+        if (err.code === 1) {
+          reason = 'Browser location permission denied';
+        } else if (err.code === 2) {
+          reason = 'Device position unavailable (Windows location service may be disabled)';
+        } else if (err.code === 3) {
+          reason = 'GPS acquisition timed out';
+        }
+        console.warn('Geolocation error:', err.code, err.message, reason);
+        await tryIpFallback(reason);
       },
-      { timeout: 8000 }
+      {
+        enableHighAccuracy: true,
+        timeout: 8500,
+        maximumAge: 30000,
+      }
     );
   };
 
@@ -1032,8 +1138,128 @@ export default function OverviewTreeLab({ onEnterApp }) {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
+      if (barkStreamRef.current) {
+        barkStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
     };
   }, []);
+
+  // Health check for AI detection model server
+  useEffect(() => {
+    speciesDetectionApi.health()
+      .then((r) => setDetectionServerUp(Boolean(r?.model_loaded || r?.status === 'ok')))
+      .catch(() => setDetectionServerUp(false));
+  }, []);
+
+  // Attach stream when bark video element renders
+  useEffect(() => {
+    if (barkCameraOpen && barkVideoRef.current && barkStreamRef.current) {
+      barkVideoRef.current.srcObject = barkStreamRef.current;
+      barkVideoRef.current.play().catch(() => {});
+    }
+  }, [barkCameraOpen]);
+
+  // ── Bark Age Analysis Handlers ──
+  const handleBarkAgeImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBarkAgeImage(file);
+    setBarkAgePreview(URL.createObjectURL(file));
+    setBarkAgeResult(null);
+  };
+
+  const openBarkCamera = async () => {
+    setBarkCameraOpen(true);
+    setBarkAgeResult(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 } },
+      });
+      barkStreamRef.current = stream;
+      if (barkVideoRef.current) {
+        barkVideoRef.current.srcObject = stream;
+        try {
+          await barkVideoRef.current.play();
+        } catch {}
+      }
+    } catch {
+      setBarkCameraOpen(false);
+      setErrorMsg('Unable to access camera for bark capture.');
+    }
+  };
+
+  const closeBarkCamera = () => {
+    if (barkStreamRef.current) {
+      barkStreamRef.current.getTracks().forEach((t) => t.stop());
+      barkStreamRef.current = null;
+    }
+    setBarkCameraOpen(false);
+  };
+
+  const captureBarkPhoto = () => {
+    if (!barkVideoRef.current || !barkCanvasRef.current) return;
+    const video = barkVideoRef.current;
+    const canvas = barkCanvasRef.current;
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (blob) {
+        const file = new File([blob], 'bark_camera_capture.jpg', { type: 'image/jpeg' });
+        setBarkAgeImage(file);
+        setBarkAgePreview(URL.createObjectURL(blob));
+      }
+    }, 'image/jpeg', 0.9);
+    closeBarkCamera();
+  };
+
+  const handlePredictBarkAge = async (overrideFile = null) => {
+    const file = overrideFile || barkAgeImage;
+    if (!file) {
+      setErrorMsg('Please upload or capture a bark image first.');
+      return;
+    }
+    setPredictingAge(true);
+    setErrorMsg('');
+    try {
+      const dbhVal = (gbhInput / Math.PI).toFixed(2);
+      const sp = SPECIES_REGISTRY[selectedSpeciesKey] || SPECIES_REGISTRY['Neem'];
+      const growthRateVal = sp.growthRate || 3.8;
+      const result = await speciesDetectionApi.predictAge(file, {
+        species: selectedSpeciesKey,
+        dbh: dbhVal,
+        gbh: gbhInput,
+        growthRate: growthRateVal,
+      });
+
+      if (result.error && !result.fallback) {
+        setErrorMsg(result.error);
+        setPredictingAge(false);
+        return;
+      }
+
+      setBarkAgeResult(result);
+    } catch {
+      setErrorMsg('Age prediction service not reachable. Is model running on port 5000?');
+    } finally {
+      setPredictingAge(false);
+    }
+  };
+
+  const applyBarkAgeToEngine = (approximateAge) => {
+    if (!approximateAge) return;
+    const numAge = Number(approximateAge);
+    const sp = SPECIES_REGISTRY[selectedSpeciesKey] || SPECIES_REGISTRY['Neem'];
+    const gr = sp.growthRate || 3.8;
+    const derivedGbh = Math.max(10, Math.round((numAge / gr) * Math.PI));
+    setGbhInput(derivedGbh);
+    const updated = computeAllometry(selectedSpeciesKey, derivedGbh);
+    updated.estimatedAge = numAge;
+    setMetrics(updated);
+    setHasCalculated(true);
+  };
 
   // Image Upload handler
   const handleFileChange = (e) => {
@@ -1202,21 +1428,21 @@ export default function OverviewTreeLab({ onEnterApp }) {
   const activeMetricObj = metricDetailsMap[effectiveMetricKey] || metricDetailsMap.oxygen;
 
   return (
-    <section id="overview-story" className="py-16 md:py-24 bg-[#fbf9f4] text-stone-900 overflow-hidden">
+    <section id="overview-story" className="py-4 sm:py-6 bg-[#fbf9f4] text-stone-900 overflow-hidden">
       <div className="lp-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* ════ SECTION HEADER ════ */}
-        <div className="text-center max-w-3xl mx-auto mb-12">
+        <div className="text-center max-w-3xl mx-auto mb-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#142e1f]/10 text-[#142e1f] border border-[#142e1f]/15 mb-3 shadow-xs">
             <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-            <span>AI Tree Vision &amp; Allometric Age Lab</span>
+            <span>Species Identification</span>
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold font-['Fraunces'] text-[#142e1f] tracking-tight leading-tight">
             Complete Tree Species, Age &amp; Climate Intelligence
           </h2>
           <p className="text-sm sm:text-base text-[#44594c] mt-3 leading-relaxed">
             Upload leaf or bark photographs for deep neural network classification, then input girth (GBH) and height. 
-            Validated allometric equations (Chave, IPCC) compute exact age, biomass, carbon vaults, and extended urban ecosystem values.
+            Validated equations compute exact age, biomass, carbon vaults, and extended urban ecosystem values.
           </p>
         </div>
 
@@ -1226,237 +1452,258 @@ export default function OverviewTreeLab({ onEnterApp }) {
           {/* ── LEFT COLUMN: INPUT WORKBENCH (Image AI + Allometric Controls) ── */}
           <div className="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-[rgba(20,46,31,0.08)] space-y-6">
 
-            {/* STEP 1: Photo Upload & Live Camera Workbench */}
-            <div>
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-                <label className="text-xs font-extrabold uppercase tracking-wider text-[#142e1f] flex items-center gap-1.5">
-                  <span className="w-5 h-5 rounded-full bg-[#142e1f] text-white flex items-center justify-center text-[10px]">1</span>
-                  Tree / Leaf Photo (AI Classifier)
-                </label>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-[#142e1f] font-bold text-xs border border-emerald-300 transition-all cursor-pointer shadow-2xs"
-                    title="Upload an image file from your device"
-                  >
-                    <Upload className="w-3.5 h-3.5 text-emerald-700" />
-                    <span>Upload Image</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => (isCameraActive ? stopCamera() : startCamera())}
-                    disabled={isCameraStarting}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer ${
-                      isCameraActive
-                        ? 'bg-red-600 hover:bg-red-700 text-white'
-                        : 'bg-[#142e1f] hover:bg-[#1a3d29] text-white'
-                    }`}
-                    title="Click photo using your phone or laptop camera"
-                  >
-                    {isCameraActive ? (
-                      <>
-                        <X className="w-3.5 h-3.5" />
-                        <span>Close Camera</span>
-                      </>
-                    ) : (
-                      <>
-                        <Camera className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>{isCameraStarting ? 'Opening...' : 'Use Camera'}</span>
-                      </>
-                    )}
-                  </button>
+            {/* ════ AI VISION STUDIO: SPECIES & BARK AGE ANALYSIS ════ */}
+            <div className="nature-card p-5 md:p-6 space-y-4 bg-white border-2 border-slate-200/90 shadow-sm rounded-2xl">
+              <div className="border-b border-slate-200 pb-3 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold font-['Fraunces'] text-[#022c17] flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-purple-600" />
+                    AI Vision Studio: Species &amp; Bark Age Analysis
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-0.5 font-medium">
+                    Deep learning species identification + EfficientNet-B4 bark age estimation
+                  </p>
                 </div>
+                {detectionServerUp === true && (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-full shadow-xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" /> AI Online
+                  </span>
+                )}
+                {detectionServerUp === false && (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-800 bg-red-100 border border-red-300 px-3 py-1 rounded-full shadow-xs">
+                    <span className="w-2 h-2 rounded-full bg-red-500" /> AI Offline
+                  </span>
+                )}
               </div>
 
-              {/* Camera Error Alert */}
-              {cameraError && (
-                <div className="mb-3 p-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center justify-between gap-2 animate-fadeIn">
-                  <div className="flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                    <span>{cameraError}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setCameraError('')}
-                    className="text-amber-700 hover:text-amber-900"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-
-              {/* Hidden file input and canvas */}
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-              <canvas ref={canvasRef} className="hidden" />
-
-              {/* Interactive Camera Viewfinder OR Image Preview / Dropzone */}
-              {isCameraActive ? (
-                /* ── LIVE CAMERA VIEWFINDER ── */
-                <div className="relative h-64 sm:h-72 rounded-2xl overflow-hidden bg-black border-2 border-emerald-500 shadow-xl flex flex-col justify-between p-3 select-none">
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    playsInline
-                    muted
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-
-                  {/* Visual Shutter Flash */}
-                  <div
-                    className={`absolute inset-0 bg-white transition-opacity duration-200 pointer-events-none z-20 ${
-                      isShutterFlashing ? 'opacity-90' : 'opacity-0'
-                    }`}
-                  />
-
-                  {/* Botanical Targeting Reticle */}
-                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                    <div className="w-44 h-44 sm:w-52 sm:h-52 border-2 border-dashed border-emerald-400/70 rounded-2xl flex items-center justify-center">
-                      <div className="w-4 h-4 border-t-2 border-l-2 border-emerald-300 absolute -top-1 -left-1" />
-                      <div className="w-4 h-4 border-t-2 border-r-2 border-emerald-300 absolute -top-1 -right-1" />
-                      <div className="w-4 h-4 border-b-2 border-l-2 border-emerald-300 absolute -bottom-1 -left-1" />
-                      <div className="w-4 h-4 border-b-2 border-r-2 border-emerald-300 absolute -bottom-1 -right-1" />
-                      <ScanLine className="w-8 h-8 text-emerald-400/80 animate-pulse" />
-                    </div>
-                  </div>
-
-                  {/* Top Overlay Controls */}
-                  <div className="relative z-10 flex items-center justify-between text-white">
-                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-bold text-emerald-300 border border-emerald-500/30">
-                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                      Live Camera View
-                    </span>
-
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        onClick={toggleCameraFacing}
-                        className="p-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white transition-colors cursor-pointer border border-white/20"
-                        title="Switch front / rear camera"
-                      >
-                        <RefreshCw className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={stopCamera}
-                        className="p-2 rounded-full bg-black/60 hover:bg-red-600 backdrop-blur-md text-white transition-colors cursor-pointer border border-white/20"
-                        title="Close camera"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Bottom Shutter Capture Bar */}
-                  <div className="relative z-10 flex items-center justify-center">
-                    <button
-                      type="button"
-                      onClick={capturePhotoFromCamera}
-                      className="group px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2.5 shadow-2xl hover:shadow-emerald-500/50 active:scale-95 transition-all cursor-pointer"
-                    >
-                      <Camera className="w-4 h-4 text-slate-950" />
-                      <span>Click Photo to Classify</span>
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* ── IMAGE PREVIEW / UPLOAD DROPZONE ── */
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="group relative h-52 sm:h-60 rounded-2xl border-2 border-dashed border-[#142e1f]/20 hover:border-emerald-600 bg-stone-50/70 hover:bg-emerald-50/30 overflow-hidden cursor-pointer transition-all flex flex-col items-center justify-center text-center p-4"
+              {/* Workflow Navigation Tabs */}
+              <div className="flex border-b border-slate-200 gap-1 pb-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveAiTab('species')}
+                  className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer ${
+                    activeAiTab === 'species'
+                      ? 'bg-purple-100 text-purple-900 border border-purple-300 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
                 >
-                  {imagePreviewUrl ? (
-                    <>
-                      <img
-                        src={imagePreviewUrl}
-                        alt="Tree preview"
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                  <TreePine className="w-4 h-4 text-emerald-600" />
+                  <span>1. Species Detection</span>
+                  {hasPredicted && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveAiTab('age')}
+                  className={`px-4 py-2 rounded-xl text-xs font-extrabold flex items-center gap-2 transition-all cursor-pointer ${
+                    activeAiTab === 'age'
+                      ? 'bg-purple-100 text-purple-900 border border-purple-300 shadow-2xs'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <Clock className="w-4 h-4 text-purple-600" />
+                  <span>2. Bark Age Analysis</span>
+                  {barkAgeResult && <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />}
+                </button>
+              </div>
 
-                      {/* Radar Scanning Line Animation while processing */}
-                      {isProcessing && (
-                        <div className="absolute inset-x-0 h-1 bg-emerald-400 shadow-[0_0_15px_#10b981] animate-pulse top-1/2 -translate-y-1/2 z-10" />
-                      )}
+              {/* TAB 1: SPECIES DETECTION */}
+              {activeAiTab === 'species' && (
+                <div className="space-y-4">
+                  {/* Camera / Upload Action Bar matching user screenshot */}
+                  {!isCameraActive && (
+                    <div className="flex flex-wrap gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => startCamera()}
+                        className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-900 border-2 border-purple-200 hover:bg-purple-100 flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4 text-purple-700" />
+                        <span>Open Camera</span>
+                      </button>
+                      <label className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-800 border-2 border-slate-200 hover:bg-slate-200 flex items-center gap-2 cursor-pointer transition-all shadow-xs">
+                        <Upload className="w-4 h-4 text-slate-700" />
+                        <span>Upload Foliage Photo</span>
+                        <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                      </label>
+                      <button
+                        type="button"
+                        disabled={(!selectedImageFile && !imagePreviewUrl) || isProcessing}
+                        onClick={() => {
+                          if (!selectedImageFile && !imagePreviewUrl) {
+                            fileInputRef.current?.click();
+                            return;
+                          }
+                          analyzeImageWithModel(selectedImageFile);
+                        }}
+                        className="px-5 py-2.5 rounded-xl text-xs font-black bg-[#047857] hover:bg-[#065f46] text-white flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all ml-auto cursor-pointer"
+                      >
+                        {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <ScanLine className="w-4 h-4" />}
+                        <span>{isProcessing ? 'Analyzing Image...' : 'Detect Species with AI'}</span>
+                      </button>
+                    </div>
+                  )}
 
-                      <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 text-white text-xs z-10">
-                        <span className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full font-semibold flex items-center gap-1.5 text-[11px] border border-white/10">
-                          {selectedImageFile?.name?.includes('tree_live_photo') ? (
-                            <>
-                              <Camera className="w-3.5 h-3.5 text-emerald-400" />
-                              <span>Live Camera Photo</span>
-                            </>
-                          ) : (
-                            <>
+                  {/* Camera Error Alert */}
+                  {cameraError && (
+                    <div className="p-3 rounded-2xl bg-amber-50 border border-amber-300 text-amber-900 text-xs flex items-center justify-between gap-2 animate-fadeIn">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                        <span>{cameraError}</span>
+                      </div>
+                      <button type="button" onClick={() => setCameraError('')} className="text-amber-700 hover:text-amber-900">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                  <canvas ref={canvasRef} className="hidden" />
+
+                  {/* Interactive Camera Viewfinder OR Image Preview / Dropzone */}
+                  {isCameraActive ? (
+                    /* ── LIVE CAMERA VIEWFINDER ── */
+                    <div className="relative h-64 sm:h-72 rounded-2xl overflow-hidden bg-black border-2 border-emerald-500 shadow-xl flex flex-col justify-between p-3 select-none">
+                      <video ref={videoRef} autoPlay playsInline muted className="absolute inset-0 w-full h-full object-cover" />
+                      <div className={`absolute inset-0 bg-white transition-opacity duration-200 pointer-events-none z-20 ${isShutterFlashing ? 'opacity-90' : 'opacity-0'}`} />
+                      <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+                        <div className="w-44 h-44 sm:w-52 sm:h-52 border-2 border-dashed border-emerald-400/70 rounded-2xl flex items-center justify-center">
+                          <div className="w-4 h-4 border-t-2 border-l-2 border-emerald-300 absolute -top-1 -left-1" />
+                          <div className="w-4 h-4 border-t-2 border-r-2 border-emerald-300 absolute -top-1 -right-1" />
+                          <div className="w-4 h-4 border-b-2 border-l-2 border-emerald-300 absolute -bottom-1 -left-1" />
+                          <div className="w-4 h-4 border-b-2 border-r-2 border-emerald-300 absolute -bottom-1 -right-1" />
+                          <ScanLine className="w-8 h-8 text-emerald-400/80 animate-pulse" />
+                        </div>
+                      </div>
+                      <div className="relative z-10 flex items-center justify-between text-white">
+                        <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-[11px] font-bold text-emerald-300 border border-emerald-500/30">
+                          <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                          Live Camera View
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <button type="button" onClick={toggleCameraFacing} className="p-2 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white transition-colors cursor-pointer border border-white/20">
+                            <RefreshCw className="w-4 h-4" />
+                          </button>
+                          <button type="button" onClick={stopCamera} className="p-2 rounded-full bg-black/60 hover:bg-red-600 backdrop-blur-md text-white transition-colors cursor-pointer border border-white/20">
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      <div className="relative z-10 flex items-center justify-center">
+                        <button type="button" onClick={capturePhotoFromCamera} className="group px-6 py-2.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2.5 shadow-2xl hover:shadow-emerald-500/50 active:scale-95 transition-all cursor-pointer">
+                          <Camera className="w-4 h-4 text-slate-950" />
+                          <span>Click Photo to Classify</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* ── IMAGE PREVIEW / UPLOAD DROPZONE ── */
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="group relative h-52 sm:h-60 rounded-2xl border-2 border-dashed border-[#142e1f]/20 hover:border-emerald-600 bg-stone-50/70 hover:bg-emerald-50/30 overflow-hidden cursor-pointer transition-all flex flex-col items-center justify-center text-center p-4"
+                    >
+                      {imagePreviewUrl ? (
+                        <>
+                          <img src={imagePreviewUrl} alt="Tree preview" className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                          {isProcessing && (
+                            <div className="absolute inset-x-0 h-1 bg-emerald-400 shadow-[0_0_15px_#10b981] animate-pulse top-1/2 -translate-y-1/2 z-10" />
+                          )}
+                          <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 text-white text-xs z-10">
+                            <span className="bg-black/60 backdrop-blur-md px-3 py-1 rounded-full font-semibold flex items-center gap-1.5 text-[11px] border border-white/10">
                               <Leaf className="w-3.5 h-3.5 text-emerald-400" />
                               <span className="truncate max-w-[140px] sm:max-w-[200px]">
                                 {selectedImageFile ? selectedImageFile.name : `${sampleActiveKey || 'Specimen'} Photo`}
                               </span>
-                            </>
-                          )}
-                        </span>
+                            </span>
+                            <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={() => analyzeImageWithModel(selectedImageFile)}
+                                disabled={isProcessing}
+                                className="bg-emerald-600 hover:bg-emerald-500 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 text-white border border-emerald-300/40 shadow-xs cursor-pointer active:scale-95 transition-all"
+                              >
+                                <Sparkles className="w-3 h-3 text-emerald-200" />
+                                <span>{isProcessing ? 'Analyzing...' : 'Predict'}</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="bg-white/25 hover:bg-white/35 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 text-white border border-white/20 shadow-xs cursor-pointer"
+                              >
+                                <Upload className="w-3 h-3" />
+                                <span>Change</span>
+                              </button>
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="space-y-3 text-[#44594c]">
+                          <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
+                            <Upload className="w-5 h-5" />
+                          </div>
+                          <div className="text-sm font-bold text-[#142e1f]">
+                            Upload foliage photo or click to use camera
+                          </div>
+                          <p className="text-xs text-stone-500 max-w-xs">
+                            High-confidence species classification via deep learning neural network.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                        <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            type="button"
-                            onClick={() => analyzeImageWithModel(selectedImageFile)}
-                            disabled={isProcessing}
-                            className="bg-emerald-600 hover:bg-emerald-500 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 text-white border border-emerald-300/40 shadow-xs cursor-pointer active:scale-95 transition-all"
-                            title="Predict species using AI neural network"
-                          >
-                            <Sparkles className="w-3 h-3 text-emerald-200" />
-                            <span>{isProcessing ? 'Analyzing...' : 'Predict'}</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => startCamera()}
-                            className="bg-[#142e1f]/85 hover:bg-[#142e1f] backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 text-white border border-emerald-400/30 shadow-xs cursor-pointer"
-                          >
-                            <Camera className="w-3 h-3 text-emerald-400" />
-                            <span>Camera</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => fileInputRef.current?.click()}
-                            className="bg-white/25 hover:bg-white/35 backdrop-blur-md px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 text-white border border-white/20 shadow-xs cursor-pointer"
-                          >
-                            <Upload className="w-3 h-3" />
-                            <span>Upload</span>
-                          </button>
+                  {/* Real-time AI Prediction Result Card */}
+                  {hasPredicted && predictionResult && (
+                    <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50 border-2 border-emerald-300 shadow-sm flex flex-col gap-2.5 animate-fadeIn">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#142e1f] text-emerald-300 flex items-center justify-center shrink-0 shadow-xs">
+                            <Leaf className="w-5 h-5 text-emerald-400" />
+                          </div>
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="text-xs uppercase font-extrabold tracking-wider text-emerald-800">
+                                Identified Species:
+                              </span>
+                              <span className="text-sm font-black text-[#142e1f]">
+                                {predictionResult.species}
+                              </span>
+                              <span className="text-xs italic text-stone-600 font-medium">
+                                ({predictionResult.scientific})
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[#44594c]">
+                              <span className="font-semibold text-emerald-900 bg-emerald-200/60 px-2 py-0.5 rounded-md font-mono">
+                                {predictionResult.confidence}% Confidence
+                              </span>
+                              <span>&bull;</span>
+                              <span className="text-stone-500 truncate max-w-[200px]">
+                                {predictionResult.source}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 self-end sm:self-center">
+                          <span className="text-[11px] font-bold text-emerald-800 bg-white/90 px-2.5 py-1 rounded-full border border-emerald-300 flex items-center gap-1 shadow-2xs">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                            Auto-selected in Step 2
+                          </span>
                         </div>
                       </div>
-                    </>
-                  ) : (
-                    <div className="space-y-3 text-[#44594c]">
-                      <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto group-hover:scale-110 transition-transform">
-                        <Upload className="w-5 h-5" />
-                      </div>
-                      <div className="text-sm font-bold text-[#142e1f]">
-                        Upload photo or click to use camera
-                      </div>
-                      <p className="text-xs text-stone-500 max-w-xs">
-                        High-confidence species classification via deep learning model.
-                      </p>
-                      <div className="flex items-center justify-center gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
+
+                      {/* Next step prompt to Bark Age Analysis */}
+                      <div className="pt-2 border-t border-emerald-200 flex items-center justify-between">
+                        <span className="text-xs font-bold text-slate-800">
+                          Step 2: Add bark image to calculate approximate tree age
+                        </span>
                         <button
                           type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow"
+                          onClick={() => setActiveAiTab('age')}
+                          className="px-3.5 py-1.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                         >
-                          <Upload className="w-3.5 h-3.5" /> Upload Photo
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => startCamera()}
-                          className="px-3 py-1.5 rounded-xl bg-[#142e1f] hover:bg-[#1a3d29] text-white font-bold text-xs flex items-center gap-1.5 shadow"
-                        >
-                          <Camera className="w-3.5 h-3.5 text-emerald-400" /> Click Photo
+                          <span>Bark Age Studio</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -1464,96 +1711,168 @@ export default function OverviewTreeLab({ onEnterApp }) {
                 </div>
               )}
 
-              {/* Primary Predict Tree Species Button */}
-              <div className="mt-3.5 space-y-2.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!selectedImageFile && !imagePreviewUrl) {
-                      fileInputRef.current?.click();
-                      return;
-                    }
-                    analyzeImageWithModel(selectedImageFile);
-                  }}
-                  disabled={isProcessing}
-                  className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-500 hover:to-teal-500 active:scale-[0.99] text-white font-black text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-700/25 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-                  title="Run deep neural network classifier to identify tree species from photo"
-                >
-                  {isProcessing ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      <span>Predicting Species with AI Model (EfficientNet-B0)...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4 text-emerald-200 animate-pulse" />
-                      <span>Predict Tree Species (AI Model)</span>
-                      <ScanLine className="w-4 h-4 text-emerald-200 ml-1" />
-                    </>
-                  )}
-                </button>
+              {/* TAB 2: BARK AGE ANALYSIS (EFFICIENTNET-B4) */}
+              {activeAiTab === 'age' && (
+                <div className="space-y-4">
+                  {/* Botanical Context Badge */}
+                  <div className="p-3.5 rounded-xl bg-purple-50 border border-purple-200 flex flex-wrap items-center justify-between gap-3 text-xs font-semibold text-purple-950">
+                    <div className="flex items-center gap-2">
+                      <TreePine className="w-4 h-4 text-emerald-700" />
+                      <span>Species: <strong>{selectedSpeciesKey} Tree</strong></span>
+                      <span className="text-[11px] text-purple-800 bg-purple-200/80 px-2 py-0.5 rounded-md font-bold">
+                        Growth Factor: {metrics.growthRate}
+                      </span>
+                    </div>
+                    <div>
+                      <span>DBH: <strong>{metrics.dbh} cm</strong> (GBH: {gbhInput} cm)</span>
+                    </div>
+                  </div>
 
-                {/* Real-time AI Prediction Result Card */}
-                {hasPredicted && predictionResult && (
-                  <div className="p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/70 to-emerald-50 border-2 border-emerald-300 shadow-sm flex flex-col gap-2.5 animate-fadeIn">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-[#142e1f] text-emerald-300 flex items-center justify-center shrink-0 shadow-xs">
-                          <Leaf className="w-5 h-5 text-emerald-400" />
-                        </div>
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-xs uppercase font-extrabold tracking-wider text-emerald-800">
-                              AI Prediction:
-                            </span>
-                            <span className="text-sm font-black text-[#142e1f]">
-                              {predictionResult.species}
-                            </span>
-                            <span className="text-xs italic text-stone-600 font-medium">
-                              ({predictionResult.scientific})
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[#44594c]">
-                            <span className="font-semibold text-emerald-900 bg-emerald-200/60 px-2 py-0.5 rounded-md font-mono">
-                              {predictionResult.confidence}% Confidence
-                            </span>
-                            <span>&bull;</span>
-                            <span className="text-stone-500 truncate max-w-[200px]">
-                              {predictionResult.source}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 self-end sm:self-center">
-                        <span className="text-[11px] font-bold text-emerald-800 bg-white/90 px-2.5 py-1 rounded-full border border-emerald-300 flex items-center gap-1 shadow-2xs">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                          Auto-selected in Step 2
-                        </span>
+                  {/* Bark Camera View */}
+                  {barkCameraOpen && (
+                    <div className="relative rounded-2xl overflow-hidden border-2 border-purple-500 shadow-md">
+                      <video ref={barkVideoRef} autoPlay playsInline muted className="w-full h-56 object-cover bg-black" />
+                      <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-3">
+                        <button type="button" onClick={captureBarkPhoto} className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-700 text-white flex items-center gap-2 shadow-lg hover:bg-purple-600 transition-colors cursor-pointer">
+                          <Camera className="w-4 h-4" /> Capture Bark Photo
+                        </button>
+                        <button type="button" onClick={closeBarkCamera} className="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 text-white flex items-center gap-2 hover:bg-slate-700 transition-colors cursor-pointer">
+                          <X className="w-4 h-4" /> Cancel
+                        </button>
                       </div>
                     </div>
+                  )}
+                  <canvas ref={barkCanvasRef} className="hidden" />
 
-                    {/* Top probabilities breakdown from EfficientNet */}
-                    {predictionResult.allPredictions && predictionResult.allPredictions.length > 1 && (
-                      <div className="pt-2 border-t border-emerald-200/60 flex flex-wrap items-center gap-1.5 text-[10px]">
-                        <span className="font-bold text-emerald-900 uppercase tracking-wider text-[9px]">Model Probabilities:</span>
-                        {predictionResult.allPredictions.slice(0, 4).map((p) => (
-                          <span
-                            key={p.class || p.display_name}
-                            className={`px-2 py-0.5 rounded-md font-mono ${
-                              p.confidence >= 50
-                                ? 'bg-emerald-600 text-white font-bold'
-                                : 'bg-emerald-100/80 text-emerald-800'
-                            }`}
-                          >
-                            {p.display_name || p.class}: {p.confidence}%
+                  {/* Bark Preview Image */}
+                  {barkAgePreview && !barkCameraOpen && (
+                    <div className="relative rounded-2xl overflow-hidden border-2 border-slate-200 shadow-xs">
+                      <img src={barkAgePreview} alt="Bark preview" className="w-full h-44 object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => { setBarkAgeImage(null); setBarkAgePreview(null); setBarkAgeResult(null); }}
+                        className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/70 text-white hover:bg-red-600 transition-colors cursor-pointer"
+                        title="Remove bark image"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Bark Camera / Upload Action Bar */}
+                  {!barkCameraOpen && (
+                    <div className="flex flex-wrap gap-2.5">
+                      <button
+                        type="button"
+                        onClick={openBarkCamera}
+                        className="px-4 py-2.5 rounded-xl text-xs font-bold bg-purple-50 text-purple-900 border-2 border-purple-200 hover:bg-purple-100 flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+                      >
+                        <Camera className="w-4 h-4 text-purple-700" /> Open Camera (Bark)
+                      </button>
+                      <label className="px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-800 border-2 border-slate-200 hover:bg-slate-200 flex items-center gap-2 cursor-pointer transition-all shadow-xs">
+                        <Upload className="w-4 h-4 text-slate-700" /> Upload Bark Image
+                        <input type="file" accept="image/*" className="hidden" onChange={handleBarkAgeImageUpload} />
+                      </label>
+                      <button
+                        type="button"
+                        disabled={!barkAgeImage || predictingAge}
+                        onClick={() => handlePredictBarkAge()}
+                        className="px-5 py-2.5 rounded-xl text-xs font-black bg-purple-700 hover:bg-purple-800 text-white flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-md transition-all ml-auto cursor-pointer"
+                      >
+                        {predictingAge ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
+                        <span>{predictingAge ? 'Analyzing Bark Texture...' : 'Estimate Age with Bark Model'}</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Bark Age Result Card */}
+                  {barkAgeResult && (
+                    <div className="p-5 rounded-2xl border-2 border-purple-300 bg-purple-50/70 space-y-4 shadow-xs animate-fadeIn">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-black uppercase tracking-wider text-purple-900 bg-purple-200 px-2.5 py-1 rounded-md">
+                              Bark Life Stage: {barkAgeResult.stage_label}
+                            </span>
+                            <span className="text-xs font-bold text-purple-700 bg-white border border-purple-200 px-2 py-0.5 rounded-md">
+                              Typical: {barkAgeResult.age_range}
+                            </span>
+                          </div>
+                          <h4 className="text-2xl font-black text-slate-900 mt-2 font-['Fraunces'] flex items-baseline gap-2">
+                            <span>~{barkAgeResult.approximate_age}</span>
+                            <span className="text-sm font-bold text-slate-600">years approximate age</span>
+                          </h4>
+                        </div>
+
+                        <div className="text-right">
+                          <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-purple-200 text-purple-950 border border-purple-300">
+                            AI Confidence: {barkAgeResult.confidence}%
                           </span>
-                        ))}
+                        </div>
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
+
+                      <p className="text-xs text-slate-700 font-medium leading-relaxed bg-white/70 p-3 rounded-xl border border-purple-200">
+                        {barkAgeResult.comparison_summary}
+                      </p>
+
+                      {/* Growth Rate & DBH Comparison Matrix */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                        <div className="p-2.5 bg-white rounded-xl border border-purple-200">
+                          <div className="text-[10px] uppercase font-bold text-slate-500">Growth Factor</div>
+                          <div className="font-extrabold text-[#022c17] mt-0.5">{metrics.growthRate}</div>
+                        </div>
+                        <div className="p-2.5 bg-white rounded-xl border border-purple-200">
+                          <div className="text-[10px] uppercase font-bold text-slate-500">Tree DBH</div>
+                          <div className="font-extrabold text-[#022c17] mt-0.5">{metrics.dbh} cm</div>
+                        </div>
+                        <div className="p-2.5 bg-white rounded-xl border border-purple-200">
+                          <div className="text-[10px] uppercase font-bold text-slate-500">Growth Age</div>
+                          <div className="font-extrabold text-purple-800 mt-0.5">{barkAgeResult.growth_age ? `${barkAgeResult.growth_age} yr` : `${metrics.estimatedAge} yr`}</div>
+                        </div>
+                        <div className="p-2.5 bg-white rounded-xl border border-purple-200">
+                          <div className="text-[10px] uppercase font-bold text-slate-500">Bark Morphology</div>
+                          <div className="font-extrabold text-purple-800 mt-0.5">{barkAgeResult.bark_age ? `${barkAgeResult.bark_age} yr` : `${barkAgeResult.approximate_age} yr`}</div>
+                        </div>
+                      </div>
+
+                      {/* Probability distribution across all 4 stages */}
+                      {barkAgeResult.all_stages && barkAgeResult.all_stages.length > 0 && (
+                        <div className="space-y-1.5 pt-1">
+                          <div className="text-[11px] font-bold text-slate-600 uppercase tracking-wide">Maturity Class Probabilities:</div>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {barkAgeResult.all_stages.map((st) => (
+                              <div key={st.stage} className="bg-white p-2 rounded-lg border border-purple-100 text-xs">
+                                <div className="flex justify-between items-center text-[11px] font-bold text-slate-700">
+                                  <span>{st.label}</span>
+                                  <span>{st.confidence}%</span>
+                                </div>
+                                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mt-1">
+                                  <div className="bg-purple-600 h-full rounded-full" style={{ width: `${st.confidence}%` }} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Apply to Impact Engine Button */}
+                      <div className="pt-2 flex items-center justify-between border-t border-purple-200">
+                        <span className="text-xs text-slate-600 font-semibold">
+                          Apply this bark age directly to Tree Impact Engine?
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => applyBarkAgeToEngine(barkAgeResult.approximate_age)}
+                          className="px-4 py-2 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-black flex items-center gap-2 shadow-sm transition-all cursor-pointer"
+                        >
+                          <CheckCircle2 className="w-4 h-4 text-purple-200" />
+                          <span>Apply Age ({barkAgeResult.approximate_age} yr) to Impact Engine</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* STEP 2: Allometric Field Controls */}
@@ -1561,7 +1880,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
               <div className="flex items-center justify-between">
                 <label className="text-xs font-extrabold uppercase tracking-wider text-[#142e1f] flex items-center gap-1.5">
                   <span className="w-5 h-5 rounded-full bg-[#142e1f] text-white flex items-center justify-center text-[10px]">2</span>
-                  Allometric Field Parameters
+                  Trunk Girth &amp; Tree Parameters
                 </label>
                 <div className="flex items-center gap-1.5">
                   <span className="text-xs font-mono font-bold text-stone-600 bg-stone-100 px-2 py-0.5 rounded-md">
@@ -1683,9 +2002,19 @@ export default function OverviewTreeLab({ onEnterApp }) {
                     type="button"
                     onClick={handleGetLocation}
                     disabled={geoLoading}
-                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 transition-colors disabled:opacity-50 cursor-pointer"
+                    className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 transition-colors disabled:opacity-50 cursor-pointer flex items-center gap-1"
                   >
-                    {geoLoading ? 'Locating...' : 'Get Current GPS'}
+                    {geoLoading ? (
+                      <>
+                        <RefreshCw className="w-3 h-3 animate-spin text-emerald-700" />
+                        <span>Locating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Crosshair className="w-3 h-3" />
+                        <span>Get Current GPS</span>
+                      </>
+                    )}
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -1704,13 +2033,45 @@ export default function OverviewTreeLab({ onEnterApp }) {
                     className="px-2.5 py-1.5 rounded-lg border border-stone-300 bg-white font-mono text-[11px]"
                   />
                 </div>
+                {geoStatus && (
+                  <div className={`mt-2 p-2 rounded-lg text-[11px] flex items-start gap-1.5 leading-snug ${
+                    geoStatus.type === 'success'
+                      ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+                      : geoStatus.type === 'fallback'
+                      ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                      : geoStatus.type === 'info'
+                      ? 'bg-stone-100 text-stone-700 border border-stone-200'
+                      : 'bg-amber-50 text-amber-900 border border-amber-200'
+                  }`}>
+                    {geoStatus.type === 'success' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />}
+                    {geoStatus.type === 'fallback' && <Globe className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />}
+                    {geoStatus.type === 'info' && <RefreshCw className="w-3.5 h-3.5 text-stone-500 animate-spin shrink-0 mt-0.5" />}
+                    {geoStatus.type === 'error' && <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />}
+                    <div className="flex-1">
+                      <span>{geoStatus.message}</span>
+                      {geoStatus.type === 'fallback' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLatitude('20.013100');
+                            setLongitude('73.821316');
+                            setGeoStatus({ type: 'info', message: 'Reset to KK Wagh Campus Center (20.013100, 73.821316)' });
+                          }}
+                          className="ml-2 underline font-semibold text-blue-700 hover:text-blue-900 cursor-pointer"
+                        >
+                          Reset to Campus Center
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Allometric Formulas Note */}
+              {/* Impact Formulas Note */}
               <div className="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200/60 text-[11px] text-emerald-950 flex items-start gap-2">
                 <Info className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Allometric Engine:</strong> DBH = GBH / &pi;. Age = (GBH / &pi;) &times; Growth Rate ({metrics.growthRate}). Tree Height &amp; Crown Spread are derived automatically via standard allometric forestry curves. Total Biomass, Carbon, and Oxygen are derived via IPCC &amp; Chave equations.
+                  <strong>Impact Engine:</strong> DBH = GBH / &pi;. Age = (GBH / &pi;) &times; Growth Rate ({metrics.growthRate}). Tree Height &amp; Crown Spread are derived automatically via forestry growth models. Total Biomass, Carbon, and Oxygen are derived via IPCC &amp; Chave equations.
                 </span>
               </div>
             </div>
@@ -1725,12 +2086,12 @@ export default function OverviewTreeLab({ onEnterApp }) {
               {isCalculating ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Processing Allometry &amp; RAG Knowledge...</span>
+                  <span>Calculating Impact &amp; Knowledge...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4 text-emerald-300 animate-pulse" />
-                  <span>Calculate Tree Allometry &amp; Impact</span>
+                  <span>Calculate Impact of the Tree</span>
                   <ArrowRight className="w-4 h-4 text-emerald-300" />
                 </>
               )}
@@ -1759,7 +2120,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
                     Ready to Calculate {selectedSpeciesKey} Tree
                   </h3>
                   <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-medium">
-                    Enter the trunk girth (GBH in cm) in the input field on the left, then click <strong className="text-[#142e1f]">&quot;Calculate Tree Allometry &amp; Impact&quot;</strong>.
+                    Enter the trunk girth (GBH in cm) in the input field on the left, then click <strong className="text-[#142e1f]">&quot;Calculate Impact of the Tree&quot;</strong>.
                   </p>
                   <p className="text-[11px] text-stone-500 leading-relaxed">
                     The calculation engine will automatically estimate tree height, crown spread, total living biomass, carbon sequestration, oxygen production, automobile emissions offset, and days of adult human respiration.
@@ -1772,7 +2133,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
                   className="mt-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#142e1f] to-emerald-800 hover:from-emerald-900 hover:to-[#142e1f] text-white font-bold text-xs tracking-wide shadow-lg shadow-emerald-950/20 transition-all flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <Sparkles className="w-4 h-4 text-emerald-300" />
-                  <span>Calculate Now ({gbhInput} cm)</span>
+                  <span>Calculate Impact ({gbhInput} cm)</span>
                 </button>
               </div>
             ) : (
@@ -1927,7 +2288,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
                   className="py-3 px-4 rounded-xl text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
                 >
                   <Trees className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Inventory Register</span>
+                  <span>Tree Registration</span>
                 </button>
 
                 <button
@@ -2204,7 +2565,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
                     <span className={`text-sm font-extrabold uppercase tracking-wider ${activeMetricObj.textColor}`}>
                       {activeMetricObj.name}
                     </span>
-                    <span className="text-xs text-stone-500 font-medium">Allometric Detail</span>
+                    <span className="text-xs text-stone-500 font-medium">Impact Detail</span>
                   </div>
 
                   <div className="mt-3 flex items-baseline gap-2">
@@ -3490,8 +3851,17 @@ export default function OverviewTreeLab({ onEnterApp }) {
                   disabled={geoLoading}
                   className="text-[11px] font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 cursor-pointer"
                 >
-                  <Crosshair className="w-3 h-3" />
-                  {geoLoading ? 'Acquiring...' : 'Use Current GPS'}
+                  {geoLoading ? (
+                    <>
+                      <RefreshCw className="w-3 h-3 animate-spin text-emerald-700" />
+                      <span>Acquiring...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Crosshair className="w-3 h-3" />
+                      <span>Use Current GPS</span>
+                    </>
+                  )}
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -3510,6 +3880,25 @@ export default function OverviewTreeLab({ onEnterApp }) {
                   className="w-full px-3 py-2 text-xs font-mono rounded-xl border border-stone-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700"
                 />
               </div>
+              {geoStatus && (
+                <div className={`mt-2 p-2 rounded-lg text-[11px] flex items-start gap-1.5 leading-snug ${
+                  geoStatus.type === 'success'
+                    ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+                    : geoStatus.type === 'fallback'
+                    ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                    : geoStatus.type === 'info'
+                    ? 'bg-stone-100 text-stone-700 border border-stone-200'
+                    : 'bg-amber-50 text-amber-900 border border-amber-200'
+                }`}>
+                  {geoStatus.type === 'success' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />}
+                  {geoStatus.type === 'fallback' && <Globe className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />}
+                  {geoStatus.type === 'info' && <RefreshCw className="w-3.5 h-3.5 text-stone-500 animate-spin shrink-0 mt-0.5" />}
+                  {geoStatus.type === 'error' && <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />}
+                  <div className="flex-1">
+                    <span>{geoStatus.message}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -3574,7 +3963,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
                   onClick={() => onEnterApp?.('register')}
                   className="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 text-stone-800 font-bold text-xs border border-stone-300 shadow-xs cursor-pointer"
                 >
-                  Open Inventory
+                  Tree Registration
                 </button>
               </div>
             </div>

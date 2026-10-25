@@ -15,6 +15,7 @@ import detectionRouter from './routes/detection.js';
 import mapAnalysisRouter from './routes/mapAnalysis.js';
 import authRouter from './routes/auth.js';
 import treeCuttingRouter from './routes/treeCutting.js';
+import projectsRouter from './routes/projects.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +42,7 @@ app.use('/api', calculationRouter);
 app.use('/api/epicollect', epicollectRouter);
 app.use('/api/detection', detectionRouter);
 app.use('/api/map-analysis', mapAnalysisRouter);
+app.use('/api/projects', projectsRouter);
 
 // Additive MongoDB tree-registration module (does not replace SQLite calculator)
 app.use('/api/registered-trees/uploads', express.static(uploadsRoot));

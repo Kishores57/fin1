@@ -18,7 +18,8 @@
     "mongoose": "^9.10.1",
     "multer": "^2.2.0",
     "sqlite3": "^5.1.7",
-    "tree-analysis-platform": "file:.."
+    "tree-analysis-platform": "file:..",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
