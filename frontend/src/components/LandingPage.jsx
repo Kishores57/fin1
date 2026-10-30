@@ -36,7 +36,6 @@ import {
   VolumeX,
   Settings,
 } from 'lucide-react';
-import heroVideo from '../assets/hero.mp4';
 import { API_BASE_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import AuthModal from './AuthModal';
@@ -714,7 +713,7 @@ export default function LandingPage({ onEnterApp }) {
   const [showAuthModal, setShowAuthModal]         = useState(false);
   const [showAdminConsole, setShowAdminConsole]   = useState(false);
   const [authMode, setAuthMode]                   = useState('login');
-  const [pendingTargetTab, setPendingTargetTab]   = useState('register');
+  const [pendingTargetTab, setPendingTargetTab]   = useState('overview');
   const [supportDropdownOpen, setSupportDropdownOpen] = useState(false);
   const [showDonateModal, setShowDonateModal]     = useState(false);
   const [donateTier, setDonateTier]               = useState(25);
@@ -795,7 +794,7 @@ export default function LandingPage({ onEnterApp }) {
     });
   }, []);
 
-  const goTab = (tab = 'register') => {
+  const goTab = (tab = 'overview') => {
     if (isAuthenticated) {
       onEnterApp?.(tab);
     } else {
@@ -807,7 +806,7 @@ export default function LandingPage({ onEnterApp }) {
 
   const handleAuthDone = (authedUser, tab) => {
     setShowAuthModal(false);
-    onEnterApp?.(pendingTargetTab || tab || 'register', authedUser);
+    onEnterApp?.(pendingTargetTab || tab || 'overview', authedUser);
   };
 
   const navTo = (targetView) => {
@@ -942,7 +941,7 @@ export default function LandingPage({ onEnterApp }) {
                 <button
                   type="button"
                   className="lp-pill-cta"
-                  onClick={() => goTab('register')}
+                  onClick={() => goTab('overview')}
                 >
                   <span>Enter Platform</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1057,7 +1056,7 @@ export default function LandingPage({ onEnterApp }) {
                 <button
                   type="button"
                   className="lp-pill-cta"
-                  onClick={() => goTab('register')}
+                  onClick={() => goTab('overview')}
                 >
                   <span>Enter Platform</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1215,7 +1214,6 @@ export default function LandingPage({ onEnterApp }) {
               playsInline
               poster={PHOTO_FOREST_HERO}
             >
-              <source src={heroVideo} type="video/mp4" />
               <source src="/hero.mp4" type="video/mp4" />
             </video>
 
@@ -1645,7 +1643,7 @@ export default function LandingPage({ onEnterApp }) {
                 {/* Explore Links */}
                 <div>
                   <h4>Platform Workspace</h4>
-                  <button type="button" onClick={() => goTab('register')}>Tree Registration</button>
+                  <button type="button" onClick={() => goTab('overview')}>Species Identification</button>
                   <button type="button" onClick={() => goTab('map')}>Live GIS Map</button>
                   <button type="button" onClick={() => goTab('analysis')}>Plantation Dashboard</button>
                   <button type="button" onClick={() => goTab('permits')}>Cutting Permits &amp; Voting</button>

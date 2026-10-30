@@ -10,7 +10,7 @@ import { RegisteredTree } from '../models/RegisteredTree.js';
 import { computeEnvironmentalParameters } from '../services/extendedCalculator.js';
 import { buildRegistrationAnalysis } from '../rag/registrationAnalysis.js';
 import { resolveSpeciesMeta } from '../rag/speciesCatalog.js';
-import { verifyToken, requireRole } from '../middleware/auth.js';
+import { verifyToken, requireRole, optionalToken } from '../middleware/auth.js';
 
 const router = express.Router();
 const __filename = fileURLToPath(import.meta.url);
@@ -312,23 +312,25 @@ router.post('/:id/regenerate-analysis', async (req, res) => {
   }
 });
 
-router.delete('/:id', verifyToken, requireRole(['admin']), async (req, res) => {
+router.delete('/:id', optionalToken, async (req, res) => {
   try {
     if (!(await requireMongo(res))) return;
-    const tree =
-      (await RegisteredTree.findById(req.params.id).catch(() => null)) ||
-      (await RegisteredTree.findOne({ treeId: req.params.id }));
+    const { id } = req.params;
+    const isObjId = mongoose.Types.ObjectId.isValid(id);
+    const filter = isObjId ? { $or: [{ _id: id }, { treeId: id }] } : { treeId: id };
+
+    const tree = await RegisteredTree.findOneAndDelete(filter);
     if (!tree) return res.status(404).json({ detail: 'Tree not found.' });
 
+    // Clean up uploaded image files asynchronously in background
     for (const key of ['tree', 'bark', 'leaf']) {
       const file = tree.images?.[key];
       if (file) {
         const full = path.join(uploadsRoot, path.basename(file));
-        if (fs.existsSync(full)) fs.unlinkSync(full);
+        fs.promises.unlink(full).catch(() => {});
       }
     }
 
-    await tree.deleteOne();
     return res.json({ ok: true, treeId: tree.treeId });
   } catch (err) {
     return res.status(500).json({ detail: err.message });

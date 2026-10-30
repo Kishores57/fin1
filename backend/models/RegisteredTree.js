@@ -44,6 +44,9 @@ const RegisteredTreeSchema = new mongoose.Schema(
   }
 );
 
+RegisteredTreeSchema.index({ createdAt: -1 });
+RegisteredTreeSchema.index({ latitude: 1, longitude: 1 });
+
 export const RegisteredTree =
   mongoose.models.RegisteredTree || mongoose.model('RegisteredTree', RegisteredTreeSchema);
 

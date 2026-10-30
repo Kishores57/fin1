@@ -22,26 +22,21 @@ let photoPrewarmDone = false;
 let photoPrewarmInProgress = false;
 
 function getFallbackTrees() {
-  const possiblePaths = [
-    path.resolve(__dirname, '../data/parsed_trees.json'),
-    path.resolve(__dirname, '../../VanJeevan-main/parsed_trees.json'),
-  ];
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p)) {
-      try {
-        const trees = JSON.parse(fs.readFileSync(p, 'utf-8'));
-        return trees.map((t) => {
-          const age = estimateTreeAge(t.circumference || t.gbh, t.species);
-          return {
-            ...t,
-            age,
-            co2: age * 22,
-            impact: age >= 26 ? 'Critical' : age >= 22 ? 'High' : age >= 10 ? 'Moderate' : 'Developing',
-          };
-        });
-      } catch (e) {
-        console.warn('Error reading fallback trees:', e.message);
-      }
+  const fallbackPath = path.resolve(__dirname, '../data/parsed_trees.json');
+  if (fs.existsSync(fallbackPath)) {
+    try {
+      const trees = JSON.parse(fs.readFileSync(fallbackPath, 'utf-8'));
+      return trees.map((t) => {
+        const age = estimateTreeAge(t.circumference || t.gbh, t.species);
+        return {
+          ...t,
+          age,
+          co2: age * 22,
+          impact: age >= 26 ? 'Critical' : age >= 22 ? 'High' : age >= 10 ? 'Moderate' : 'Developing',
+        };
+      });
+    } catch (e) {
+      console.warn('Error reading fallback trees:', e.message);
     }
   }
   return [];

@@ -5,7 +5,7 @@ import json
 import torch
 import torch.nn as nn
 from torchvision import models, transforms
-from PIL import Image
+from PIL import Image, ImageOps
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -20,6 +20,9 @@ app.add_middleware(
 )
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+if device.type == "cpu":
+    # Optimize CPU inference threads for multi-core devices, laptops and cloud containers
+    torch.set_num_threads(min(4, os.cpu_count() or 1))
 print(f"Using device: {device}")
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -210,10 +213,15 @@ async def predict_species(file: UploadFile = File(...)):
 
     try:
         image_data = await file.read()
-        image = Image.open(io.BytesIO(image_data)).convert("RGB")
+        image = Image.open(io.BytesIO(image_data))
+        # Automatically respect smartphone camera orientation (EXIF tag)
+        image = ImageOps.exif_transpose(image)
+        image = image.convert("RGB")
+        # Bound maximum resolution to 1024px to prevent out-of-memory on mobile photo uploads
+        image.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
         tensor = species_transform(image).unsqueeze(0).to(device)
 
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = species_model(tensor)
             probabilities = torch.nn.functional.softmax(outputs[0], dim=0)
             confidence, predicted_idx = torch.max(probabilities, 0)
@@ -265,10 +273,15 @@ async def predict_age(
 
     try:
         image_data = await file.read()
-        image = Image.open(io.BytesIO(image_data)).convert("RGB")
+        image = Image.open(io.BytesIO(image_data))
+        # Automatically respect smartphone camera orientation (EXIF tag)
+        image = ImageOps.exif_transpose(image)
+        image = image.convert("RGB")
+        # Bound maximum resolution to 1024px to prevent out-of-memory on mobile photo uploads
+        image.thumbnail((1024, 1024), Image.Resampling.LANCZOS)
         tensor = bark_transform(image).unsqueeze(0).to(device)
 
-        with torch.no_grad():
+        with torch.inference_mode():
             outputs = age_model(tensor)
             probabilities = torch.nn.functional.softmax(outputs[0], dim=0)
             confidence, predicted_idx = torch.max(probabilities, 0)

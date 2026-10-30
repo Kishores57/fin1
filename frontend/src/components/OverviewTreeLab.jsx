@@ -46,6 +46,7 @@ import {
   ScanLine,
   TreePine,
   Loader2,
+  Search,
 } from 'lucide-react';
 import { speciesDetectionApi, registeredTreeApi } from '../services/api';
 import { SPECIES_EXTENDED_KNOWLEDGE } from '../data/speciesRagKnowledge';
@@ -54,6 +55,7 @@ import {
   buildLocalMedicinalSummary,
   buildLocalHabitatSummary,
 } from '../data/localSpeciesPacks';
+import { getBiodiversityData } from '../data/biodiversityDatabase';
 
 /**
  * Full Botanical & Ecological Knowledge Base
@@ -70,7 +72,7 @@ const SPECIES_REGISTRY = {
     role: 'Antibacterial air purification, intense urban heat mitigation, high drought tolerance.',
     sampleImage: '/campus_neem_canopy.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Azadirachtin', 'Nimbin', 'Nimbidin', 'Limonoids', 'Quercetin', 'Gedunin'],
     applications: ['Dermatological antiseptic lotions', 'Natural biopesticide sprays', 'Herbal dental extracts', 'Immune modulation tonic'],
     diseases: ['Eczema & cutaneous lesions', 'Bacterial & fungal dermatoses', 'Gingivitis & periodontal inflammation', 'Malaria & febrile symptoms'],
@@ -91,7 +93,7 @@ const SPECIES_REGISTRY = {
     role: 'Massive shade umbrella, keystone biodiversity habitat, supports hundreds of bird & insect species.',
     sampleImage: '/stewardship_tree_canopy.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/banyan_canopy_real.jpg',
     compounds: ['Bengalenoside', 'Flavonoid glycosides', 'Triterpenes', 'Aerial root tannins', 'Beta-sitosterol'],
     applications: ['Astringent root tonics', 'Latex wound dressings', 'Anti-inflammatory poultices', 'Metabolic glucose balancing'],
     diseases: ['Rheumatic joint inflammation', 'Dental abscesses & oral ulcers', 'Superficial skin ulcers', 'Dysentery & gastrointestinal flux'],
@@ -112,7 +114,7 @@ const SPECIES_REGISTRY = {
     role: 'Continuous daytime oxygen synthesis, sacred canopy shelter, soil moisture conservation.',
     sampleImage: '/stewardship_forest_hills.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/peepal_canopy_real.jpg',
     compounds: ['Campesterol', 'Stigmasterol', 'Tannic acid', 'Phenolic flavonoids', 'Arginine'],
     applications: ['Bark decoction mouthwashes', 'Antiasthmatic leaf powders', 'Wound-cleansing leaf extracts', 'Cardiovascular tonics'],
     diseases: ['Chronic respiratory asthma', 'Inflammatory boils & wound crusts', 'Gastrointestinal bleeding', 'Gingival disorders'],
@@ -133,7 +135,7 @@ const SPECIES_REGISTRY = {
     role: 'Atmospheric nitrogen-fixing root nodules, vast microclimate cooling, fast-growing canopy.',
     sampleImage: '/campus_tree_plantation.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/raintree_canopy_real.jpg',
     compounds: ['Pithecellobine alkaloid', 'Saponins', 'Polyphenols', 'Tannins', 'Flavonoid glycosides'],
     applications: ['Antibacterial leaf washes', 'Antidiarrheal bark extracts', 'Cooling scalp washes', 'Traditional sedatives'],
     diseases: ['Bacterial dysentery', 'Intestinal cramps', 'Superficial fungal rashes', 'Insomnia & nervous restlessness'],
@@ -154,7 +156,7 @@ const SPECIES_REGISTRY = {
     role: 'Dense columnar evergreen foliage, sound barrier, fragrant pollinator nectar blooms.',
     sampleImage: '/botanical_red_flora.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/ashoka_canopy_real.jpg',
     compounds: ['Saracin', 'Catechin', 'Epicatechin', 'Leucopelargonidin', 'Organic iron complexes'],
     applications: ['Ashokarishta uterine tonic', 'Hemostatic bark extracts', 'Anti-inflammatory pelvic remedies', 'Dermal astringent lotions'],
     diseases: ['Gynecological hemorrhages & menorrhagia', 'Dysmenorrhea & uterine cramps', 'Internal ulcers', 'Dermatological discoloration'],
@@ -175,7 +177,7 @@ const SPECIES_REGISTRY = {
     role: 'Seasonal fruit canopy, high carbon retention, supports wild pollinators and urban avifauna.',
     sampleImage: '/stewardship_farmer_planting.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/mango_canopy_real.jpg',
     compounds: ['Mangiferin', 'Phenolic acids', 'Anacardic acid', 'Catechins', 'Alpha-terpineol'],
     applications: ['Antidiabetic leaf decoctions', 'Digestive seed powder infusions', 'Anti-inflammatory gum resins', 'Antioxidant skin serums'],
     diseases: ['Type-2 diabetes metabolic support', 'Chronic diarrhea & dysentery', 'Bleeding gums', 'Throat catarrh & hoarseness'],
@@ -196,7 +198,7 @@ const SPECIES_REGISTRY = {
     role: 'Glossy thick foliage traps heavy particulate matter (PM2.5/PM10), robust wind resistance.',
     sampleImage: '/blooming_flora.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/rubber_canopy_real.jpg',
     compounds: ['Latex cis-1,4-polyisoprene', 'Ficaprenol', 'Triterpenes', 'Flavonoids', 'Proteolytic enzymes'],
     applications: ['Antimicrobial latex ointments', 'Mild anti-inflammatory poultices', 'Natural elastomer synthesis', 'Particulate pollutant scrubbers'],
     diseases: ['Minor dermal infections', 'Muscular sprains & swelling', 'Superficial skin warts', 'Insect sting inflammation'],
@@ -217,7 +219,7 @@ const SPECIES_REGISTRY = {
     role: 'Hyper-fast biomass generation, deep fibrous root soil anchoring against flash-flood river erosion.',
     sampleImage: '/campus_tree_plantation.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Tabasheer (organic silica)', 'Silicic acid', 'Flavone glycosides', 'Phenolic peptides'],
     applications: ['Bone & connective tissue mineralizer', 'Natural antipyretic tablets', 'Cooling bronchial infusions', 'Wound styptics'],
     diseases: ['Osteoporosis & joint brittleness', 'Chronic bronchial inflammation', 'Fever & thirst agitation', 'Internal tissue heat'],
@@ -238,7 +240,7 @@ const SPECIES_REGISTRY = {
     role: 'Coastal cyclone resistance, natural electrolyte reservoir, perennial green cover.',
     sampleImage: '/stewardship_farmer_planting.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Lauric acid (monolaurin)', 'Cytokinins', 'Medium-chain triglycerides', 'Potassium-rich mineral salts'],
     applications: ['Antimicrobial virgin coconut oil', 'Electrolyte hydration fluids', 'Dermal barrier lipid restore', 'Digestive energy supplements'],
     diseases: ['Dehydration & heat prostration', 'Fungal tinea & candidiasis', 'Dry xerosis dermatosis', 'Gastrointestinal malnutrition'],
@@ -259,7 +261,7 @@ const SPECIES_REGISTRY = {
     role: 'Compact architectural palm, high salt tolerance, resilient urban decorative canopy.',
     sampleImage: '/campus_neem_canopy.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Polyphenolic antioxidants', 'Cellulose fibers', 'Fatty acid esters'],
     applications: ['Traditional shade cooling', 'Erosion prevention in sandy loam', 'Urban particulate barrier'],
     diseases: ['Thermal heat mitigation', 'Urban particulate pollution filtering'],
@@ -280,7 +282,7 @@ const SPECIES_REGISTRY = {
     role: 'High-density fruit canopy, Vitamin C enrichment, rapid pollinator attraction.',
     sampleImage: '/botanical_red_flora.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Quercetin', 'Guajaverin', 'Vitamin C (ascorbic acid)', 'Caryophyllene', 'Lycopene'],
     applications: ['Antidiabetic leaf tea infusions', 'Astringent oral gargles', 'Anti-diarrheal broths', 'Antimicrobial topical washes'],
     diseases: ['Acute gastroenteritis & diarrhea', 'Oral candidiasis & bleeding gums', 'Hyperglycemia regulation', 'Superficial skin acne'],
@@ -301,7 +303,7 @@ const SPECIES_REGISTRY = {
     role: 'Windbreak buffer, deep mycorrhizal phosphorus uptake, prominent golden brush flowers.',
     sampleImage: '/stewardship_forest_hills.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Resorcinol alkyl derivatives', 'Grevilleol', 'Phenolic glycosides', 'Proteoid cluster exudates'],
     applications: ['Agroforestry shade canopy', 'Windbreak shelterbelt barrier', 'Timber & artisan woodwork'],
     diseases: ['Thermal shock protection for understory crops', 'Soil degradation mitigation'],
@@ -322,7 +324,7 @@ const SPECIES_REGISTRY = {
     role: 'Architectural evergreen conifer, windbreak barrier, year-round urban PM filter.',
     sampleImage: '/stewardship_forest_hills.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Beyerene diterpenes', 'Bioflavonoids', 'Araucaria resin acids', 'Lignans'],
     applications: ['Natural antiseptic wound sealant', 'Aromatic conifer resin', 'Urban acoustic baffle'],
     diseases: ['Minor skin abrasions', 'Atmospheric particulate filtration'],
@@ -343,7 +345,7 @@ const SPECIES_REGISTRY = {
     role: 'Subtropical aromatic spice tree, culinary essential oils, soil-binding hillside canopy.',
     sampleImage: '/botanical_red_flora.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Eugenol', 'Linalool', 'Cinnamic aldehyde', 'Polyphenols', 'Alpha-pinene'],
     applications: ['Ayurvedic digestive Agni stimulator', 'Aromatic culinary spice', 'Glycemic control infusions'],
     diseases: ['Digestive dyspepsia', 'Metabolic glucose balancing', 'Respiratory congestion'],
@@ -364,7 +366,7 @@ const SPECIES_REGISTRY = {
     role: 'Pagoda-tiered coastal shade tree, edible nut crop, tannin-rich aquaculture leaf conditioner.',
     sampleImage: '/stewardship_tree_canopy.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Punicalagin', 'Tannins', 'Squalene', 'Oleic acid', 'Flavonoids'],
     applications: ['Antimicrobial aquaculture water conditioner', 'Liver-protective foliar broths', 'Edible protein nuts'],
     diseases: ['Dysentery & gastrointestinal cramps', 'Aquatic bacterial infections', 'Dermatological irritation'],
@@ -385,7 +387,7 @@ const SPECIES_REGISTRY = {
     role: 'Slender monocot cash crop, multi-tier agroforestry pillar, biodegradable leaf sheaths.',
     sampleImage: '/campus_neem_canopy.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Arecoline', 'Arecaidine', 'Catechin tannins', 'Gallic acid'],
     applications: ['Traditional masticatory (Tambula)', 'Veterinary anthelmintic', 'Biodegradable eco-plates from sheaths'],
     diseases: ['Helminthic parasites (veterinary)', 'Mild digestive stagnation'],
@@ -406,7 +408,7 @@ const SPECIES_REGISTRY = {
     role: 'Massive water-storing pachycaul trunk, centuries-long carbon reservoir, superfood fruit pulp.',
     sampleImage: '/campus_neem_canopy.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Ascorbic acid (Vitamin C)', 'Tartaric acid', 'Polyphenols', 'Pectins', 'Adansonin'],
     applications: ['Electrolyte & hydration fruit pulp drinks', 'Traditional febrifuge bark decoctions', 'Skin barrier seed oil'],
     diseases: ['Scurvy & nutritional depletion', 'Febrile dehydration', 'Cutaneous inflammation'],
@@ -427,7 +429,7 @@ const SPECIES_REGISTRY = {
     role: 'Sacred trifoliate foliage, premier digestive fruit therapeutics (Dashamoola), high drought endurance.',
     sampleImage: '/botanical_red_flora.jpg',
     apothecaryImage: '/medicinal_apothecary.png',
-    habitatImage: '/canopy_biodiversity.png',
+    habitatImage: '/biodiversity/neem_canopy_real.jpg',
     compounds: ['Marmelosin', 'Aegeline', 'Marmin', 'Imperatorin', 'Pectins'],
     applications: ['Ayurvedic ulcerative colitis remedy', 'Digestive cooling Bael Sharbat', 'Dashamoola anti-inflammatory roots'],
     diseases: ['Chronic amoebic dysentery', 'Irritable bowel syndrome (IBS)', 'Glycemic dysregulation', 'Colitis'],
@@ -459,6 +461,9 @@ export default function OverviewTreeLab({ onEnterApp }) {
   const [isCalculating, setIsCalculating] = useState(false);
   const [latitude, setLatitude] = useState('20.013100');
   const [longitude, setLongitude] = useState('73.821316');
+  const [locationAddress, setLocationAddress] = useState('K.K. Wagh Institute Campus, Nashik');
+  const [searchLocationQuery, setSearchLocationQuery] = useState('');
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
   const [geoStatus, setGeoStatus] = useState(null);
 
@@ -470,6 +475,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
   const [hasPredicted, setHasPredicted] = useState(false);
   const [predictionResult, setPredictionResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showAllReasons, setShowAllReasons] = useState(false);
 
   // Interactive Tree Metric Inspector
   const [activeMetricKey, setActiveMetricKey] = useState('oxygen');
@@ -650,6 +656,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
     setMetrics(updated);
     setCalculatedGbh(gbhNum);
     setHasCalculated(true);
+    setShowAllReasons(false);
 
     // Live RAG Retrieval from backend /api/registered-trees/analyze
     setIsRagLoading(true);
@@ -674,115 +681,112 @@ export default function OverviewTreeLab({ onEnterApp }) {
   };
 
   // Fallback IP-based geolocation (fast city-level coordinates when device GPS / permissions are blocked)
-  const fetchLocationViaIp = async () => {
+  const handleSearchLocation = async () => {
+    if (!searchLocationQuery.trim()) return;
+    setIsSearchingLocation(true);
+    setGeoStatus({ type: 'info', message: 'Searching geographic database...' });
     try {
-      const res = await fetch('https://ipwho.is/');
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchLocationQuery.trim())}&limit=1`,
+        { headers: { 'User-Agent': 'VanJeevan-TreeGIS/1.0' } }
+      );
       if (res.ok) {
         const data = await res.json();
-        if (data && data.success && data.latitude && data.longitude) {
-          const lat = Number(data.latitude).toFixed(6);
-          const lng = Number(data.longitude).toFixed(6);
-          const cityInfo = [data.city, data.region, data.country].filter(Boolean).join(', ');
-          return { lat, lng, source: 'network', cityInfo };
+        if (data && data.length > 0) {
+          const top = data[0];
+          const lat = parseFloat(top.lat).toFixed(6);
+          const lng = parseFloat(top.lon).toFixed(6);
+          setLatitude(lat);
+          setLongitude(lng);
+          setLocationAddress(top.display_name);
+          setGeoStatus({
+            type: 'success',
+            message: `📍 Pinned: ${top.display_name.slice(0, 60)}...`,
+          });
+        } else {
+          setGeoStatus({
+            type: 'error',
+            message: 'Location not found. Try searching another landmark, college, or street name.',
+          });
         }
       }
-    } catch (e1) {
-      console.warn('ipwho.is fallback failed:', e1.message);
+    } catch (err) {
+      setGeoStatus({
+        type: 'error',
+        message: 'Location search failed. Check your network connection.',
+      });
+    } finally {
+      setIsSearchingLocation(false);
     }
-
-    try {
-      const res = await fetch('https://ipapi.co/json/');
-      if (res.ok) {
-        const data = await res.json();
-        if (data && data.latitude && data.longitude) {
-          const lat = Number(data.latitude).toFixed(6);
-          const lng = Number(data.longitude).toFixed(6);
-          const cityInfo = [data.city, data.region, data.country_name].filter(Boolean).join(', ');
-          return { lat, lng, source: 'network', cityInfo };
-        }
-      }
-    } catch (e2) {
-      console.warn('ipapi.co fallback failed:', e2.message);
-    }
-
-    return null;
   };
 
-  // Robust Geolocation handler with automatic IP fallback
-  const handleGetLocation = async () => {
+  const handleGetLocation = () => {
     setGeoLoading(true);
-    setGeoStatus({ type: 'info', message: 'Requesting device GPS location...' });
+    setGeoStatus({ type: 'info', message: 'Acquiring real device GPS coordinates...' });
     setErrorMsg('');
 
-    const tryIpFallback = async (reason) => {
-      setGeoStatus({ type: 'info', message: 'Device GPS unavailable. Fetching network/IP location...' });
-      const ipResult = await fetchLocationViaIp();
-      if (ipResult) {
-        setLatitude(ipResult.lat);
-        setLongitude(ipResult.lng);
+    if (!navigator.geolocation) {
+      setGeoStatus({
+        type: 'error',
+        message: 'Geolocation is not supported by this browser. Please type coordinates or search below.',
+      });
+      setGeoLoading(false);
+      return;
+    }
+
+    const applyPosition = async (pos, source) => {
+      const lat = pos.coords.latitude.toFixed(6);
+      const lng = pos.coords.longitude.toFixed(6);
+      const acc = pos.coords.accuracy ? Math.round(pos.coords.accuracy) : null;
+      setLatitude(lat);
+      setLongitude(lng);
+
+      let addrName = '';
+      try {
+        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, {
+          headers: { 'User-Agent': 'VanJeevan-TreeGIS/1.0' },
+        });
+        if (r.ok) {
+          const d = await r.json();
+          addrName = d?.display_name || '';
+          if (addrName) setLocationAddress(addrName);
+        }
+      } catch (e) {
+        console.warn('Reverse geocode failed:', e);
+      }
+
+      if (acc && acc > 80) {
         setGeoStatus({
-          type: 'fallback',
-          message: `Network location detected: ${ipResult.cityInfo || 'Local Region'} (${ipResult.lat}, ${ipResult.lng}). Allow browser GPS permission for meter-level accuracy.`,
+          type: 'warning',
+          message: `⚠️ Approx Network Location: [${lat}, ${lng}] (±${acc}m accuracy) — ${addrName ? addrName.slice(0, 50) + '...' : 'ISP/Wi-Fi'}. If inaccurate, search your exact college/road below.`,
         });
       } else {
         setGeoStatus({
-          type: 'error',
-          message: `${reason || 'Unable to retrieve location'}. Please enter coordinates manually.`,
+          type: 'success',
+          message: `Exact ${source} locked: [${lat}, ${lng}] ${acc ? `(±${acc}m accuracy)` : ''} ${addrName ? `— ${addrName.slice(0, 45)}...` : ''}`,
         });
-        setErrorMsg('Unable to retrieve automatic location. You can enter coordinates manually.');
       }
       setGeoLoading(false);
     };
 
-    if (!navigator.geolocation) {
-      await tryIpFallback('Geolocation is not supported by this browser');
-      return;
-    }
-
-    let isResolved = false;
-    const fallbackTimer = setTimeout(() => {
-      if (!isResolved) {
-        isResolved = true;
-        tryIpFallback('Device GPS request timed out');
-      }
-    }, 9000);
-
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        if (isResolved) return;
-        isResolved = true;
-        clearTimeout(fallbackTimer);
-        const lat = pos.coords.latitude.toFixed(6);
-        const lng = pos.coords.longitude.toFixed(6);
-        const acc = pos.coords.accuracy ? ` (±${Math.round(pos.coords.accuracy)}m)` : '';
-        setLatitude(lat);
-        setLongitude(lng);
-        setGeoStatus({
-          type: 'success',
-          message: `Device GPS coordinates acquired${acc}: ${lat}, ${lng}`,
-        });
-        setGeoLoading(false);
+      (pos) => applyPosition(pos, 'satellite GPS'),
+      (err) => {
+        console.warn('High-accuracy GPS attempt failed, trying device network:', err.message);
+        navigator.geolocation.getCurrentPosition(
+          (pos) => applyPosition(pos, 'device network'),
+          (err2) => {
+            console.error('All device geolocation attempts failed:', err2.message);
+            setGeoStatus({
+              type: 'error',
+              message: 'Device GPS unavailable. Please search your landmark/campus below.',
+            });
+            setGeoLoading(false);
+          },
+          { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+        );
       },
-      async (err) => {
-        if (isResolved) return;
-        isResolved = true;
-        clearTimeout(fallbackTimer);
-        let reason = 'Device GPS failed';
-        if (err.code === 1) {
-          reason = 'Browser location permission denied';
-        } else if (err.code === 2) {
-          reason = 'Device position unavailable (Windows location service may be disabled)';
-        } else if (err.code === 3) {
-          reason = 'GPS acquisition timed out';
-        }
-        console.warn('Geolocation error:', err.code, err.message, reason);
-        await tryIpFallback(reason);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 8500,
-        maximumAge: 30000,
-      }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -1002,6 +1006,8 @@ export default function OverviewTreeLab({ onEnterApp }) {
       const saved = await registeredTreeApi.create(fd);
       setSavedTreeRecord(saved);
       setSaveSuccessMsg(`Tree ${saved.treeId} (${finalTreeName}) successfully saved to MongoDB Database and pinned on the GIS Map!`);
+      // Immediately notify GIS Map so it renders and pins the tree without page reload
+      window.dispatchEvent(new CustomEvent('tree-registered', { detail: saved }));
     } catch (err) {
       console.error('Save tree error:', err);
       setSaveErrorMsg(err.response?.data?.detail || err.message || 'Failed to save tree to database.');
@@ -1259,6 +1265,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
     updated.estimatedAge = numAge;
     setMetrics(updated);
     setHasCalculated(true);
+    setShowAllReasons(false);
   };
 
   // Image Upload handler
@@ -1340,10 +1347,8 @@ export default function OverviewTreeLab({ onEnterApp }) {
             source: 'EfficientNet-B0 Deep Learning Model',
             allPredictions: result.all_predictions || [],
           });
-          if (hasCalculated) {
-            const gbhNum = Math.max(5, Number(gbhInput) || 65);
-            setMetrics(computeAllometry(matched, gbhNum));
-          }
+          const gbhNum = Math.max(5, Number(gbhInput) || 65);
+          setMetrics(computeAllometry(matched, gbhNum));
         } else if (result && result.error) {
           throw new Error(result.error);
         }
@@ -1367,6 +1372,8 @@ export default function OverviewTreeLab({ onEnterApp }) {
         source: 'EfficientNet-B0 Calibrated Classifier',
         allPredictions: [],
       });
+      const gbhNum = Math.max(5, Number(gbhInput) || 65);
+      setMetrics(computeAllometry(selectedSpeciesKey, gbhNum));
       setAnalyzed(true);
       setHasPredicted(true);
     } finally {
@@ -1915,11 +1922,9 @@ export default function OverviewTreeLab({ onEnterApp }) {
                     setTreeNameInput(`${newKey} Specimen`);
                     setSaveSuccessMsg('');
                     setSaveErrorMsg('');
-                    if (hasCalculated) {
-                      const gbhNum = Math.max(5, Number(gbhInput) || 65);
-                      const updated = computeAllometry(newKey, gbhNum);
-                      setMetrics(updated);
-                    }
+                    const gbhNum = Math.max(5, Number(gbhInput) || 65);
+                    const updated = computeAllometry(newKey, gbhNum);
+                    setMetrics(updated);
                   }}
                   className="w-full px-3 py-2 text-sm rounded-xl border border-stone-300 bg-stone-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#142e1f]"
                 >
@@ -2017,51 +2022,90 @@ export default function OverviewTreeLab({ onEnterApp }) {
                     )}
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 mb-2">
                   <input
                     type="text"
                     value={latitude}
                     onChange={(e) => setLatitude(e.target.value)}
-                    placeholder="Latitude"
+                    placeholder="Latitude (e.g. 20.013100)"
                     className="px-2.5 py-1.5 rounded-lg border border-stone-300 bg-white font-mono text-[11px]"
                   />
                   <input
                     type="text"
                     value={longitude}
                     onChange={(e) => setLongitude(e.target.value)}
-                    placeholder="Longitude"
+                    placeholder="Longitude (e.g. 73.821316)"
                     className="px-2.5 py-1.5 rounded-lg border border-stone-300 bg-white font-mono text-[11px]"
                   />
                 </div>
+
+                {/* Search Landmark / Area */}
+                <div className="flex gap-1.5 mb-2">
+                  <div className="relative flex-1">
+                    <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={searchLocationQuery}
+                      onChange={(e) => setSearchLocationQuery(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearchLocation(); } }}
+                      placeholder="Search landmark, campus, or area (e.g. KK Wagh, College Road)..."
+                      className="w-full pl-8 pr-2 py-1.5 rounded-lg border border-stone-300 bg-white text-[11px] outline-none focus:border-emerald-700"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSearchLocation}
+                    disabled={isSearchingLocation}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                  >
+                    {isSearchingLocation ? <RefreshCw className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
+                    <span>Find</span>
+                  </button>
+                </div>
+
+                {/* Verified Address Banner */}
+                {locationAddress && (
+                  <div className="mb-2 p-2 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-950 flex items-start gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-700 shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-[10px] uppercase text-emerald-800 block">Identified Address:</span>
+                      <span className="text-slate-800 font-medium">{locationAddress}</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between text-[10px] text-stone-500 mb-1">
+                  <span>Quick Preset:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLatitude('20.013100');
+                      setLongitude('73.821316');
+                      setLocationAddress('K.K. Wagh Institute of Engineering Education & Research, Nashik, Maharashtra');
+                      setGeoStatus({ type: 'info', message: 'Set to K.K. Wagh Campus Center (20.013100, 73.821316)' });
+                    }}
+                    className="text-emerald-700 hover:underline font-semibold cursor-pointer"
+                  >
+                    📍 Set to KK Wagh Campus Center
+                  </button>
+                </div>
+
                 {geoStatus && (
                   <div className={`mt-2 p-2 rounded-lg text-[11px] flex items-start gap-1.5 leading-snug ${
                     geoStatus.type === 'success'
                       ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
                       : geoStatus.type === 'fallback'
-                      ? 'bg-blue-50 text-blue-900 border border-blue-200'
+                      ? 'bg-amber-50 text-amber-900 border border-amber-200'
                       : geoStatus.type === 'info'
                       ? 'bg-stone-100 text-stone-700 border border-stone-200'
-                      : 'bg-amber-50 text-amber-900 border border-amber-200'
+                      : 'bg-red-50 text-red-900 border border-red-200'
                   }`}>
                     {geoStatus.type === 'success' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />}
-                    {geoStatus.type === 'fallback' && <Globe className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />}
+                    {geoStatus.type === 'fallback' && <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />}
                     {geoStatus.type === 'info' && <RefreshCw className="w-3.5 h-3.5 text-stone-500 animate-spin shrink-0 mt-0.5" />}
-                    {geoStatus.type === 'error' && <AlertCircle className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />}
+                    {geoStatus.type === 'error' && <AlertCircle className="w-3.5 h-3.5 text-red-600 shrink-0 mt-0.5" />}
                     <div className="flex-1">
                       <span>{geoStatus.message}</span>
-                      {geoStatus.type === 'fallback' && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setLatitude('20.013100');
-                            setLongitude('73.821316');
-                            setGeoStatus({ type: 'info', message: 'Reset to KK Wagh Campus Center (20.013100, 73.821316)' });
-                          }}
-                          className="ml-2 underline font-semibold text-blue-700 hover:text-blue-900 cursor-pointer"
-                        >
-                          Reset to Campus Center
-                        </button>
-                      )}
                     </div>
                   </div>
                 )}
@@ -2282,14 +2326,6 @@ export default function OverviewTreeLab({ onEnterApp }) {
                   <span>Why Not Cut ({doNotCutReasons.length} Reasons)</span>
                 </a>
 
-                <button
-                  type="button"
-                  onClick={() => onEnterApp?.('register')}
-                  className="py-3 px-4 rounded-xl text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition-all flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
-                >
-                  <Trees className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Tree Registration</span>
-                </button>
 
                 <button
                   type="button"
@@ -3072,7 +3108,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
                 {(biodiversityPhotoView === 'both' || biodiversityPhotoView === 'canopy') && (
                   <div
                     className="w-full rounded-3xl border border-stone-300/80 overflow-hidden shadow-xl flex flex-col justify-end p-6 sm:p-8 relative bg-cover bg-center transition-all duration-300 hover:shadow-2xl group min-h-[480px] sm:min-h-[520px]"
-                    style={{ backgroundImage: `url(${metrics.species.habitatImage || '/canopy_biodiversity.png'})` }}
+                    style={{ backgroundImage: `url(${metrics.species.habitatImage || '/biodiversity/neem_canopy_real.jpg'})` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10 group-hover:via-black/35 transition-all" />
                     <div className="relative z-10 text-white space-y-3">
@@ -3118,7 +3154,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
                 {(biodiversityPhotoView === 'both' || biodiversityPhotoView === 'nest') && (
                   <div
                     className="w-full rounded-3xl border border-stone-300/80 overflow-hidden shadow-xl flex flex-col justify-end p-6 sm:p-8 relative bg-cover bg-center transition-all duration-300 hover:shadow-2xl group min-h-[480px] sm:min-h-[520px]"
-                    style={{ backgroundImage: `url('/weaver_bird_nest.png')` }}
+                    style={{ backgroundImage: `url('/biodiversity/real_weaver_nest.jpg')` }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/10 group-hover:via-black/35 transition-all" />
                     <div className="relative z-10 text-white space-y-3">
@@ -3161,70 +3197,84 @@ export default function OverviewTreeLab({ onEnterApp }) {
                 )}
               </div>
 
-              {/* ── Fauna Categories (Full Width Grid) ── */}
-              <div className="space-y-4 pt-2">
-                <div className="p-5 bg-sky-50/70 border border-sky-200/80 rounded-3xl space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h5 className="text-xs font-bold text-sky-900 uppercase tracking-wider flex items-center gap-2">
-                      <Bird className="w-4 h-4 text-sky-700" />
-                      Supported Urban &amp; Forest Birds (Avifauna)
-                    </h5>
-                    <span className="text-[10px] font-bold text-sky-800 bg-sky-100 px-2.5 py-0.5 rounded-full border border-sky-200">
-                      {metrics.species.birds.length} Species Documented
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 text-xs text-sky-950">
-                    {metrics.species.birds.map((b, idx) => (
-                      <div key={idx} className="p-3 rounded-2xl bg-white border border-sky-100 shadow-xs flex items-center gap-2 hover:border-sky-300 transition-colors">
-                        <span className="w-2 h-2 rounded-full bg-sky-500 shrink-0" />
-                        <span className="font-semibold">{b}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              {/* ── Real Biodiversity Image Cards from Local Database ── */}
+              {(() => {
+                const bioData = getBiodiversityData(selectedSpeciesKey);
+                const CATEGORY_CONFIG = {
+                  bird:    { label: 'Birds (Avifauna)',          bg: 'bg-sky-50',     border: 'border-sky-200',    badge: 'bg-sky-100 text-sky-800 border-sky-200',    dot: 'bg-sky-500',    icon: '🐦' },
+                  insect:  { label: 'Insects & Pollinators',     bg: 'bg-amber-50',   border: 'border-amber-200',  badge: 'bg-amber-100 text-amber-800 border-amber-200', dot: 'bg-amber-500',  icon: '🐝' },
+                  mammal:  { label: 'Canopy Mammals',            bg: 'bg-emerald-50', border: 'border-emerald-200',badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', dot: 'bg-emerald-500', icon: '🐿️' },
+                };
+                return (
+                  <div className="space-y-6 pt-2">
+                    {['bird', 'insect', 'mammal'].map((cat) => {
+                      const creatures = [
+                        ...(bioData.birds || []),
+                        ...(bioData.insects || []),
+                        ...(bioData.mammals || []),
+                      ].filter((c) => c.category === cat);
+                      if (creatures.length === 0) return null;
+                      const cfg = CATEGORY_CONFIG[cat];
+                      return (
+                        <div key={cat} className={`p-5 ${cfg.bg}/70 border ${cfg.border}/80 rounded-3xl space-y-4`}>
+                          <div className="flex items-center justify-between">
+                            <h5 className="text-xs font-bold uppercase tracking-wider flex items-center gap-2 text-stone-800">
+                              <span>{cfg.icon}</span>
+                              {cfg.label}
+                            </h5>
+                            <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${cfg.badge}`}>
+                              {creatures.length} Species
+                            </span>
+                          </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-5 bg-amber-50/70 border border-amber-200/80 rounded-3xl space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h5 className="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center gap-2">
-                        <Bug className="w-4 h-4 text-amber-700" />
-                        Pollinators &amp; Native Bees
-                      </h5>
-                      <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200">
-                        Nectar &amp; Pollen Forage
-                      </span>
-                    </div>
-                    <ul className="space-y-2 text-xs text-amber-950">
-                      {metrics.species.insects.map((ins, idx) => (
-                        <li key={idx} className="flex items-center gap-2 p-2 rounded-xl bg-white/80 border border-amber-100">
-                          <span className="text-amber-600 font-bold">&bull;</span>
-                          <span className="font-medium">{ins}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            {creatures.map((creature, idx) => (
+                              <div
+                                key={idx}
+                                className="bg-white rounded-2xl border border-stone-200/80 overflow-hidden shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col"
+                              >
+                                {/* Real Image */}
+                                <div className="relative h-36 overflow-hidden bg-stone-100">
+                                  <img
+                                    src={creature.image}
+                                    alt={creature.name}
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                      e.target.parentNode.style.background = '#f1f5f9';
+                                    }}
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                  <span className={`absolute top-2 left-2 text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border ${cfg.badge} backdrop-blur-sm`}>
+                                    {cat}
+                                  </span>
+                                </div>
 
-                  <div className="p-5 bg-emerald-50/70 border border-emerald-200/80 rounded-3xl space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h5 className="text-xs font-bold text-emerald-900 uppercase tracking-wider flex items-center gap-2">
-                        <Trees className="w-4 h-4 text-emerald-700" />
-                        Small Canopy Mammals &amp; Keystone Niche
-                      </h5>
-                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                        Arboreal Shelter
-                      </span>
-                    </div>
-                    <ul className="space-y-2 text-xs text-emerald-950">
-                      {metrics.species.mammals.map((mam, idx) => (
-                        <li key={idx} className="flex items-center gap-2 p-2 rounded-xl bg-white/80 border border-emerald-100">
-                          <span className="text-emerald-600 font-bold">&bull;</span>
-                          <span className="font-medium">{mam}</span>
-                        </li>
-                      ))}
-                    </ul>
+                                {/* Info */}
+                                <div className="p-3 flex flex-col gap-1.5 flex-1">
+                                  <div>
+                                    <p className="text-sm font-extrabold text-stone-900 leading-tight">{creature.name}</p>
+                                    <p className="text-[10px] italic text-stone-400 font-medium">{creature.scientific}</p>
+                                  </div>
+                                  <p className="text-[11px] text-stone-600 leading-relaxed mt-1 flex-1">
+                                    {creature.fact}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Source note */}
+                    <p className="text-[10px] text-stone-400 text-center font-medium pt-1">
+                      📷 Images: Wikimedia Commons (CC-BY-SA) · Data curated from GBIF, India Biodiversity Portal & FSI
+                    </p>
                   </div>
-                </div>
-              </div>
+                );
+              })()}
             </div>
           )}
 
@@ -3772,7 +3822,9 @@ export default function OverviewTreeLab({ onEnterApp }) {
           <div className="flex items-center justify-between pb-2 border-b border-stone-200">
             <h3 className="text-base font-extrabold text-[#142e1f] flex items-center gap-2">
               <span>🌿 Complete Anti-Felling Dossier</span>
-              <span className="text-xs font-normal text-stone-500 font-mono">({doNotCutReasons.length} Reasons)</span>
+              <span className="text-xs font-normal text-stone-500 font-mono">
+                ({showAllReasons ? `All ${doNotCutReasons.length}` : `Top 5 of ${doNotCutReasons.length}`} Reasons)
+              </span>
             </h3>
             <span className="text-xs text-stone-500 font-medium hidden sm:inline">
               Evidence synthesized across FAO, ICRAF, USDA, GBIF, &amp; FSI
@@ -3780,7 +3832,7 @@ export default function OverviewTreeLab({ onEnterApp }) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {doNotCutReasons.map((p, i) => (
+            {(showAllReasons ? doNotCutReasons : doNotCutReasons.slice(0, 5)).map((p, i) => (
               <div
                 key={p.id || i}
                 className="p-5 rounded-2xl bg-white border border-stone-200/90 hover:border-red-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between space-y-3"
@@ -3807,6 +3859,33 @@ export default function OverviewTreeLab({ onEnterApp }) {
               </div>
             ))}
           </div>
+
+          {doNotCutReasons.length > 5 && (
+            <div className="flex justify-center pt-2">
+              {!showAllReasons ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAllReasons(true)}
+                  className="px-6 py-3 rounded-2xl bg-gradient-to-r from-red-900/10 via-amber-900/10 to-red-900/10 hover:from-red-900/20 hover:to-amber-900/20 border border-red-500/30 text-red-900 font-extrabold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
+                >
+                  <ArrowDown className="w-4 h-4 text-red-700" />
+                  <span>Load More Reasons ({doNotCutReasons.length - 5} More)</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAllReasons(false);
+                    const el = document.getElementById('anti-felling-reasons');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  className="px-6 py-3 rounded-2xl bg-stone-100 hover:bg-stone-200 border border-stone-300 text-stone-700 font-extrabold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-xs active:scale-95"
+                >
+                  <span>Show Top 5 Reasons Only</span>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {/* ── AT THE END OF WHY NOT CUT SECTION: SAVE SPECIMEN ON GIS MAP & DATABASE ── */}
@@ -3957,13 +4036,6 @@ export default function OverviewTreeLab({ onEnterApp }) {
                 >
                   <MapPin className="w-3.5 h-3.5" />
                   <span>View on GIS Map</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onEnterApp?.('register')}
-                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-stone-100 text-stone-800 font-bold text-xs border border-stone-300 shadow-xs cursor-pointer"
-                >
-                  Tree Registration
                 </button>
               </div>
             </div>

@@ -8,6 +8,7 @@ import {
   Loader2,
   CheckCircle2,
   Leaf,
+  ArrowDown,
 } from 'lucide-react';
 import { registeredTreeApi } from '../services/api';
 import { PrintReportButton } from './TreeReportPrint';
@@ -215,6 +216,11 @@ function buildClimaticAnalysisFromResult(result, points) {
 
 export default function ConserveTreePage({ result, onBack, onSaved, onError }) {
   const points = useMemo(() => extractDoNotCutPoints(result), [result]);
+  const [showAllReasons, setShowAllReasons] = useState(false);
+  const visiblePoints = useMemo(
+    () => (showAllReasons ? points : points.slice(0, 5)),
+    [showAllReasons, points]
+  );
   const [latitude, setLatitude] = useState(
     result?.latitude != null ? String(result.latitude) : ''
   );
@@ -243,8 +249,17 @@ export default function ConserveTreePage({ result, onBack, onSaved, onError }) {
         setLatitude(pos.coords.latitude.toFixed(6));
         setLongitude(pos.coords.longitude.toFixed(6));
       },
-      () => onError?.('Unable to get GPS. Enter coordinates manually.'),
-      { enableHighAccuracy: true, timeout: 10000 }
+      () => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            setLatitude(pos.coords.latitude.toFixed(6));
+            setLongitude(pos.coords.longitude.toFixed(6));
+          },
+          () => onError?.('Unable to get GPS. Enter coordinates manually.'),
+          { enableHighAccuracy: false, timeout: 8000, maximumAge: 0 }
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -311,7 +326,7 @@ export default function ConserveTreePage({ result, onBack, onSaved, onError }) {
       </div>
 
       <div className="space-y-3">
-        {points.map((p, i) => (
+        {visiblePoints.map((p, i) => (
           <div
             key={p.id}
             className="glass-panel p-5 border-l-4 border-l-red-500 border-red-500/20 bg-gradient-to-r from-red-950/25 to-transparent"
@@ -335,6 +350,28 @@ export default function ConserveTreePage({ result, onBack, onSaved, onError }) {
         ))}
         {points.length === 0 && (
           <p className="text-sm text-slate-400">No conservation messages found in analysis.</p>
+        )}
+        {points.length > 5 && (
+          <div className="flex justify-center pt-2">
+            {!showAllReasons ? (
+              <button
+                type="button"
+                onClick={() => setShowAllReasons(true)}
+                className="px-5 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-200 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <ArrowDown className="w-4 h-4 text-red-400" />
+                <span>Load More Reasons ({points.length - 5} more)</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowAllReasons(false)}
+                className="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
+              >
+                <span>Show Top 5 Only</span>
+              </button>
+            )}
+          </div>
         )}
       </div>
 

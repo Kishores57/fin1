@@ -1,10 +1,17 @@
 import axios from 'axios';
 
+const getDevHost = () => {
+  if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+    return window.location.hostname;
+  }
+  return 'localhost';
+};
+
 // Resolve API base URL:
 // In production or cloud deployment, VITE_API_URL can be set (e.g. https://api.yourdomain.com).
-// In development, defaults to http://localhost:8000.
+// In development, defaults to current device host on port 8000 so phones on LAN work seamlessly.
 // If frontend & backend are served together, relative '' is used.
-export const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : '');
+export const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? `http://${getDevHost()}:8000` : '');
 
 export const mediaBaseUrl = API_BASE_URL;
 
@@ -200,7 +207,7 @@ export const registeredTreeApi = {
  * 2. Direct Python FastAPI port 5000: `http://localhost:5000/predict` (local development fallback)
  */
 const PROXY_DETECTION_URL = `${API_BASE_URL}/api/detection`;
-const DIRECT_DETECTION_URL = import.meta.env.VITE_DETECTION_URL || 'http://localhost:5000';
+const DIRECT_DETECTION_URL = import.meta.env.VITE_DETECTION_URL || (import.meta.env.DEV ? `http://${getDevHost()}:5000` : '');
 
 export const speciesDetectionApi = {
   predict: async (imageFile) => {

@@ -114,9 +114,11 @@
   z-index: 1000;
   display: flex;
   justify-content: center;
-  padding: 0 1.25rem;
+  padding: 0 1rem;
   pointer-events: none;
   transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .lp-nav-wrapper.scrolled {
@@ -125,9 +127,9 @@
 
 .lp-pill-bar {
   pointer-events: auto;
-  width: 100%;
-  max-width: 1320px;
-  background: rgba(246, 244, 238, 0.92);
+  width: auto;
+  max-width: min(1560px, calc(100vw - 2rem));
+  background: rgba(246, 244, 238, 0.94);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
   border: 1px solid rgba(255, 255, 255, 0.75);
@@ -139,9 +141,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.42rem 0.55rem 0.42rem 1.15rem;
-  gap: 1rem;
+  padding: 0.35rem 0.5rem 0.35rem 1rem;
+  gap: 0.65rem;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
 }
 
 .lp-nav-wrapper.scrolled .lp-pill-bar {
@@ -156,15 +159,16 @@
 .lp-pill-brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.55rem;
   background: transparent;
   border: 0;
   cursor: pointer;
-  padding: 0.2rem 0.4rem 0.2rem 0;
+  padding: 0.15rem 0.35rem 0.15rem 0;
   text-decoration: none;
   border-radius: 9999px;
   transition: opacity 0.2s ease, transform 0.2s ease;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .lp-pill-brand:hover {
@@ -227,25 +231,27 @@
 .lp-pill-links {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.15rem;
+  flex-shrink: 1;
 }
 
 .lp-pill-link {
   background: transparent;
   border: 0;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  font-size: 0.86rem;
+  font-size: 0.81rem;
   font-weight: 600;
   color: #24352a;
-  padding: 0.45rem 0.75rem;
+  padding: 0.38rem 0.55rem;
   border-radius: 9999px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   white-space: nowrap;
   text-decoration: none;
+  flex-shrink: 0;
 }
 
 .lp-pill-link:hover {
@@ -366,16 +372,17 @@
   display: flex;
   align-items: center;
   gap: 0.45rem;
+  flex-shrink: 0;
 }
 
 .lp-pill-signin {
   background: transparent;
   border: 0;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #24352a;
-  padding: 0.55rem 0.95rem;
+  padding: 0.48rem 0.85rem;
   border-radius: 9999px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -383,6 +390,7 @@
   align-items: center;
   gap: 0.4rem;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .lp-pill-signin:hover {
@@ -431,10 +439,10 @@
   color: #ffffff;
   border: 0;
   font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-  font-size: 0.84rem;
+  font-size: 0.81rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  padding: 0.55rem 1.25rem;
+  padding: 0.48rem 1rem;
   border-radius: 9999px;
   cursor: pointer;
   box-shadow: 
@@ -443,8 +451,9 @@
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .lp-pill-cta:hover {
@@ -1180,7 +1189,46 @@
   color: var(--lp-forest-300);
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1400px) {
+  .lp-pill-bar {
+    gap: 0.45rem;
+    padding: 0.32rem 0.45rem 0.32rem 0.85rem;
+  }
+  .lp-pill-link {
+    font-size: 0.77rem;
+    padding: 0.35rem 0.48rem;
+  }
+  .lp-pill-cta {
+    font-size: 0.78rem;
+    padding: 0.44rem 0.85rem;
+  }
+}
+
+@media (max-width: 1240px) {
+  .lp-pill-bar {
+    gap: 0.3rem;
+    padding: 0.3rem 0.4rem 0.3rem 0.75rem;
+  }
+  .lp-pill-link {
+    font-size: 0.73rem;
+    padding: 0.32rem 0.38rem;
+  }
+  .lp-pill-cta {
+    font-size: 0.74rem;
+    padding: 0.4rem 0.75rem;
+  }
+  .lp-user-name {
+    max-width: 65px;
+  }
+  .lp-brand-line-trees {
+    font-size: 0.74rem;
+  }
+  .lp-brand-line-future {
+    font-size: 0.5rem;
+  }
+}
+
+@media (max-width: 1140px) {
   .lp-pill-links {
     display: none;
   }

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MapDashboard from './components/MapDashboard';
-import TreeRegistration from './components/TreeRegistration';
 import MapAnalysis from './components/MapAnalysis';
 import LandingPage from './components/LandingPage';
 import AuthModal from './components/AuthModal';
@@ -96,13 +95,13 @@ function DashboardStats() {
 export default function App() {
   const { user, isAdmin, isAuthenticated, logout } = useAuth();
   const [showLanding, setShowLanding]           = useState(true);
-  const [activeTab, setActiveTab]               = useState('register');
+  const [activeTab, setActiveTab]               = useState('overview');
   const [selectedResult, setSelectedResult]     = useState(null);
   const [mapRefreshKey, setMapRefreshKey]        = useState(0);
   const [error, setError]                       = useState('');
   const [showAuthModal, setShowAuthModal]       = useState(false);
   const [showAdminConsole, setShowAdminConsole] = useState(false);
-  const [pendingTab, setPendingTab]             = useState('register');
+  const [pendingTab, setPendingTab]             = useState('overview');
   const [selectedPermitId, setSelectedPermitId] = useState(null);
   const [targetLiveMapTree, setTargetLiveMapTree] = useState(null);
   const [analysisInitialTab, setAnalysisInitialTab] = useState('overview');
@@ -129,8 +128,8 @@ export default function App() {
     };
   }, [profileMenuOpen]);
 
-  const enterApp = (tab = 'register', authedUser = null) => {
-    const target = tab === 'calculator' ? 'register' : tab;
+  const enterApp = (tab = 'overview', authedUser = null) => {
+    const target = tab === 'calculator' || tab === 'register' ? 'overview' : tab;
     const isAuthed = Boolean(authedUser) || isAuthenticated || Boolean(localStorage.getItem('vanjeevan_auth_token'));
     if (!isAuthed && target !== 'permits' && target !== 'map' && target !== 'overview') {
       setPendingTab(target);
@@ -144,7 +143,7 @@ export default function App() {
 
   const handleAuthDone = (_authedUser, tab) => {
     setShowAuthModal(false);
-    setActiveTab(pendingTab || tab || 'register');
+    setActiveTab(pendingTab || tab || 'overview');
     setShowLanding(false);
     window.scrollTo(0, 0);
   };
@@ -153,7 +152,7 @@ export default function App() {
     const mapped = mapRegisteredTreeToCalculatorResult(registeredTree);
     if (!mapped) return;
     setSelectedResult(mapped);
-    setActiveTab('register');
+    setActiveTab('overview');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -192,11 +191,6 @@ export default function App() {
       tag: 'Interactive AI Classification',
       title: 'Species Identification',
       description: 'Upload leaf or bark photographs for neural network classification, then input trunk girth (GBH) to predict species, calculate age, and evaluate tree impact in real-time.',
-    },
-    register: {
-      tag: 'Tree Inventory & AI Evaluation',
-      title: 'Tree Registration & Carbon Calculator',
-      description: 'Accurately register individual trees with mandatory GPS coordinates, GBH, height, and health condition. Calculate biomass, carbon sequestration, and generate ecological conservation reasons.',
     },
     map: {
       tag: 'Interactive Cartography',
@@ -273,14 +267,6 @@ export default function App() {
             >
               <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
               <span>Species Identification</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab('register')}
-              className={`app-nav-btn ${activeTab === 'register' ? 'active' : ''}`}
-            >
-              <TreePine className="w-3.5 h-3.5" />
-              <span>Tree Registration</span>
             </button>
             <button
               type="button"
@@ -502,13 +488,7 @@ export default function App() {
         {/* View Component */}
         <div className="mt-4">
           {activeTab === 'overview' ? (
-            <OverviewTreeLab onEnterApp={(target) => setActiveTab(target || 'register')} />
-          ) : activeTab === 'register' ? (
-            <TreeRegistration
-              onError={handleError}
-              initialResult={selectedResult}
-              onTreeSaved={handleProtectedTreeSaved}
-            />
+            <OverviewTreeLab onEnterApp={(target) => setActiveTab(target === 'register' ? 'overview' : (target || 'overview'))} />
           ) : activeTab === 'map' ? (
             <MapDashboard
               refreshKey={mapRefreshKey}

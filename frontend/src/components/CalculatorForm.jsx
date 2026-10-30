@@ -1,4 +1,4 @@
- import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { treeApi } from '../services/api';
 import { MapPin, Trees, Hash, Ruler, Sparkles, Loader2 } from 'lucide-react';
 
@@ -9,7 +9,7 @@ export default function CalculatorForm({ onResult, onError }) {
   const [height, setHeight] = useState('');
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
-  
+
   const [loading, setLoading] = useState(false);
   const [geoLoading, setGeoLoading] = useState(false);
 
@@ -43,12 +43,22 @@ export default function CalculatorForm({ onResult, onError }) {
         setLongitude(position.coords.longitude.toFixed(6));
         setGeoLoading(false);
       },
-      (error) => {
-        console.error("Geolocation error:", error);
-        onError("Unable to retrieve location. Please input coordinates manually.");
-        setGeoLoading(false);
+      () => {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            setLatitude(position.coords.latitude.toFixed(6));
+            setLongitude(position.coords.longitude.toFixed(6));
+            setGeoLoading(false);
+          },
+          (err2) => {
+            console.error("Geolocation error:", err2);
+            onError("Unable to retrieve location. Please input coordinates manually.");
+            setGeoLoading(false);
+          },
+          { enableHighAccuracy: false, timeout: 8000, maximumAge: 0 }
+        );
       },
-      { enableHighAccuracy: true, timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import '../mapStyles.css';
 import { generateEcologicalInsight } from '../services/aiService';
 import SidebarMenu from './SidebarMenu';
-import { API_BASE_URL } from '../services/api';
+import { API_BASE_URL, registeredTreeApi } from '../services/api';
 import UnifiedTreeReport from './UnifiedTreeReport';
 import L, { createTileLayer, BASEMAP_TILES } from '../utils/mapConfig';
 
@@ -456,9 +456,13 @@ const MapTreeModal = ({ onClose, onAddTree }) => {
     species: 'Rain Tree',
     circumference: '',
     habitat: '',
+    latitude: '',
+    longitude: '',
   });
   const [photo, setPhoto] = useState(null);
   const [cameraActive, setCameraActive] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsStatus, setGpsStatus] = useState('');
   const videoRef = useRef(null);
 
   const startCamera = async () => {
@@ -494,13 +498,49 @@ const MapTreeModal = ({ onClose, onAddTree }) => {
     }
   };
 
+  const handleCaptureGps = () => {
+    if (!navigator.geolocation) {
+      setGpsStatus('Geolocation not supported by device');
+      return;
+    }
+    setGpsLoading(true);
+    setGpsStatus('Acquiring precise satellite GPS...');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude.toFixed(6);
+        const lng = pos.coords.longitude.toFixed(6);
+        const acc = Math.round(pos.coords.accuracy || 10);
+        setFormData((f) => ({ ...f, latitude: lat, longitude: lng }));
+        setGpsStatus(`GPS Locked: [${lat}, ${lng}] (±${acc}m)`);
+        setGpsLoading(false);
+      },
+      () => {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude.toFixed(6);
+            const lng = pos.coords.longitude.toFixed(6);
+            const acc = Math.round(pos.coords.accuracy || 150);
+            setFormData((f) => ({ ...f, latitude: lat, longitude: lng }));
+            setGpsStatus(`Network location: [${lat}, ${lng}] (±${acc}m)`);
+            setGpsLoading(false);
+          },
+          () => {
+            setGpsStatus('GPS failed. Enter coordinates manually.');
+            setGpsLoading(false);
+          },
+          { enableHighAccuracy: false, timeout: 8000, maximumAge: 0 }
+        );
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.circumference) return;
 
-    // Estimate coordinates randomly close to Nashik center
-    const lat = 20.013100 + (Math.random() - 0.5) * 0.003;
-    const lng = 73.821316 + (Math.random() - 0.5) * 0.003;
+    const lat = parseFloat(formData.latitude) || 20.013100;
+    const lng = parseFloat(formData.longitude) || 73.821316;
 
     const age = calculateTreeAge(formData.circumference, formData.species);
     const co2 = age * 22;
@@ -557,6 +597,56 @@ const MapTreeModal = ({ onClose, onAddTree }) => {
                 required
               />
             </div>
+
+            {/* GPS Coordinates & Capture */}
+            <div className="form-group full-width">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                <label style={{ margin: 0 }}>Coordinates (Lat, Lng)</label>
+                <button
+                  type="button"
+                  onClick={handleCaptureGps}
+                  disabled={gpsLoading}
+                  style={{
+                    background: '#047857',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '3px 8px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                  }}
+                >
+                  <Icon name="Crosshair" size={13} />
+                  {gpsLoading ? 'Locating...' : 'Capture GPS'}
+                </button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <input
+                  type="text"
+                  placeholder="Latitude (e.g. 20.0131)"
+                  value={formData.latitude}
+                  onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                  className="form-input-box"
+                />
+                <input
+                  type="text"
+                  placeholder="Longitude (e.g. 73.8213)"
+                  value={formData.longitude}
+                  onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
+                  className="form-input-box"
+                />
+              </div>
+              {gpsStatus && (
+                <div style={{ fontSize: '11px', color: '#047857', marginTop: '4px', fontWeight: 600 }}>
+                  {gpsStatus}
+                </div>
+              )}
+            </div>
+
             <div className="form-group full-width">
               <label>Habitat Notes</label>
               <textarea
@@ -807,8 +897,8 @@ export const MapDashboard = ({
               gbh: t.gbh,
               healthStatus: t.healthStatus,
               impact: 'High',
-              lat: t.latitude,
-              lng: t.longitude,
+              lat: Number(t.latitude),
+              lng: Number(t.longitude),
               leaf_photo: t.images?.leaf || null,
               bark_photo: t.images?.bark || null,
               height_photo: t.images?.tree || null,
@@ -836,6 +926,44 @@ export const MapDashboard = ({
     }
     loadLiveTrees();
   }, [refreshKey]);
+
+  // Live real-time update when tree is registered in OverviewTreeLab or TreeRegistration
+  useEffect(() => {
+    const handleTreeRegistered = (e) => {
+      const t = e.detail;
+      if (!t || !t.latitude || !t.longitude) return;
+      const mapped = {
+        id: 950000 + (Date.now() % 100000),
+        mongoId: t._id,
+        treeId: t.treeId,
+        uuid: t.treeId,
+        species: t.species,
+        treeName: t.treeName || t.species,
+        scientificName: t.scientificName,
+        age: t.age,
+        height: t.height,
+        dbh: t.dbh,
+        gbh: t.gbh,
+        healthStatus: t.healthStatus || 'Healthy',
+        impact: 'High',
+        lat: Number(t.latitude),
+        lng: Number(t.longitude),
+        leaf_photo: t.images?.leaf || null,
+        bark_photo: t.images?.bark || null,
+        height_photo: t.images?.tree || null,
+        photo: t.images?.leaf || t.images?.tree || t.images?.bark || null,
+        source: 'mongo',
+        createdAt: t.createdAt || new Date().toISOString(),
+        raw: t,
+      };
+      setTrees((prev) => [mapped, ...prev]);
+      if (mapInstanceRef.current && Number.isFinite(mapped.lat) && Number.isFinite(mapped.lng)) {
+        mapInstanceRef.current.flyTo([mapped.lat, mapped.lng], 18, { duration: 1.0 });
+      }
+    };
+    window.addEventListener('tree-registered', handleTreeRegistered);
+    return () => window.removeEventListener('tree-registered', handleTreeRegistered);
+  }, []);
 
   // Handle incoming targetTree from Epicollect Survey or external navigations
   useEffect(() => {
@@ -1045,14 +1173,15 @@ export const MapDashboard = ({
           onClose={() => setSelectedAiTree(null)}
           onDeleteMongoTree={async (treeToDelete) => {
             if (!window.confirm('Are you sure you want to delete this registered tree?')) return;
+            const targetId = treeToDelete.mongoId || treeToDelete.treeId || treeToDelete.id;
+            // Optimistic UI update: instantly remove from map and close modal
+            setTrees((prev) => prev.filter((t) => t.id !== treeToDelete.id && t.mongoId !== treeToDelete.mongoId && t.treeId !== treeToDelete.treeId));
+            setSelectedAiTree(null);
             try {
-              await fetch(`${API_BASE_URL}/api/registered-trees/${treeToDelete.mongoId}`, {
-                method: 'DELETE',
-              });
-              setTrees((prev) => prev.filter((t) => t.id !== treeToDelete.id));
-              setSelectedAiTree(null);
+              await registeredTreeApi.remove(targetId);
             } catch (e) {
-              alert(e.message || 'Delete failed');
+              console.error('Failed to delete tree from database:', e);
+              alert(e.response?.data?.detail || e.message || 'Delete failed');
             }
           }}
         />

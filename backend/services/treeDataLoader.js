@@ -53,15 +53,10 @@ export async function getAllUnifiedTrees() {
   }
 
   // 2. Fetch Epicollect / Local Survey Dataset
-  const possiblePaths = [
-    path.resolve(__dirname, '../data/parsed_trees.json'),
-    path.resolve(__dirname, '../../VanJeevan-main/parsed_trees.json'),
-  ];
-
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p)) {
-      try {
-        const raw = JSON.parse(fs.readFileSync(p, 'utf-8'));
+  const surveyDataPath = path.resolve(__dirname, '../data/parsed_trees.json');
+  if (fs.existsSync(surveyDataPath)) {
+    try {
+      const raw = JSON.parse(fs.readFileSync(surveyDataPath, 'utf-8'));
         for (const item of raw) {
           const id = `EPIC-${item.id}`;
           const lat = parseFloat(item.lat);
@@ -87,14 +82,11 @@ export async function getAllUnifiedTrees() {
                 createdAt: item.date || null,
               });
             }
-          }
         }
-        break; // Successfully loaded survey trees
       } catch (e) {
         console.warn('Error reading survey trees in unified loader:', e.message);
       }
     }
-  }
 
   return unified;
 }

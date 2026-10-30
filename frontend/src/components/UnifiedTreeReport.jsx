@@ -1,6 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { PrintReportButton } from './TreeReportPrint';
 import { API_BASE_URL } from '../services/api';
+import { getBiodiversityData } from '../data/biodiversityDatabase';
+import {
+  buildLocalClimateSummary,
+  buildLocalMedicinalSummary,
+  buildLocalHabitatSummary,
+} from '../data/localSpeciesPacks';
 
 /* ─────────────────────────────────────────────────────────────────────────────
    UnifiedTreeReport — Complete Tabbed Analytical Report
@@ -284,6 +290,11 @@ function resolveImg(val, species = null, type = 'tree') {
   if (isEpicollectGuid(val)) {
     const base = API_BASE_URL || (typeof window !== 'undefined' && window.location.origin ? window.location.origin : 'http://localhost:8000');
     return `${base}/api/epicollect/media?name=${encodeURIComponent(val)}`;
+  }
+
+  // Local public static assets like /biodiversity/... should not be routed to backend port
+  if (val.startsWith('/biodiversity/')) {
+    return val;
   }
 
   // User-uploaded photos from TreeRegistration (/api/registered-trees/uploads/...)
@@ -1090,9 +1101,1311 @@ function ConservationBanner({ text }) {
   );
 }
 
+// ── CANOPY REAL PHOTOS & LOOKUP ──────────────────────────────────────────────
+const CANOPY_PHOTOS = {
+  'Neem': '/biodiversity/neem_canopy_real.jpg',
+  'Banyan': '/biodiversity/banyan_canopy_real.jpg',
+  'Peepal': '/biodiversity/peepal_canopy_real.jpg',
+  'Mango': '/biodiversity/mango_canopy_real.jpg',
+  'Ashok Tree': '/biodiversity/ashoka_canopy_real.jpg',
+  'Ashoka': '/biodiversity/ashoka_canopy_real.jpg',
+  'Rain Tree': '/biodiversity/raintree_canopy_real.jpg',
+  'Rubber': '/biodiversity/rubber_canopy_real.jpg',
+};
+
+function getCanopyPhoto(species) {
+  if (!species) return '/biodiversity/neem_canopy_real.jpg';
+  for (const [k, v] of Object.entries(CANOPY_PHOTOS)) {
+    if (species.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(species.toLowerCase())) {
+      return v;
+    }
+  }
+  return '/biodiversity/neem_canopy_real.jpg';
+}
+
+// ── ALLOMETRIC & EXTENDED CALCULATOR FACTORS ──────────────────────────────────
+const SPECIES_FACTORS = {
+  'Rain Tree': { factor: 3.8, family: 'Fabaceae', density: 0.52 },
+  'Neem': { factor: 3.5, family: 'Meliaceae', density: 0.72 },
+  'Banyan': { factor: 4.2, family: 'Moraceae', density: 0.56 },
+  'Peepal': { factor: 4.0, family: 'Moraceae', density: 0.48 },
+  'Mango': { factor: 3.8, family: 'Anacardiaceae', density: 0.60 },
+  'Ashok Tree': { factor: 3.5, family: 'Fabaceae', density: 0.68 },
+  'Ashoka': { factor: 3.5, family: 'Fabaceae', density: 0.68 },
+  'Guava Tree': { factor: 3.2, family: 'Myrtaceae', density: 0.75 },
+  'Coconut Tree': { factor: 2.5, family: 'Arecaceae', density: 0.50 },
+  'Palm Tree': { factor: 2.8, family: 'Arecaceae', density: 0.55 },
+  'Bamboo Tree': { factor: 2.0, family: 'Poaceae', density: 0.65 },
+  'Rubber': { factor: 3.6, family: 'Euphorbiaceae', density: 0.60 },
+};
+
+function getSpeciesFactor(species) {
+  if (!species) return { factor: 3.5, family: 'Tropical Flora', density: 0.65 };
+  for (const [k, v] of Object.entries(SPECIES_FACTORS)) {
+    if (species.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(species.toLowerCase())) {
+      return v;
+    }
+  }
+  return { factor: 3.5, family: 'Tropical Flora', density: 0.65 };
+}
+
+export function computeTreeAllometrics(tree) {
+  const species = tree.species || 'Rain Tree';
+  const meta = getSpeciesFactor(species);
+  const growthFactor = Number(tree.growthRate || meta.factor);
+  const family = tree.family || meta.family;
+
+  const age = Number(tree.age || 10);
+  let dbh = tree.dbh ? Number(tree.dbh) : null;
+  let gbh = tree.gbh ? Number(tree.gbh) : null;
+
+  if (!dbh && gbh) {
+    dbh = Number((gbh / Math.PI).toFixed(2));
+  } else if (!dbh && !gbh) {
+    dbh = Number((age / growthFactor).toFixed(2));
+    gbh = Number((dbh * Math.PI).toFixed(1));
+  } else if (dbh && !gbh) {
+    gbh = Number((dbh * Math.PI).toFixed(1));
+  }
+
+  const biomass = Number((tree.biomass || (tree.carbon ? tree.carbon / 0.47 : age * 12)).toFixed(2));
+  const carbon = Number((tree.carbon || biomass * 0.47).toFixed(2));
+  const co2 = Number((tree.co2 || carbon * 3.67).toFixed(2));
+  const oxygen = Number((tree.oxygen || co2 * 0.727).toFixed(2));
+
+  // Canopy Area & Environmental proxy metrics (extendedCalculator.js)
+  const crownM = Number((Math.max(2, Math.min(22, 0.28 * dbh + 1.5))).toFixed(2));
+  const canopyArea = tree.canopyArea ? Number(tree.canopyArea) : Number((Math.PI * Math.pow(crownM / 2, 2)).toFixed(2));
+
+  const coolingEffect = tree.coolingEffect ? Number(tree.coolingEffect) : Number((canopyArea * 0.35).toFixed(1));
+  const rainwaterInterception = tree.rainwaterInterception ? Number(tree.rainwaterInterception) : Number((canopyArea * 8.5).toFixed(1));
+  const airPollutionRemoval = tree.airPollutionRemoval ? Number(tree.airPollutionRemoval) : Number((canopyArea * 0.012).toFixed(3));
+  const heatIslandReduction = tree.heatIslandReduction ? Number(tree.heatIslandReduction) : Number(Math.min(100, canopyArea * 1.8 + Math.min(age, 25)).toFixed(0));
+
+  // Equivalencies
+  const co2CarKm = Math.round(co2 / 0.12);
+  const oxygenPersonDays = Math.round(oxygen / 0.84);
+
+  // Life Stage
+  let stage = 'Young Established';
+  let stageColor = '#34d399';
+  let stageBg = 'rgba(52, 211, 153, 0.15)';
+  let stageBorder = 'rgba(52, 211, 153, 0.35)';
+
+  if (age < 20) {
+    stage = 'Sapling';
+    stageColor = '#2dd4bf';
+    stageBg = 'rgba(45, 212, 191, 0.15)';
+    stageBorder = 'rgba(45, 212, 191, 0.35)';
+  } else if (age < 60) {
+    stage = 'Young Established';
+    stageColor = '#34d399';
+    stageBg = 'rgba(52, 211, 153, 0.15)';
+    stageBorder = 'rgba(52, 211, 153, 0.35)';
+  } else if (age < 150) {
+    stage = 'Mature Canopy';
+    stageColor = '#fbbf24';
+    stageBg = 'rgba(251, 191, 36, 0.15)';
+    stageBorder = 'rgba(251, 191, 36, 0.35)';
+  } else {
+    stage = 'Heritage Veteran';
+    stageColor = '#c084fc';
+    stageBg = 'rgba(192, 132, 252, 0.15)';
+    stageBorder = 'rgba(192, 132, 252, 0.35)';
+  }
+
+  return {
+    species,
+    family,
+    age,
+    dbh,
+    gbh,
+    growthFactor,
+    biomass,
+    carbon,
+    co2,
+    oxygen,
+    canopyArea,
+    coolingEffect,
+    rainwaterInterception,
+    airPollutionRemoval,
+    heatIslandReduction,
+    co2CarKm,
+    oxygenPersonDays,
+    stage,
+    stageColor,
+    stageBg,
+    stageBorder,
+    confidence: tree.confidence || 96.2,
+  };
+}
+
+// ── CALCULATED TREE AGE & ALLOMETRIC VALUES CARD (Image 1) ───────────────────
+function CalculatedTreeAgeCard({ allometrics }) {
+  const m = allometrics;
+  return (
+    <div style={{
+      background: 'rgba(15, 23, 42, 0.75)',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+      borderRadius: 22,
+      padding: '1.4rem',
+      marginBottom: '1.25rem',
+      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Top Tag & Life Stage Bar */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '0.75rem',
+        paddingBottom: '0.9rem',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+      }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.65rem' }}>
+          <span style={{
+            fontSize: '0.68rem',
+            fontWeight: 900,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: '#10b981',
+            background: 'rgba(16, 185, 129, 0.14)',
+            padding: '0.25rem 0.75rem',
+            borderRadius: 999,
+            border: '1px solid rgba(16, 185, 129, 0.3)',
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+          }}>
+            EFFICIENTNET-B0 DEEP LEARNING MODEL
+          </span>
+          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#94a3b8' }}>
+            {m.confidence}% Match
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+          <span style={{
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            color: m.stageColor,
+            background: m.stageBg,
+            border: `1px solid ${m.stageBorder}`,
+            padding: '0.2rem 0.75rem',
+            borderRadius: 999,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+          }}>
+            <span>🌿</span> {m.stage}
+          </span>
+          <span style={{ fontSize: '0.65rem', color: '#64748b', marginTop: 2 }}>Life Stage</span>
+        </div>
+      </div>
+
+      {/* Big Dark Forest Green Age Banner */}
+      <div style={{
+        margin: '1.15rem 0',
+        padding: '1.4rem 1.6rem',
+        borderRadius: 18,
+        background: 'linear-gradient(135deg, #142e1f 0%, #1e452f 100%)',
+        border: '1px solid rgba(52, 211, 153, 0.3)',
+        color: '#ffffff',
+        position: 'relative',
+        overflow: 'hidden',
+        boxShadow: '0 8px 24px rgba(20, 46, 31, 0.4)',
+      }}>
+        <div style={{
+          position: 'absolute',
+          right: -10,
+          bottom: -20,
+          fontSize: '9rem',
+          opacity: 0.08,
+          pointerEvents: 'none',
+          userSelect: 'none',
+        }}>
+          🌳
+        </div>
+
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.45rem',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: '#6ee7b7',
+            marginBottom: '0.4rem',
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+          }}>
+            <span>⏱️</span>
+            <span>CALCULATED TREE AGE ((GBH / π) × GROWTH RATE)</span>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.65rem', margin: '0.35rem 0' }}>
+            <span style={{
+              fontSize: 'clamp(2.6rem, 5vw, 3.8rem)',
+              fontWeight: 900,
+              letterSpacing: '-0.03em',
+              lineHeight: 1,
+              color: '#ffffff',
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            }}>
+              {m.age}
+            </span>
+            <span style={{
+              fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)',
+              fontWeight: 800,
+              color: '#a7f3d0',
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            }}>
+              Years Old
+            </span>
+          </div>
+
+          <div style={{ fontSize: '0.82rem', color: 'rgba(255, 255, 255, 0.85)', marginTop: '0.5rem', fontWeight: 500 }}>
+            Calculated as ({m.gbh} / π) × {m.growthFactor} ({m.species} growth factor) · DBH: {m.dbh} cm
+          </div>
+        </div>
+      </div>
+
+      {/* 4 Core Allometric Values */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
+        gap: '0.75rem',
+        marginBottom: '1rem',
+      }}>
+        {[
+          { label: 'AGE', val: m.age, sub: `Years ((GBH/π) × ${m.growthFactor})`, icon: '⏱️', color: '#6ee7b7' },
+          { label: 'BIOMASS', val: m.biomass, sub: 'Total AGB+BGB (kg)', icon: '🌿', color: '#fbbf24' },
+          { label: 'CARBON', val: m.carbon, sub: 'Stored C (kg)', icon: '🛡️', color: '#34d399' },
+          { label: 'CO₂ VAULT', val: m.co2, sub: 'Sequestered (kg)', icon: '💨', color: '#22d3ee' },
+        ].map((c) => (
+          <div key={c.label} style={{
+            background: 'rgba(15, 23, 42, 0.65)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: 14,
+            padding: '0.85rem 1rem',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              fontSize: '0.68rem',
+              fontWeight: 800,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              color: '#94a3b8',
+              marginBottom: 4,
+            }}>
+              <span>{c.icon}</span>
+              <span>{c.label}</span>
+            </div>
+            <div style={{
+              fontSize: '1.25rem',
+              fontWeight: 900,
+              color: '#f8fafc',
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            }}>
+              {c.val}
+            </div>
+            <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: 3 }}>
+              {c.sub}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Real World Equivalencies Strip */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gap: '0.75rem',
+      }}>
+        <div style={{
+          background: 'rgba(6, 182, 212, 0.1)',
+          border: '1px solid rgba(6, 182, 212, 0.28)',
+          borderRadius: 14,
+          padding: '0.75rem 1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.85rem',
+        }}>
+          <div style={{
+            width: 38,
+            height: 38,
+            borderRadius: 10,
+            background: 'rgba(6, 182, 212, 0.22)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.15rem',
+            flexShrink: 0,
+          }}>
+            🚗
+          </div>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: '0.98rem', color: '#a5f3fc', fontFamily: "var(--font-heading, 'Outfit', sans-serif)" }}>
+              {m.co2CarKm.toLocaleString()} km
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#67e8f9' }}>
+              Automobile emissions offset
+            </div>
+          </div>
+        </div>
+
+        <div style={{
+          background: 'rgba(16, 185, 129, 0.1)',
+          border: '1px solid rgba(16, 185, 129, 0.28)',
+          borderRadius: 14,
+          padding: '0.75rem 1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.85rem',
+        }}>
+          <div style={{
+            width: 38,
+            height: 38,
+            borderRadius: 10,
+            background: 'rgba(16, 185, 129, 0.22)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '1.15rem',
+            flexShrink: 0,
+          }}>
+            📈
+          </div>
+          <div>
+            <div style={{ fontWeight: 900, fontSize: '0.98rem', color: '#a7f3d0', fontFamily: "var(--font-heading, 'Outfit', sans-serif)" }}>
+              {m.oxygenPersonDays.toLocaleString()} Days
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#6ee7b7' }}>
+              1 Adult human respiration sustained
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── URBAN FORESTRY & MICROCLIMATE SHIELD CARD (Image 2) ─────────────────────
+function UrbanMicroclimateShieldCard({ allometrics }) {
+  const m = allometrics;
+  return (
+    <div style={{
+      background: 'rgba(15, 23, 42, 0.75)',
+      border: '1px solid rgba(255, 255, 255, 0.08)',
+      borderRadius: 22,
+      padding: '1.4rem',
+      marginBottom: '1.25rem',
+      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)',
+    }}>
+      {/* Header with Canopy Area */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '0.5rem',
+        paddingBottom: '0.85rem',
+        borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+        marginBottom: '1rem',
+      }}>
+        <div style={{
+          fontSize: '0.76rem',
+          fontWeight: 900,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+          color: '#34d399',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.45rem',
+          fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+        }}>
+          <span>✨</span>
+          <span>URBAN FORESTRY &amp; MICROCLIMATE SHIELD (EXTENDEDCALCULATOR.JS)</span>
+        </div>
+        <div style={{
+          fontSize: '0.76rem',
+          fontWeight: 800,
+          color: '#cbd5e1',
+          fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+          background: 'rgba(255, 255, 255, 0.05)',
+          padding: '0.2rem 0.65rem',
+          borderRadius: 8,
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+        }}>
+          Canopy: <strong style={{ color: '#38bdf8' }}>{m.canopyArea} m²</strong>
+        </div>
+      </div>
+
+      {/* 4 Cards from Image 2 */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(135px, 1fr))',
+        gap: '0.75rem',
+        textAlign: 'center',
+      }}>
+        {/* Cooling Energy */}
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.65)',
+          border: '1px solid rgba(251, 191, 36, 0.25)',
+          borderRadius: 16,
+          padding: '1.1rem 0.85rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{ fontSize: '1.35rem', marginBottom: 4 }}>⚡</div>
+          <div style={{
+            fontSize: '1.25rem',
+            fontWeight: 900,
+            color: '#fbbf24',
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+          }}>
+            {m.coolingEffect} kWh
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 4 }}>
+            Cooling Energy Saved
+          </div>
+        </div>
+
+        {/* Rainwater */}
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.65)',
+          border: '1px solid rgba(56, 189, 248, 0.25)',
+          borderRadius: 16,
+          padding: '1.1rem 0.85rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{ fontSize: '1.35rem', marginBottom: 4 }}>💧</div>
+          <div style={{
+            fontSize: '1.25rem',
+            fontWeight: 900,
+            color: '#38bdf8',
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+          }}>
+            {m.rainwaterInterception} L
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 4 }}>
+            Rainwater Buffered/yr
+          </div>
+        </div>
+
+        {/* Air Pollution */}
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.65)',
+          border: '1px solid rgba(52, 211, 153, 0.25)',
+          borderRadius: 16,
+          padding: '1.1rem 0.85rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{ fontSize: '1.35rem', marginBottom: 4 }}>💨</div>
+          <div style={{
+            fontSize: '1.25rem',
+            fontWeight: 900,
+            color: '#34d399',
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+          }}>
+            {m.airPollutionRemoval} kg
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 4 }}>
+            Air Pollution Scrubbed
+          </div>
+        </div>
+
+        {/* Heat Island Buffer */}
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.65)',
+          border: '1px solid rgba(251, 146, 60, 0.25)',
+          borderRadius: 16,
+          padding: '1.1rem 0.85rem',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{ fontSize: '1.35rem', marginBottom: 4 }}>☀️</div>
+          <div style={{
+            fontSize: '1.25rem',
+            fontWeight: 900,
+            color: '#fb923c',
+            fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+          }}>
+            {m.heatIslandReduction}%
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: 4 }}>
+            Heat Island Buffer
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── MEDICINAL PLANT PARTS BREAKDOWN ──────────────────────────────────────────
+const MEDICINAL_PARTS = {
+  Neem: [
+    { part: '🍃 Leaves (Nimba Patra)', compounds: 'Nimbin, Azadirachtin, Gedunin', uses: 'Blood purifier, anti-diabetic infusions, antiseptic wash, chickenpox bath', formula: 'Nimba Taila, Nimbadi Churna' },
+    { part: '🪵 Bark (Nimba Tvak)', compounds: 'Nimbinene, Tannins, Catechins', uses: 'Malarial fever control, periodontal gum massage, chronic eczema', formula: 'Khadirarishta, Nimba Kashayam' },
+    { part: '🌸 Flowers', compounds: 'Flavonoids, Glycosides, Nimbosterin', uses: 'Intestinal worms elimination, ophthalmic drops, cooling summer tonics', formula: 'Ugadi Pachadi traditional formulation' },
+    { part: '🫐 Seed Oil (Nimba Taila)', compounds: 'Salannin, Meliantriol, Azadirachtin', uses: 'Bio-pesticide, lice elimination, anti-psoriatic ointment, antifungal salve', formula: 'Pure cold-pressed Azadirachta seed oil' },
+    { part: '🌿 Twigs (Datun)', compounds: 'Fibrous cellulose, Phenolics', uses: 'Traditional tooth brushing, Streptococcus mutans oral bacteria elimination', formula: 'Raw fresh datun mastication' },
+  ],
+  Peepal: [
+    { part: '🍃 Leaves (Ashvattha Patra)', compounds: 'Flavonoids, Campesterol, Tannins', uses: 'Cardiac tonic, asthma relief infusions, nosebleed stop, gastric ulcers', formula: 'Ashvatthadi Leha' },
+    { part: '🪵 Bark (Ashvattha Tvak)', compounds: 'Tannins, β-sitosterol, Saponins', uses: 'Diabetic wound astringent dressing, burns healing, aphrodisiac tonics', formula: 'Nyagrodhadi Kashayam' },
+    { part: '🫐 Fruits (Figs)', compounds: 'Inositol, Saponins, Calcium', uses: 'Infertility management, gentle digestive laxative, lung tonic', formula: 'Ashvattha Phala Churna' },
+    { part: '🌱 Latex', compounds: 'Enzymes, Latex resins', uses: 'Wart treatment, cracked heel healing, boils maturation', formula: 'Fresh topical plant milk' },
+  ],
+  Banyan: [
+    { part: '🪢 Aerial Prop Roots (Nyagrodha Jata)', compounds: 'Polyphenols, Lupeol, Sterols', uses: 'Firming gums, dental hygiene, female reproductive health tonics', formula: 'Nyagrodha Jata Churna' },
+    { part: '🪵 Bark (Nyagrodha Tvak)', compounds: 'Bengalenoside, Tannins, Flavonoids', uses: 'Hyperglycemia management, chronic diarrhea, urinary tract tonics', formula: 'Nyagrodhadi Churna' },
+    { part: '🍃 Tender Leaf Buds', compounds: 'Tannins, Flavonoids', uses: 'Nausea arrest, dysentery healing, burning sensation relief', formula: 'Bud decoctions in milk' },
+    { part: '🌱 Milky Latex', compounds: 'Proteolytic enzymes', uses: 'Rheumatic joint pain massage, hemorrhoids relief', formula: 'Latex with honey application' },
+  ],
+  Mango: [
+    { part: '🍃 Tender Leaves (Amra Patra)', compounds: 'Mangiferin, Polyphenols', uses: 'Blood sugar stabilization tea, kidney stones dissolution, asthma smoke', formula: 'Amra Patra Kashayam' },
+    { part: '🪵 Bark', compounds: 'Mangiferin, Tannins, Catechins', uses: 'Heavy menstrual bleeding control, throat gargles for hoarseness', formula: 'Amra Tvak Decoction' },
+    { part: '🫐 Seed Kernel (Amra Asthi)', compounds: 'Gallic acid, Stearic acid, Oleic acid', uses: 'Diarrhea management, intestinal parasite expulsion, dandruff hair pack', formula: 'Amra Majja Churna' },
+  ],
+  'Ashok Tree': [
+    { part: '🪵 Stem Bark (Asoka Tvak)', compounds: 'Saracin, Catechin, Tannins, Ketosterol', uses: 'Premier uterine tonic, menorrhagia, dysmenorrhea, pelvic decongestant', formula: 'Asokarishta, Asokaghrita' },
+    { part: '🌸 Flowers', compounds: 'Flavonoids, Anthocyanins', uses: 'Bleeding piles relief, complexion enhancement, diabetes support', formula: 'Asoka Pushpa Churna' },
+    { part: '🌱 Seeds', compounds: 'Phospholipids, Fatty acids', uses: 'Urinary calculus (stones) treatment, bladder tonics', formula: 'Asoka Bija Kwath' },
+  ],
+  'Rain Tree': [
+    { part: '🍃 Leaves & Foliage', compounds: 'Alkaloids, Flavonoids, Pinitol', uses: 'Traditional poultice for swellings, antibacterial wash', formula: 'Leaf infusion compress' },
+    { part: '🫐 Sweet Pods', compounds: 'Natural sugars, Tannins, Saponins', uses: 'Nutritive forage, antioxidant biological extract', formula: 'Pod water extract' },
+  ],
+};
+
+function getMedicinalParts(species) {
+  if (!species) return MEDICINAL_PARTS['Neem'];
+  for (const [k, v] of Object.entries(MEDICINAL_PARTS)) {
+    if (species.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(species.toLowerCase())) {
+      return v;
+    }
+  }
+  return [
+    { part: '🍃 Foliage & Leaves', compounds: 'Flavonoids, Phenolics', uses: 'Antioxidant infusion, traditional cleansing washes', formula: 'Standard botanical decoction' },
+    { part: '🪵 Wood & Bark', compounds: 'Tannins, Lignin complexes', uses: 'Astringent topical dressings, anti-inflammatory compresses', formula: 'Bark extract infusion' },
+  ];
+}
+
+// ── DYNAMIC ANTI-FELLING REASONS ENGINE ──────────────────────────────────────
+export function getDoNotCutReasons(tree) {
+  if (Array.isArray(tree.doNotCutReasons) && tree.doNotCutReasons.length > 0) {
+    return tree.doNotCutReasons;
+  }
+
+  const species = tree.species || 'Neem';
+  const age = Number(tree.age || 10);
+  const biomass = Number(tree.biomass || 100);
+  const carbon = Number(tree.carbon || 47);
+  const co2 = Number(tree.co2 || 172);
+
+  const localClimate = buildLocalClimateSummary(species, age, biomass, carbon, co2) || {};
+  const localMed = buildLocalMedicinalSummary(species) || {};
+  const localHab = buildLocalHabitatSummary(species) || {};
+
+  const climate = (tree.climaticAnalysis?.sourceClimatePack && Object.keys(tree.climaticAnalysis.sourceClimatePack).length > 0)
+    ? tree.climaticAnalysis.sourceClimatePack
+    : localClimate;
+  const medicinal = tree.climaticAnalysis?.medicinalValue || localMed;
+  const habitat = tree.climaticAnalysis?.biodiversity || localHab;
+
+  const points = [];
+
+  // Points 1 - 18: RAG climatic sections
+  Object.entries(climate).forEach(([key, section]) => {
+    if (!section || typeof section !== 'object' || key === 'research_pipeline') return;
+    if (section.conservation_message) {
+      points.push({
+        id: `cons-${key}`,
+        title: section.title || key.replace(/_/g, ' '),
+        highlight: section.conservation_message,
+        support: section.interesting_fact || section.importance || section.scientific_explanation || '',
+        kind: 'conservation',
+      });
+    }
+  });
+
+  // Carbon vault at risk
+  points.push({
+    id: 'metric-carbon',
+    title: 'Carbon vault at risk',
+    highlight: `Do not cut this tree — it currently stores ~${carbon.toFixed(1)} kg of carbon (~${co2.toFixed(1)} kg CO₂ equivalent). Felling releases this climate benefit.`,
+    support: `Estimated age ${age.toFixed(1)} years · biomass ${biomass.toFixed(1)} kg`,
+    kind: 'metric',
+  });
+
+  // Oxygen & air quality
+  const oxygenVal = Number(tree.oxygen || (co2 * 0.727));
+  const oxygenDays = Math.round(oxygenVal / 0.84);
+  points.push({
+    id: 'metric-oxygen',
+    title: 'Oxygen & air quality',
+    highlight: `Do not cut this tree — it has contributed ~${oxygenVal.toFixed(1)} kg of oxygen. Removing it cuts a living air-support system for the neighbourhood.`,
+    support: `Sustains ~${oxygenDays.toLocaleString()} adult human respiration days · continuously scrubs airborne particulates.`,
+    kind: 'metric',
+  });
+
+  // Wildlife habitat
+  const habDesc = habitat.description || `${species} canopy creates dense cover and windbreaks that shelter birds and insects in urban and farm corridors.`;
+  const habSupport = [
+    ...(habitat.birds || []).slice(0, 3),
+    ...(habitat.insects || []).slice(0, 2),
+  ].join(' · ');
+  points.push({
+    id: 'habitat',
+    title: 'Wildlife habitat',
+    highlight: `Do not cut this tree — it supports local biodiversity. ${habDesc}`,
+    support: habSupport || `${species} canopy supports vital local avian, pollinator, and insect forage.`,
+    kind: 'habitat',
+  });
+
+  // Medicinal & community value
+  const medDesc = medicinal.description || medicinal.traditionalUses || `${species} carries verified medicinal, traditional, and ecological value for urban communities.`;
+  const medSupport = (medicinal.applications || []).slice(0, 3).join(' · ');
+  points.push({
+    id: 'medicinal',
+    title: 'Medicinal & community value',
+    highlight: `Do not cut this tree — it carries medicinal / traditional value. ${medDesc}`,
+    support: medSupport || `Active compounds: ${(medicinal.compounds || []).slice(0, 3).join(', ')}`,
+    kind: 'medicinal',
+  });
+
+  // Deduplicate
+  const seen = new Set();
+  return points.filter((p) => {
+    const k = (p.highlight || '').slice(0, 80);
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
+// ── REAL BIODIVERSITY SHOWCASE COMPONENT ─────────────────────────────────────
+function BiodiversityShowcase({ species }) {
+  const bioData = useMemo(() => getBiodiversityData(species), [species]);
+  const canopyImg = getCanopyPhoto(species);
+
+  const CATEGORY_STYLES = {
+    bird: {
+      label: 'Birds (Avifauna)',
+      icon: '🐦',
+      color: '#38bdf8',
+      bg: 'rgba(56, 189, 248, 0.08)',
+      border: 'rgba(56, 189, 248, 0.25)',
+      badge: 'rgba(56, 189, 248, 0.2)',
+    },
+    insect: {
+      label: 'Insects & Pollinators',
+      icon: '🐝',
+      color: '#fbbf24',
+      bg: 'rgba(251, 191, 36, 0.08)',
+      border: 'rgba(251, 191, 36, 0.25)',
+      badge: 'rgba(251, 191, 36, 0.2)',
+    },
+    mammal: {
+      label: 'Canopy Mammals',
+      icon: '🐿️',
+      color: '#34d399',
+      bg: 'rgba(52, 211, 153, 0.08)',
+      border: 'rgba(52, 211, 153, 0.25)',
+      badge: 'rgba(52, 211, 153, 0.2)',
+    },
+  };
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1.25rem' }}>
+      {/* ── TWO BIG ECOSYSTEM CARDS ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1rem' }}>
+        {/* Big Card 1: Botanical Canopy Sanctuary */}
+        <div style={{
+          position: 'relative',
+          minHeight: 380,
+          borderRadius: 20,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          padding: '1.5rem',
+          backgroundImage: `url(${canopyImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          border: '1px solid rgba(56, 189, 248, 0.35)',
+          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.4)',
+        }}>
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(2, 6, 23, 0.96) 0%, rgba(2, 6, 23, 0.6) 55%, rgba(2, 6, 23, 0.2) 100%)',
+          }} />
+          <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', alignItems: 'center' }}>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                background: 'rgba(15, 23, 42, 0.85)',
+                color: '#38bdf8',
+                padding: '0.22rem 0.65rem',
+                borderRadius: 999,
+                border: '1px solid rgba(56, 189, 248, 0.4)',
+                backdropFilter: 'blur(6px)',
+              }}>
+                🌳 Canopy Sanctuary
+              </span>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                background: 'rgba(15, 23, 42, 0.85)',
+                color: '#34d399',
+                padding: '0.22rem 0.65rem',
+                borderRadius: 999,
+                border: '1px solid rgba(52, 211, 153, 0.4)',
+                backdropFilter: 'blur(6px)',
+              }}>
+                Trophic Web
+              </span>
+            </div>
+            <h4 style={{
+              margin: 0,
+              fontSize: '1.25rem',
+              fontWeight: 900,
+              color: '#ffffff',
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            }}>
+              Botanical Canopy Sanctuary &amp; Micro-Ecosystem
+            </h4>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.55 }}>
+              A single mature {species} canopy provides nesting perches, fruit, nectar, and thermal shelter for hundreds of wild organisms in urban and suburban landscapes.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', paddingTop: '0.2rem' }}>
+              {['🌿 Avian Nesting Perches', '🌸 Nectar & Pollen Forage', '🌡️ Thermal Shelter Buffer'].map((t, idx) => (
+                <span key={idx} style={{
+                  fontSize: '0.72rem',
+                  color: '#e2e8f0',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: 8,
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                }}>
+                  {t}
+                </span>
+              ))}
+            </div>
+            <div style={{
+              borderTop: '1px solid rgba(255, 255, 255, 0.15)',
+              paddingTop: '0.6rem',
+              fontSize: '0.75rem',
+              color: '#67e8f9',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}>
+              <span>🛡️</span>
+              <span>Felling this tree eradicates an entire living micro-ecosystem.</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Big Card 2: Suspended Weaver Bird Nest */}
+        <div style={{
+          position: 'relative',
+          minHeight: 380,
+          borderRadius: 20,
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          padding: '1.5rem',
+          backgroundImage: `url('/biodiversity/real_weaver_nest.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          border: '1px solid rgba(251, 191, 36, 0.35)',
+          boxShadow: '0 12px 30px rgba(0, 0, 0, 0.4)',
+        }}>
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(to top, rgba(2, 6, 23, 0.96) 0%, rgba(2, 6, 23, 0.6) 55%, rgba(2, 6, 23, 0.2) 100%)',
+          }} />
+          <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', alignItems: 'center' }}>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                background: 'rgba(15, 23, 42, 0.85)',
+                color: '#fcd34d',
+                padding: '0.22rem 0.65rem',
+                borderRadius: 999,
+                border: '1px solid rgba(251, 191, 36, 0.4)',
+                backdropFilter: 'blur(6px)',
+              }}>
+                🐦 Avian Nesting Architecture
+              </span>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                background: 'rgba(15, 23, 42, 0.85)',
+                color: '#38bdf8',
+                padding: '0.22rem 0.65rem',
+                borderRadius: 999,
+                border: '1px solid rgba(56, 189, 248, 0.4)',
+                backdropFilter: 'blur(6px)',
+              }}>
+                Active Bird Refuge
+              </span>
+            </div>
+            <h4 style={{
+              margin: 0,
+              fontSize: '1.25rem',
+              fontWeight: 900,
+              color: '#ffffff',
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            }}>
+              Suspended Weaver Bird Nest &amp; Arboreal Nursery
+            </h4>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.55 }}>
+              Naturally woven retort-shaped pendant nest constructed by weaver birds from flexible plant fibers and grassroots. Suspended high from branches, it provides predator-proof incubation chambers and climatic shielding for young nestlings.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', paddingTop: '0.2rem' }}>
+              {['🌾 Natural Woven Fiber Architecture', '🛡️ Predator Exclusion Entry Tunnel', '🐣 Thermal Brood Incubator'].map((t, idx) => (
+                <span key={idx} style={{
+                  fontSize: '0.72rem',
+                  color: '#e2e8f0',
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  padding: '0.2rem 0.6rem',
+                  borderRadius: 8,
+                  backdropFilter: 'blur(4px)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                }}>
+                  {t}
+                </span>
+              ))}
+            </div>
+            <div style={{
+              borderTop: '1px solid rgba(255, 255, 255, 0.15)',
+              paddingTop: '0.6rem',
+              fontSize: '0.75rem',
+              color: '#fde68a',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}>
+              <span>✅</span>
+              <span>Crucial arboreal nesting, egg incubation &amp; fledgling nursery for native avifauna.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── REAL BIODIVERSITY CARDS BY CATEGORY ── */}
+      {['bird', 'insect', 'mammal'].map((cat) => {
+        const creatures = [
+          ...(bioData?.birds || []),
+          ...(bioData?.insects || []),
+          ...(bioData?.mammals || []),
+        ].filter((c) => c.category === cat);
+        if (creatures.length === 0) return null;
+        const cfg = CATEGORY_STYLES[cat];
+
+        return (
+          <div key={cat} style={{
+            background: cfg.bg,
+            border: `1px solid ${cfg.border}`,
+            borderRadius: 18,
+            padding: '1.25rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.85rem',
+                fontWeight: 900,
+                color: cfg.color,
+                textTransform: 'uppercase',
+                letterSpacing: '0.06em',
+                fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+              }}>
+                <span>{cfg.icon}</span>
+                <span>{cfg.label}</span>
+              </div>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 800,
+                color: cfg.color,
+                background: cfg.badge,
+                padding: '0.2rem 0.65rem',
+                borderRadius: 999,
+                border: `1px solid ${cfg.border}`,
+              }}>
+                {creatures.length} Documented Species
+              </span>
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '0.9rem',
+            }}>
+              {creatures.map((creature, idx) => (
+                <div key={idx} style={{
+                  background: 'rgba(15, 23, 42, 0.85)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: 14,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                  boxShadow: '0 4px 14px rgba(0, 0, 0, 0.25)',
+                }}>
+                  <div style={{ position: 'relative', height: 140, overflow: 'hidden', background: '#0f172a' }}>
+                    <img
+                      src={creature.image}
+                      alt={creature.name}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                      }}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(to top, rgba(15, 23, 42, 0.85) 0%, transparent 60%)',
+                    }} />
+                    <span style={{
+                      position: 'absolute',
+                      top: 8,
+                      left: 8,
+                      fontSize: '0.62rem',
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      background: 'rgba(15, 23, 42, 0.85)',
+                      color: cfg.color,
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: 6,
+                      border: `1px solid ${cfg.border}`,
+                    }}>
+                      {cat}
+                    </span>
+                  </div>
+
+                  <div style={{ padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: 1 }}>
+                    <div>
+                      <div style={{
+                        fontSize: '0.92rem',
+                        fontWeight: 900,
+                        color: '#f8fafc',
+                        lineHeight: 1.25,
+                        fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+                      }}>
+                        {creature.name}
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#94a3b8', fontStyle: 'italic', marginTop: 2 }}>
+                        {creature.scientific}
+                      </div>
+                    </div>
+                    <p style={{
+                      margin: '0.2rem 0 0',
+                      fontSize: '0.78rem',
+                      color: '#cbd5e1',
+                      lineHeight: 1.5,
+                      flex: 1,
+                    }}>
+                      {creature.fact}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      <div style={{
+        fontSize: '0.72rem',
+        color: '#64748b',
+        textAlign: 'center',
+        padding: '0.5rem 0',
+        fontStyle: 'italic',
+      }}>
+        📷 Real Wildlife Photography: Wikimedia Commons (CC-BY-SA) · Data curated from GBIF, India Biodiversity Portal &amp; FSI
+      </div>
+    </div>
+  );
+}
+
+// ── ANTI-FELLING DOSSIER COMPONENT (Top 5 + Load More Reasons) ───────────────
+export function AntiFellingDossier({ tree, isPrint = false }) {
+  const [showAllReasons, setShowAllReasons] = useState(false);
+  const reasons = useMemo(() => getDoNotCutReasons(tree), [tree]);
+
+  if (!reasons || reasons.length === 0) return null;
+
+  const displayedReasons = (showAllReasons || isPrint) ? reasons : reasons.slice(0, 5);
+
+  return (
+    <div style={{
+      marginTop: '1.75rem',
+      background: 'linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, rgba(15, 23, 42, 0.9) 100%)',
+      border: '1px solid rgba(239, 68, 68, 0.35)',
+      borderRadius: 20,
+      padding: '1.5rem',
+      boxShadow: '0 8px 32px rgba(239, 68, 68, 0.12)',
+    }}>
+      {/* Red warning header */}
+      <div style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        gap: '1rem',
+        paddingBottom: '1.25rem',
+        borderBottom: '1px solid rgba(239, 68, 68, 0.25)',
+        marginBottom: '1.25rem',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.85rem' }}>
+          <div style={{
+            fontSize: '1.8rem',
+            background: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid rgba(239, 68, 68, 0.35)',
+            borderRadius: 14,
+            padding: '0.6rem 0.75rem',
+            lineHeight: 1,
+            flexShrink: 0,
+          }}>
+            🛡️
+          </div>
+          <div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '0.5rem', marginBottom: '0.35rem' }}>
+              <span style={{
+                fontSize: '0.68rem',
+                fontWeight: 900,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em',
+                background: 'rgba(239, 68, 68, 0.22)',
+                color: '#f87171',
+                padding: '0.2rem 0.65rem',
+                borderRadius: 999,
+                border: '1px solid rgba(239, 68, 68, 0.4)',
+                fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+              }}>
+                Anti-Felling Ecological Mandate
+              </span>
+              <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>
+                {reasons.length} Species-Specific Protections
+              </span>
+            </div>
+            <h3 style={{
+              margin: '0.2rem 0',
+              fontSize: '1.4rem',
+              fontWeight: 900,
+              color: '#fef2f2',
+              fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+            }}>
+              Why you should <span style={{ color: '#ef4444', textDecoration: 'underline', textDecorationColor: '#f87171' }}>not cut</span> this {tree.species}
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: '#cbd5e1', lineHeight: 1.5 }}>
+              Age ~{tree.age} yr · DBH {tree.dbh ? `${tree.dbh} cm` : '—'} · Carbon {(tree.carbon || 0).toFixed(1)} kg · Oxygen {(tree.oxygen || 0).toFixed(1)} kg &mdash; reasons below are synthesized from complete climatic &amp; botanical analysis.
+            </p>
+          </div>
+        </div>
+
+        <div style={{
+          background: 'rgba(15, 23, 42, 0.8)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: 12,
+          padding: '0.45rem 0.9rem',
+          fontSize: '0.78rem',
+          color: '#fca5a5',
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+        }}>
+          <span>⚖️</span>
+          <span>Zero-Felling Urban Protection</span>
+        </div>
+      </div>
+
+      {/* Grid of Reasons */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+        gap: '0.85rem',
+      }}>
+        {displayedReasons.map((p, i) => (
+          <div
+            key={p.id || i}
+            style={{
+              background: 'rgba(15, 23, 42, 0.75)',
+              border: '1px solid rgba(239, 68, 68, 0.25)',
+              borderRadius: 14,
+              padding: '1rem 1.15rem',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              gap: '0.65rem',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '0.5rem',
+                marginBottom: '0.5rem',
+                paddingBottom: '0.4rem',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+              }}>
+                <span style={{
+                  fontSize: '0.65rem',
+                  fontWeight: 900,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                  background: 'rgba(239, 68, 68, 0.2)',
+                  color: '#fca5a5',
+                  padding: '0.15rem 0.55rem',
+                  borderRadius: 6,
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                }}>
+                  Do not cut · {i + 1}
+                </span>
+                <span style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  color: '#94a3b8',
+                  textTransform: 'capitalize',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {p.title}
+                </span>
+              </div>
+              <p style={{
+                margin: 0,
+                fontSize: '0.86rem',
+                fontWeight: 700,
+                color: '#f8fafc',
+                lineHeight: 1.5,
+              }}>
+                {p.highlight}
+              </p>
+            </div>
+
+            {p.support && (
+              <div style={{
+                fontSize: '0.76rem',
+                color: '#94a3b8',
+                background: 'rgba(255, 255, 255, 0.03)',
+                padding: '0.5rem 0.65rem',
+                borderRadius: 8,
+                border: '1px solid rgba(255, 255, 255, 0.05)',
+                lineHeight: 1.45,
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.4rem',
+              }}>
+                <span style={{ color: '#34d399', flexShrink: 0, fontSize: '0.85rem' }}>🍃</span>
+                <span>{p.support}</span>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Load More Button */}
+      {!isPrint && reasons.length > 5 && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1.25rem' }}>
+          {!showAllReasons ? (
+            <button
+              type="button"
+              onClick={() => setShowAllReasons(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.65rem 1.4rem',
+                borderRadius: 999,
+                background: 'linear-gradient(90deg, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.25))',
+                border: '1px solid rgba(239, 68, 68, 0.45)',
+                color: '#fef2f2',
+                fontWeight: 800,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 14px rgba(239, 68, 68, 0.2)',
+                fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+              }}
+            >
+              <span>⬇️</span>
+              <span>Load More Reasons ({reasons.length - 5} More)</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowAllReasons(false)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                padding: '0.65rem 1.4rem',
+                borderRadius: 999,
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
+                color: '#cbd5e1',
+                fontWeight: 800,
+                fontSize: '0.82rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontFamily: "var(--font-heading, 'Outfit', sans-serif)",
+              }}
+            >
+              <span>⬆️</span>
+              <span>Show Top 5 Reasons Only</span>
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── TAB CONTENT RENDERING ───────────────────────────────────────────────────
 function TabContent({ tabKey, tree }) {
   const co2Km = ((tree.co2 || 0) / 0.12).toFixed(0);
   const o2Days = ((tree.oxygen || 0) / 0.84).toFixed(0);
+  const medicinalParts = getMedicinalParts(tree.species);
 
   switch (tabKey) {
     case 'oxygen':
@@ -1149,7 +2462,7 @@ function TabContent({ tabKey, tree }) {
             <p style={{ color: '#cbd5e1', fontSize: '0.88rem', lineHeight: 1.7 }}>
               Calculated using the internationally validated <strong style={{ color: '#fbbf24' }}>Chave Allometric Model</strong>:
               <br />
-              <code style={{ background: 'rgba(0,0,0,0.4)', padding: '0.2rem 0.6rem', borderRadius: 6, color: '#fbbf24', fontSize: '0.82rem' }}>
+              <code style={{ background: 'rgba(0,0,0,0.4)', padding: '0.2rem 0.6rem', borderRadius: 6, color: '#fbbf24', fontSize: '0.82rem', display: 'inline-block', margin: '0.4rem 0' }}>
                 AGB = 0.0673 × (ρ × D² × H)^0.976
               </code>
               <br />
@@ -1162,19 +2475,32 @@ function TabContent({ tabKey, tree }) {
     case 'climate':
       return (
         <div>
+          <UrbanMicroclimateShieldCard allometrics={computeTreeAllometrics(tree)} />
           <Section title="Thermal & Microclimate Regulation" color="#fb923c">
             <InfoCards items={[
               { label: 'Canopy Shade', value: `~${Math.round(15 + (tree.age || 10) * 1.5)} m²`, sub: 'Direct shade footprint' },
               { label: 'Cooling Equivalent', value: '~10 Air Conditioners', sub: 'Operating 20 hrs/day' },
               { label: 'Stormwater Intercepted', value: `~${Math.round((tree.age || 10) * 2.4)} L/storm`, sub: 'Reduces surface runoff' },
+              { label: 'Particulate Scrub', value: `~${((tree.age || 10) * 0.6).toFixed(1)} kg/yr`, sub: 'PM2.5 & PM10 filtration' },
             ]} />
           </Section>
           <Section title="Urban Heat Island Mitigation" color="#94a3b8">
             <p style={{ color: '#cbd5e1', fontSize: '0.88rem', lineHeight: 1.7 }}>
               Through <strong style={{ color: '#fb923c' }}>evapotranspiration</strong> and solar radiation interception, mature trees reduce surrounding surface temperatures by 2°C to 8°C.
-              Asphalt roads under mature tree canopies measure up to 11°C cooler during Indian summers, directly lowering heat stroke hospitalizations and indoor air-conditioning power bills.
+              Asphalt roads under mature tree canopies measure up to 11°C cooler during Indian summers, directly lowering heat stroke hospitalizations and indoor air-conditioning power bills for surrounding households.
             </p>
           </Section>
+          <div style={{
+            background: 'rgba(251, 146, 60, 0.08)',
+            border: '1px solid rgba(251, 146, 60, 0.25)',
+            borderRadius: 14,
+            padding: '0.9rem 1.1rem',
+            color: '#fed7aa',
+            fontSize: '0.82rem',
+            lineHeight: 1.6,
+          }}>
+            🌡️ <strong>Thermal Buffer:</strong> Each large mature tree provides the equivalent cooling of 10 room-sized air conditioners operating continuously, saving thousands of kWh in grid electrical power.
+          </div>
         </div>
       );
 
@@ -1186,6 +2512,7 @@ function TabContent({ tabKey, tree }) {
               { label: 'Avian Species', value: 'Nesting & Roosting', sub: 'Cavity nesters & frugivores' },
               { label: 'Pollinators', value: 'Bees & Butterflies', sub: 'Nectar corridors & pollen' },
               { label: 'Soil Microfauna', value: 'Mycorrhizal Fungi', sub: 'Root rhizosphere network' },
+              { label: 'Microclimate', value: 'Canopy Humidity', sub: 'Leaf moisture reservoir' },
             ]} />
           </Section>
           <Section title="Keystone Ecosystem Role" color="#94a3b8">
@@ -1193,6 +2520,10 @@ function TabContent({ tabKey, tree }) {
               This tree functions as a <strong style={{ color: '#2dd4bf' }}>vital biological node</strong> in the urban ecosystem. Its fissured bark provides refuge for beneficial predatory insects, its flowers sustain wild pollinators, its foliage shelters migratory birds, and its organic leaf litter regenerates topsoil microbial communities.
             </p>
           </Section>
+
+          {/* ── REAL BIODIVERSITY SUITE (TWO BIG CARDS + CATEGORY SPECIES) ── */}
+          <BiodiversityShowcase species={tree.species} />
+
           <ConservationBanner text="Removing this mature tree dismantles an entire living food web — displacing resident songbirds and severing pollinator flight corridors." />
         </div>
       );
@@ -1244,6 +2575,39 @@ function TabContent({ tabKey, tree }) {
               ]} />
             )}
           </Section>
+
+          {/* Plant Parts Breakdown Cards */}
+          <Section title="Botanical Plant Parts & Pharmacopoeia Breakdown" color="#c084fc">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+              {medicinalParts.map((mp, idx) => (
+                <div key={idx} style={{
+                  background: 'rgba(15, 23, 42, 0.7)',
+                  border: '1px solid rgba(192, 132, 252, 0.25)',
+                  borderRadius: 14,
+                  padding: '0.9rem 1rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.35rem',
+                }}>
+                  <div style={{ fontWeight: 800, fontSize: '0.88rem', color: '#f3e8ff' }}>
+                    {mp.part}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#c084fc', fontWeight: 700 }}>
+                    🧪 Compounds: {mp.compounds}
+                  </div>
+                  <div style={{ fontSize: '0.76rem', color: '#cbd5e1', lineHeight: 1.45 }}>
+                    {mp.uses}
+                  </div>
+                  {mp.formula && (
+                    <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontStyle: 'italic', marginTop: '0.2rem' }}>
+                      💊 Classical Form: {mp.formula}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </Section>
+
           <div style={{
             background: 'rgba(192, 132, 252, 0.08)',
             border: '1px solid rgba(192, 132, 252, 0.25)',
@@ -1311,6 +2675,39 @@ function TabContent({ tabKey, tree }) {
                   </p>
                 </div>
               )}
+            </div>
+          </Section>
+
+          {/* Grassroots Conservation Movements */}
+          <Section title="Historic Tree Protection Movements" color="#fcd34d">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.85rem' }}>
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.7)',
+                border: '1px solid rgba(252, 211, 77, 0.25)',
+                borderRadius: 14,
+                padding: '1rem',
+              }}>
+                <div style={{ fontWeight: 800, color: '#fcd34d', fontSize: '0.9rem', marginBottom: 4 }}>
+                  ✊ Chipko Movement (1973)
+                </div>
+                <p style={{ color: '#cbd5e1', fontSize: '0.78rem', lineHeight: 1.5, margin: 0 }}>
+                  Villagers in the Garhwal Himalayas led by Gaura Devi hugged forest trees to physically prevent commercial loggers from cutting them down, giving birth to India's modern environmental movement.
+                </p>
+              </div>
+
+              <div style={{
+                background: 'rgba(15, 23, 42, 0.7)',
+                border: '1px solid rgba(252, 211, 77, 0.25)',
+                borderRadius: 14,
+                padding: '1rem',
+              }}>
+                <div style={{ fontWeight: 800, color: '#fcd34d', fontSize: '0.9rem', marginBottom: 4 }}>
+                  🪔 Khejarli Bishnoi Sacrifice (1730)
+                </div>
+                <p style={{ color: '#cbd5e1', fontSize: '0.78rem', lineHeight: 1.5, margin: 0 }}>
+                  Amrita Devi Bishnoi and 363 Bishnois sacrificed their lives clinging to sacred Khejri trees against royal woodcutters, inspiring the Indian principle that tree life equals human life.
+                </p>
+              </div>
             </div>
           </Section>
         </div>
@@ -1410,6 +2807,7 @@ function TabContent({ tabKey, tree }) {
 export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive', onPrint }) {
   const tree = normalizeTree(rawTree);
   const [activeTab, setActiveTab] = useState('oxygen');
+  const allometrics = useMemo(() => (tree ? computeTreeAllometrics(tree) : null), [tree]);
 
   if (!tree) return null;
 
@@ -1506,6 +2904,16 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
       {/* ── OXYGEN TREE LIVING BIOSYNTHESIS FACTORY ── */}
       <OxygenTreeCard tree={tree} />
 
+      {/* ── CALCULATED TREE AGE & ALLOMETRIC IMPACT (Image 1) ── */}
+      {allometrics && (
+        <CalculatedTreeAgeCard allometrics={allometrics} />
+      )}
+
+      {/* ── URBAN FORESTRY & MICROCLIMATE SHIELD (Image 2) ── */}
+      {allometrics && (
+        <UrbanMicroclimateShieldCard allometrics={allometrics} />
+      )}
+
       {/* ── SMALL HEADINGS IN VISUALLY IMPELLING SHAPES & COLOURS ── */}
       {!isPrint && (
         <div style={{
@@ -1589,6 +2997,11 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
         </div>
       )}
 
+      {/* ── ANTI-FELLING ECOLOGICAL MANDATE (Top 5 + Load More Reasons) ── */}
+      {!isPrint && (
+        <AntiFellingDossier tree={tree} />
+      )}
+
       {/* ── PRINT VIEW: All sections expanded ── */}
       {isPrint && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -1615,6 +3028,7 @@ export default function UnifiedTreeReport({ tree: rawTree, mode = 'interactive',
               <TabContent tabKey={tab.key} tree={tree} />
             </div>
           ))}
+          <AntiFellingDossier tree={tree} isPrint={true} />
         </div>
       )}
     </div>

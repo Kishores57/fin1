@@ -18,6 +18,10 @@ import {
   ArrowRight,
   Clock,
   Layers,
+  Search,
+  Info,
+  AlertTriangle,
+  RefreshCw,
 } from 'lucide-react';
 import { treeApi, registeredTreeApi, mediaBaseUrl, speciesDetectionApi } from '../services/api';
 import ResultCard from './ResultCard';
@@ -198,11 +202,14 @@ function TreeDetailsModal({ tree, onClose, onDeleted, focusAnalysis }) {
             className="px-4 py-2 rounded-xl text-sm font-bold text-red-400 border border-red-500/30 hover:bg-red-500/10"
             onClick={async () => {
               if (!window.confirm('Are you sure you want to delete this tree?')) return;
+              const targetId = tree._id || tree.id;
+              // Optimistically notify parent and close modal immediately (0ms latency)
+              onDeleted?.(tree);
+              onClose();
               try {
-                await registeredTreeApi.remove(tree._id || tree.id);
-                onDeleted?.(tree);
-                onClose();
+                await registeredTreeApi.remove(targetId);
               } catch (e) {
+                console.error('Delete tree error:', e);
                 alert(e.response?.data?.detail || e.message);
               }
             }}
@@ -256,6 +263,10 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
   const mapInstance = useRef(null);
   const markerRef = useRef(null);
   const registeredLayer = useRef(null);
+  const accuracyCircleRef = useRef(null);
+  const [searchLocQuery, setSearchLocQuery] = useState('');
+  const [isSearchingLoc, setIsSearchingLoc] = useState(false);
+  const [locationAddress, setLocationAddress] = useState('');
 
   // Species detection state
   const [detectionImage, setDetectionImage] = useState(null);
@@ -301,6 +312,18 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
     loadTrees();
     // Check if species detection server is up
     speciesDetectionApi.health().then((r) => setDetectionServerUp(r.model_loaded)).catch(() => setDetectionServerUp(false));
+
+    const handleTreeRegistered = (e) => {
+      if (e.detail) {
+        setTrees((prev) => {
+          const exists = prev.some((t) => (t._id && t._id === e.detail._id) || (t.treeId && t.treeId === e.detail.treeId));
+          if (!exists) return [e.detail, ...prev];
+          return prev;
+        });
+      }
+    };
+    window.addEventListener('tree-registered', handleTreeRegistered);
+    return () => window.removeEventListener('tree-registered', handleTreeRegistered);
   }, [loadTrees, onError]);
 
   useEffect(() => {
@@ -536,7 +559,64 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
     void sp;
   }, [form.species]);
 
-  const placeMarker = useCallback((lat, lng) => {
+  const fetchAddressForCoords = useCallback(async (lat, lng) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+        { headers: { 'User-Agent': 'VanJeevan-TreeGIS/1.0' } }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data?.display_name) {
+          setLocationAddress(data.display_name);
+          const addr = data.address || {};
+          setForm((f) => ({
+            ...f,
+            address: f.address || data.display_name,
+            ward: f.ward || addr.suburb || addr.neighbourhood || addr.city_district || '',
+            zone: f.zone || addr.city || addr.town || addr.state_district || '',
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn('Reverse geocode failed:', e);
+    }
+  }, []);
+
+  const handleSearchLocation = async () => {
+    if (!searchLocQuery.trim()) return;
+    setIsSearchingLoc(true);
+    setGpsHint('Searching geographic database...');
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchLocQuery.trim())}&limit=1`,
+        { headers: { 'User-Agent': 'VanJeevan-TreeGIS/1.0' } }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const top = data[0];
+          const lat = parseFloat(top.lat).toFixed(6);
+          const lng = parseFloat(top.lon).toFixed(6);
+          setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
+          setGpsHint(`📍 Located: ${top.display_name.slice(0, 50)}...`);
+          setLocationAddress(top.display_name);
+          placeMarker(Number(lat), Number(lng));
+          if (mapInstance.current) {
+            mapInstance.current.flyTo([Number(lat), Number(lng)], 18, { animate: true, duration: 1.2 });
+          }
+        } else {
+          setGpsHint('Location not found. Try another landmark, road, or area name.');
+        }
+      }
+    } catch (err) {
+      setGpsHint('Location search failed. Check your internet connection.');
+    } finally {
+      setIsSearchingLoc(false);
+    }
+  };
+
+  const placeMarker = useCallback((lat, lng, accuracy = null) => {
     // eslint-disable-next-line no-undef
     const L = window.L;
     if (!mapInstance.current || !L) return;
@@ -546,12 +626,39 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
       markerRef.current = L.marker([lat, lng], { draggable: true }).addTo(mapInstance.current);
       markerRef.current.on('dragend', () => {
         const p = markerRef.current.getLatLng();
-        setForm((f) => ({ ...f, latitude: String(p.lat.toFixed(6)), longitude: String(p.lng.toFixed(6)) }));
-        setGpsHint('');
+        const sLat = p.lat.toFixed(6);
+        const sLng = p.lng.toFixed(6);
+        setForm((f) => ({ ...f, latitude: sLat, longitude: sLng }));
+        setGpsHint('📍 Custom marker moved on map.');
+        fetchAddressForCoords(sLat, sLng);
+        if (accuracyCircleRef.current && mapInstance.current) {
+          mapInstance.current.removeLayer(accuracyCircleRef.current);
+          accuracyCircleRef.current = null;
+        }
       });
     }
+
+    if (accuracy && accuracy > 15) {
+      if (accuracyCircleRef.current) {
+        accuracyCircleRef.current.setLatLng([lat, lng]);
+        accuracyCircleRef.current.setRadius(accuracy);
+      } else {
+        accuracyCircleRef.current = L.circle([lat, lng], {
+          radius: accuracy,
+          color: accuracy > 80 ? '#f59e0b' : '#10b981',
+          weight: 1.5,
+          fillColor: accuracy > 80 ? '#fbbf24' : '#34d399',
+          fillOpacity: 0.15,
+        }).addTo(mapInstance.current);
+      }
+    } else if (accuracyCircleRef.current && mapInstance.current) {
+      mapInstance.current.removeLayer(accuracyCircleRef.current);
+      accuracyCircleRef.current = null;
+    }
+
     mapInstance.current.setView([lat, lng], Math.max(mapInstance.current.getZoom(), 16));
-  }, []);
+    fetchAddressForCoords(lat, lng);
+  }, [fetchAddressForCoords]);
 
   const renderRegisteredMarkers = useCallback(() => {
     // eslint-disable-next-line no-undef
@@ -604,11 +711,13 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
             if (!found) return;
             if (act === 'delete') {
               if (!window.confirm('Are you sure you want to delete this tree?')) return;
+              // Optimistically remove marker & state immediately (0ms delay)
+              setTrees((prev) => prev.filter((t) => String(t._id) !== String(id)));
+              m.closePopup();
               try {
                 await registeredTreeApi.remove(id);
-                setTrees((prev) => prev.filter((t) => String(t._id) !== String(id)));
-                m.closePopup();
               } catch (e) {
+                console.error('Delete tree error:', e);
                 alert(e.response?.data?.detail || e.message);
               }
               return;
@@ -635,13 +744,15 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
 
     mapInstance.current.on('click', (e) => {
       const { lat, lng } = e.latlng;
+      const sLat = lat.toFixed(6);
+      const sLng = lng.toFixed(6);
       setForm((f) => ({
         ...f,
-        latitude: String(lat.toFixed(6)),
-        longitude: String(lng.toFixed(6)),
+        latitude: sLat,
+        longitude: sLng,
       }));
-      setGpsHint('');
-      placeMarker(lat, lng);
+      setGpsHint('📍 Tree location pinned on map.');
+      placeMarker(Number(sLat), Number(sLng));
     });
 
     const handleResize = () => {
@@ -664,21 +775,53 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
   useEffect(() => {
     if (gpsValid) placeMarker(Number(form.latitude), Number(form.longitude));
   }, [form.latitude, form.longitude, gpsValid, placeMarker]);
+
   const handleDeviceGps = () => {
     if (!navigator.geolocation) {
       setGpsHint('Geolocation is not supported on this device.');
       return;
     }
+    setGpsHint('Acquiring live satellite GPS coordinates...');
+    // Stage 1: Try high-accuracy device GPS
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const lat = pos.coords.latitude.toFixed(6);
         const lng = pos.coords.longitude.toFixed(6);
+        const acc = Math.round(pos.coords.accuracy || 10);
         setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
-        setGpsHint('');
-        placeMarker(Number(lat), Number(lng));
+        if (acc > 80) {
+          setGpsHint(`⚠️ Approx Location (±${acc}m from network). Drag pin or search address for exact tree spot.`);
+        } else {
+          setGpsHint(`✅ GPS Locked (Precision: ±${acc}m)`);
+        }
+        placeMarker(Number(lat), Number(lng), acc);
+        if (mapInstance.current) {
+          mapInstance.current.flyTo([Number(lat), Number(lng)], 18, { animate: true, duration: 1 });
+        }
       },
-      () => setGpsHint('Unable to read device location. Please manually enter coordinates.'),
-      { enableHighAccuracy: true, timeout: 12000 }
+      (err) => {
+        console.warn('High-accuracy GPS attempt failed, trying standard device network:', err);
+        // Stage 2: Fallback to standard device location (cell/wifi triangulation)
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude.toFixed(6);
+            const lng = pos.coords.longitude.toFixed(6);
+            const acc = Math.round(pos.coords.accuracy || 150);
+            setForm((f) => ({ ...f, latitude: lat, longitude: lng }));
+            setGpsHint(`⚠️ Network Location (±${acc}m). Drag pin or search address for exact tree spot.`);
+            placeMarker(Number(lat), Number(lng), acc);
+            if (mapInstance.current) {
+              mapInstance.current.flyTo([Number(lat), Number(lng)], 17, { animate: true, duration: 1 });
+            }
+          },
+          (err2) => {
+            console.error('All device location options failed:', err2);
+            setGpsHint('Unable to read device GPS. Please search your landmark/address or click on the map.');
+          },
+          { enableHighAccuracy: false, timeout: 10000, maximumAge: 0 }
+        );
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
@@ -762,6 +905,11 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
       const saved = await registeredTreeApi.create(fd);
       setTrees((prev) => [saved, ...prev]);
       setSuccessMsg(`Tree ${saved.treeId} saved to MongoDB and added to the map.`);
+      // Instantly dispatch event for GIS MapDashboard and other components
+      window.dispatchEvent(new CustomEvent('tree-registered', { detail: saved }));
+      if (mapInstance.current && saved.latitude && saved.longitude) {
+        mapInstance.current.flyTo([Number(saved.latitude), Number(saved.longitude)], 18, { animate: true, duration: 1 });
+      }
       setAnalysisPreview(null);
       setCalculatedResult(null);
       onTreeSaved?.();
@@ -1433,6 +1581,53 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
               )}
             </div>
 
+            {locationAddress && (
+              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-300 text-xs text-emerald-950 flex items-start gap-2.5 shadow-xs">
+                <MapPin className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <span className="font-black text-[11px] uppercase tracking-wider text-emerald-800 block">Verified Geographic Address:</span>
+                  <span className="font-semibold text-slate-800 text-xs">{locationAddress}</span>
+                </div>
+              </div>
+            )}
+
+            {gpsHint && (
+              <div className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-xs text-slate-700 flex items-center gap-2">
+                <Info className="w-4 h-4 text-[#059669] shrink-0" />
+                <span>{gpsHint}</span>
+              </div>
+            )}
+
+            {/* Landmark / Address Search Bar */}
+            <div className="space-y-1.5">
+              <span className="text-xs font-extrabold text-[#022c17] flex items-center gap-1.5">
+                <Search className="w-3.5 h-3.5 text-[#059669]" />
+                Find Specific Campus, Landmark, Road or Colony
+              </span>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Search className="w-4 h-4 text-emerald-700 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={searchLocQuery}
+                    onChange={(e) => setSearchLocQuery(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSearchLocation(); } }}
+                    placeholder="e.g. KK Wagh College, Amrutdham, Panchavati, Nashik..."
+                    className="w-full rounded-2xl bg-white border-2 border-slate-300 focus:border-[#059669] focus:ring-4 focus:ring-emerald-500/20 pl-10 pr-4 py-2.5 text-xs font-semibold text-slate-800 placeholder:text-slate-400 outline-none shadow-xs transition-all"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSearchLocation}
+                  disabled={isSearchingLoc}
+                  className="px-5 py-2.5 rounded-2xl bg-[#047857] hover:bg-[#065f46] text-white text-xs font-black flex items-center gap-1.5 shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                >
+                  {isSearchingLoc ? <RefreshCw className="w-4 h-4 animate-spin text-emerald-200" /> : <Search className="w-4 h-4 text-emerald-200" />}
+                  <span>Locate Area</span>
+                </button>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-3.5">
               <label className="text-xs font-extrabold text-[#022c17] space-y-1.5 block tracking-wide">
                 <span>Latitude *</span>
@@ -1462,11 +1657,11 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
                   Interactive Map Pinpoint
                 </span>
                 <span className="text-[11px] font-semibold text-slate-500">
-                  Click map or drag marker to set GPS
+                  Click map or drag marker to set exact tree trunk position
                 </span>
               </div>
-              <div className="rounded-2xl overflow-hidden border-2 border-[#059669]/40 shadow-xs h-56 bg-slate-900 relative">
-                <div ref={mapRef} className="w-full h-full" style={{ minHeight: '220px' }} />
+              <div className="rounded-2xl overflow-hidden border-2 border-[#059669]/40 shadow-xs h-64 bg-slate-900 relative">
+                <div ref={mapRef} className="w-full h-full" style={{ minHeight: '250px' }} />
               </div>
             </div>
 
@@ -1677,10 +1872,13 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
                           title="Delete"
                           onClick={async () => {
                             if (!window.confirm('Are you sure you want to delete this tree?')) return;
+                            const targetId = t._id;
+                            // Optimistically remove from UI in 0ms
+                            setTrees((prev) => prev.filter((x) => x._id !== targetId));
                             try {
-                              await registeredTreeApi.remove(t._id);
-                              setTrees((prev) => prev.filter((x) => x._id !== t._id));
+                              await registeredTreeApi.remove(targetId);
                             } catch (e) {
+                              console.error('Delete tree error:', e);
                               onError?.(e.response?.data?.detail || e.message);
                             }
                           }}
