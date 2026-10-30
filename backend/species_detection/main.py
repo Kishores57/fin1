@@ -19,10 +19,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+torch.set_grad_enabled(False)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 if device.type == "cpu":
-    # Optimize CPU inference threads for multi-core devices, laptops and cloud containers
-    torch.set_num_threads(min(4, os.cpu_count() or 1))
+    # Limit to 1 thread in cloud containers to keep memory footprint well under 512MB
+    torch.set_num_threads(1)
 print(f"Using device: {device}")
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -132,40 +133,44 @@ SPECIES_GROWTH_RATES = {
     "ad": 1.00,
 }
 
-age_model = models.efficientnet_b4(weights=None)
-in_features_age = age_model.classifier[1].in_features
-age_model.classifier = nn.Sequential(
-    nn.Dropout(p=0.4, inplace=True),
-    nn.Linear(in_features_age, 512),
-    nn.BatchNorm1d(512),
-    nn.SiLU(),
-    nn.Dropout(p=0.3, inplace=True),
-    nn.Linear(512, 4),
-)
-age_model = age_model.to(device)
-
+age_model = None
+age_model_loaded = False
 age_model_path = os.environ.get("AGE_MODEL_PATH") or os.path.join(SCRIPT_DIR, "..", "export", "tree_age_efficientnet_b4.pth")
 age_model_path = os.path.normpath(age_model_path)
 age_info_path = os.path.join(SCRIPT_DIR, "..", "export", "model_info.json")
 
-age_model_loaded = False
-try:
+def get_age_model():
+    global age_model, age_model_loaded, AGE_CLASSES
+    if age_model is not None:
+        return age_model, age_model_loaded
     if os.path.exists(age_model_path):
-        age_checkpoint = torch.load(age_model_path, map_location=device, weights_only=False)
-        if isinstance(age_checkpoint, dict) and "model_state_dict" in age_checkpoint:
-            age_model.load_state_dict(age_checkpoint["model_state_dict"])
-            if "class_names" in age_checkpoint:
-                AGE_CLASSES = age_checkpoint["class_names"]
-        else:
-            age_model.load_state_dict(age_checkpoint)
-        age_model.eval()
-        age_model_loaded = True
-        print(f"Bark age model loaded successfully from {age_model_path}")
-        print(f"Age classes: {AGE_CLASSES}")
-    else:
-        print(f"WARNING: Bark age model not found at {age_model_path}")
-except Exception as e:
-    print(f"Error loading bark age model: {e}")
+        try:
+            m = models.efficientnet_b4(weights=None)
+            in_features_age = m.classifier[1].in_features
+            m.classifier = nn.Sequential(
+                nn.Dropout(p=0.4, inplace=True),
+                nn.Linear(in_features_age, 512),
+                nn.BatchNorm1d(512),
+                nn.SiLU(),
+                nn.Dropout(p=0.3, inplace=True),
+                nn.Linear(512, 4),
+            )
+            m = m.to(device)
+            age_checkpoint = torch.load(age_model_path, map_location=device, weights_only=False)
+            if isinstance(age_checkpoint, dict) and "model_state_dict" in age_checkpoint:
+                m.load_state_dict(age_checkpoint["model_state_dict"])
+                if "class_names" in age_checkpoint:
+                    AGE_CLASSES = age_checkpoint["class_names"]
+            else:
+                m.load_state_dict(age_checkpoint)
+            m.eval()
+            age_model = m
+            age_model_loaded = True
+            print(f"Bark age model loaded on demand from {age_model_path}")
+            return age_model, True
+        except Exception as e:
+            print(f"Error loading bark age model: {e}")
+    return None, False
 
 # Preprocessing transforms (ImageNet standard)
 species_transform = transforms.Compose([
@@ -268,7 +273,8 @@ async def predict_age(
     Predict tree age from uploaded bark image using EfficientNet-B4
     and synthesize with species Mean Annual Increment (growth rate) and DBH/GBH.
     """
-    if not age_model_loaded:
+    model, loaded = get_age_model()
+    if not loaded or model is None:
         return {"error": "Bark age model not loaded. Check server logs."}
 
     try:
@@ -282,7 +288,7 @@ async def predict_age(
         tensor = bark_transform(image).unsqueeze(0).to(device)
 
         with torch.inference_mode():
-            outputs = age_model(tensor)
+            outputs = model(tensor)
             probabilities = torch.nn.functional.softmax(outputs[0], dim=0)
             confidence, predicted_idx = torch.max(probabilities, 0)
             predicted_stage = AGE_CLASSES[predicted_idx.item()]

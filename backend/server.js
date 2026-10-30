@@ -86,62 +86,22 @@ if (fs.existsSync(frontendDist)) {
   });
 }
 
-import { spawn } from 'child_process';
-
-let pyProcess = null;
-async function ensureDetectionService() {
-  const detectionUrl = process.env.DETECTION_URL || settings.DETECTION_URL || 'http://127.0.0.1:5000';
-  if (!detectionUrl.includes('127.0.0.1') && !detectionUrl.includes('localhost')) {
-    return;
-  }
-  try {
-    const res = await fetch(`${detectionUrl}/health`, { signal: AbortSignal.timeout(1500) });
-    if (res.ok) {
-      console.log('TreeVisionAI Model Service already active on port 5000.');
-      return;
-    }
-  } catch (_) {}
-
-  const scriptPath = path.resolve(__dirname, 'species_detection/main.py');
-  if (!fs.existsSync(scriptPath)) return;
-
-  const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-  console.log(`Auto-starting TreeVisionAI PyTorch Model Service (${pythonCmd} ${scriptPath})...`);
-  const env = { ...process.env, DETECTION_PORT: '5000' };
-  delete env.PORT;
-
-  pyProcess = spawn(pythonCmd, [scriptPath], {
-    cwd: path.resolve(__dirname, 'species_detection'),
-    env,
-    stdio: 'ignore',
-  });
-
-  pyProcess.on('error', (err) => {
-    console.warn('AI Model service auto-start note:', err.message);
-  });
-}
-
-// Initialize database, run RAG ingestion, and start server
+// Initialize database, start server immediately, and run background ingestion
 async function start() {
   try {
     await initDb();
-    await ingestDocuments();
-    // Mongo is additive — failure does not stop the existing SQLite calculator
-    await connectMongo();
-
-    // Ensure PyTorch model service is running
-    ensureDetectionService();
 
     const server = app.listen(settings.PORT, () => {
       console.log(`Backend server successfully running on port ${settings.PORT}`);
     });
 
+    // Run background services asynchronously without blocking port detection or spiking memory
+    connectMongo().catch((err) => console.warn('Mongo connection note:', err.message));
+    ingestDocuments().catch((err) => console.warn('RAG document ingestion note:', err.message));
+
     // Graceful shutdown for containers / cloud platforms
     const shutdown = () => {
       console.log('Received termination signal, shutting down server gracefully...');
-      if (pyProcess) {
-        try { pyProcess.kill(); } catch (_) {}
-      }
       server.close(() => {
         console.log('HTTP server closed.');
         process.exit(0);
