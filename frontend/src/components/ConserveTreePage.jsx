@@ -420,10 +420,21 @@ export default function ConserveTreePage({ result, onBack, onSaved, onError }) {
           <button
             type="button"
             onClick={captureGps}
-            className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 bg-amber-500/15 text-amber-200 border border-amber-500/30"
+            className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 bg-amber-500/15 text-amber-200 border border-amber-500/30 hover:bg-amber-500/25 transition-all"
           >
             <Crosshair className="w-4 h-4" />
             Use current location
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setLatitude('20.013100');
+              setLongitude('73.821316');
+            }}
+            className="px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 bg-emerald-500/15 text-emerald-200 border border-emerald-500/30 hover:bg-emerald-500/25 transition-all"
+            title="Set to K.K. Wagh Campus, Nashik (20.013100, 73.821316)"
+          >
+            📍 Nashik Study Campus
           </button>
           <button
             type="button"
