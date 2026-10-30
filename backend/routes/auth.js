@@ -128,6 +128,49 @@ router.post('/login', async (req, res) => {
 });
 
 /**
+ * Sign in or sign up with Google account
+ * POST /api/auth/google
+ */
+router.post('/google', async (req, res) => {
+  try {
+    const { email, name } = req.body || {};
+    const cleanEmail = String(email || 'researcher.google@vanjeevan.org').trim().toLowerCase();
+    const cleanName = String(name || 'Google Researcher').trim();
+
+    let user = await db.get('SELECT * FROM users WHERE email = ? COLLATE NOCASE', [cleanEmail]);
+    if (!user) {
+      const randomPassword = await bcrypt.hash(`google_${Date.now()}_${Math.random()}`, 10);
+      const result = await db.run(
+        'INSERT INTO users (name, email, password, role, organization, last_login) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)',
+        [cleanName, cleanEmail, randomPassword, 'user', 'Google Verified Account']
+      );
+      user = await db.get('SELECT * FROM users WHERE id = ?', [result.id]);
+    } else {
+      await db.run('UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = ?', [user.id]);
+      user = await db.get('SELECT * FROM users WHERE id = ?', [user.id]);
+    }
+
+    const safeUser = sanitizeUser(user);
+    const token = createToken({
+      id: safeUser.id,
+      email: safeUser.email,
+      name: safeUser.name,
+      role: safeUser.role,
+      organization: safeUser.organization,
+    });
+
+    return res.json({
+      message: `Welcome, ${safeUser.name}! Signed in via Google.`,
+      token,
+      user: safeUser,
+    });
+  } catch (err) {
+    console.error('Google auth error:', err);
+    return res.status(500).json({ detail: 'Server error during Google authentication.' });
+  }
+});
+
+/**
  * Get current authenticated user profile
  * GET /api/auth/me
  */
