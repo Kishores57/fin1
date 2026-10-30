@@ -33,10 +33,11 @@ uploads/*
 backend/uploads/*
 !backend/uploads/**/.gitkeep
 
-# Large unused model checkpoints (keep best_model.pth)
+# Large unused model checkpoints (keep best_model.pth and tree_age_efficientnet_b4.pth)
 backend/models/best_resnet50.pth
 backend/models/last_model.pth
 backend/export/*.pth
+!backend/export/tree_age_efficientnet_b4.pth
 
 # Logs & Debug
 logs/
