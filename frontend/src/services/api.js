@@ -243,21 +243,25 @@ export const speciesDetectionApi = {
     try {
       const response = await axios.post(`${PROXY_DETECTION_URL}/predict`, fd, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 15000,
+        timeout: 20000,
       });
-      if (response.data && !response.data.fallback && !response.data.error) {
+      if (response.data && (response.data.prediction || response.data.display_name)) {
         return response.data;
       }
     } catch (proxyErr) {
       console.warn('Backend detection proxy unavailable, attempting direct model connection:', proxyErr.message);
     }
 
-    // 2. Direct fallback to Python FastAPI server
-    const response = await axios.post(`${DIRECT_DETECTION_URL}/predict`, fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 20000,
-    });
-    return response.data;
+    // 2. Direct fallback to Python FastAPI server if configured
+    if (DIRECT_DETECTION_URL) {
+      const response = await axios.post(`${DIRECT_DETECTION_URL}/predict`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 20000,
+      });
+      return response.data;
+    }
+
+    throw new Error('Species detection model unavailable. Please try again.');
   },
 
   predictAge: async (imageFile, { species = '', dbh = '', gbh = '', growthRate = '' } = {}) => {
@@ -274,19 +278,23 @@ export const speciesDetectionApi = {
         headers: { 'Content-Type': 'multipart/form-data' },
         timeout: 20000,
       });
-      if (response.data && !response.data.fallback && !response.data.error) {
+      if (response.data && (response.data.approximate_age || response.data.age_stage || response.data.stage_label)) {
         return response.data;
       }
     } catch (proxyErr) {
       console.warn('Backend age detection proxy unavailable, attempting direct model connection:', proxyErr.message);
     }
 
-    // 2. Direct fallback to Python FastAPI server
-    const response = await axios.post(`${DIRECT_DETECTION_URL}/predict-age`, fd, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 25000,
-    });
-    return response.data;
+    // 2. Direct fallback to Python FastAPI server if configured
+    if (DIRECT_DETECTION_URL) {
+      const response = await axios.post(`${DIRECT_DETECTION_URL}/predict-age`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 25000,
+      });
+      return response.data;
+    }
+
+    throw new Error('Bark age model unavailable. Please try again.');
   },
 
   health: async () => {

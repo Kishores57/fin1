@@ -509,11 +509,11 @@ const DEFAULT_BOTANICAL = {
  */
 router.get('/media', async (req, res) => {
   const { name } = req.query;
-  if (!name) {
-    return res.status(400).json({ error: 'Parameter "name" is required.' });
+  if (!name || name === 'null' || name === 'undefined' || name.trim() === '') {
+    return res.redirect(302, DEFAULT_BOTANICAL.tree);
   }
 
-  const cleanName = path.basename(name);
+  const cleanName = path.basename(name.trim());
 
   // 1. Check local disk directories first
   const localDirs = [
@@ -537,12 +537,12 @@ router.get('/media', async (req, res) => {
     fs.mkdirSync(epicollectUploadsDir, { recursive: true });
   } catch (_) {}
 
-  const clientId = (process.env.EPICOLLECT_CLIENT_ID || settings.EPICOLLECT_CLIENT_ID || '').trim();
-  const clientSecret = (process.env.EPICOLLECT_CLIENT_SECRET || settings.EPICOLLECT_CLIENT_SECRET || '').trim();
+  const clientId = (process.env.EPICOLLECT_CLIENT_ID || settings.EPICOLLECT_CLIENT_ID || '8217').trim();
+  const clientSecret = (process.env.EPICOLLECT_CLIENT_SECRET || settings.EPICOLLECT_CLIENT_SECRET || 'iVSSjQbKhrnnqmZvMhbxpDFcZsi5VvpaJYtfmQCj').trim();
   const projectSlug = (process.env.EPICOLLECT_PROJECT_SLUG || settings.EPICOLLECT_PROJECT_SLUG || 'vanjeevan').trim();
 
   if (clientId && clientSecret) {
-    const formats = ['entry_original', 'entry_medium', 'entry_thumb'];
+    const formats = ['entry_original', 'entry_thumb'];
     try {
       const token = await getAccessToken();
       for (const fmt of formats) {

@@ -49,8 +49,9 @@ export const settings = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
   RAG_DOCUMENT_DIR: path.resolve(projectRoot, process.env.RAG_DOCUMENT_DIR || 'backend/documents'),
   CHROMADB_DIR: path.resolve(projectRoot, process.env.CHROMADB_DIR || 'backend/chroma_db'),
-  EPICOLLECT_CLIENT_ID: process.env.EPICOLLECT_CLIENT_ID || '',
-  EPICOLLECT_CLIENT_SECRET: process.env.EPICOLLECT_CLIENT_SECRET || '',
+  EPICOLLECT_CLIENT_ID: process.env.EPICOLLECT_CLIENT_ID || '8217',
+  EPICOLLECT_CLIENT_SECRET: process.env.EPICOLLECT_CLIENT_SECRET || 'iVSSjQbKhrnnqmZvMhbxpDFcZsi5VvpaJYtfmQCj',
   EPICOLLECT_PROJECT_SLUG: process.env.EPICOLLECT_PROJECT_SLUG || 'vanjeevan',
+  DETECTION_URL: process.env.DETECTION_URL || 'http://127.0.0.1:5000',
   JWT_SECRET: process.env.JWT_SECRET || 'vanjeevan_gis_forest_auth_secret_token_2025',
 };
