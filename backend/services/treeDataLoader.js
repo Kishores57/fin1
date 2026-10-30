@@ -82,6 +82,7 @@ export async function getAllUnifiedTrees() {
                 createdAt: item.date || null,
               });
             }
+          }
         }
       } catch (e) {
         console.warn('Error reading survey trees in unified loader:', e.message);
