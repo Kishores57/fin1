@@ -293,7 +293,7 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
 
   const gpsValid = hasValidGps(form.latitude, form.longitude);
   const canCalculate = Boolean(form.species && Number(form.gbh) > 0 && Number(form.height) > 0);
-  const canAddTree = Boolean(canCalculate && analysisPreview && gpsValid);
+  const canAddTree = Boolean(canCalculate && gpsValid);
 
   const setField = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -868,33 +868,47 @@ export default function TreeRegistration({ onError, initialResult, onTreeSaved }
       setGpsHint('Please capture the tree location before saving.');
       return;
     }
-    if (!canAddTree) {
-      onError?.('Run Calculate Analysis first, and ensure GPS is set.');
+    if (!canCalculate) {
+      onError?.('Please select a species and enter valid GBH and height before saving.');
       return;
     }
     setBusy(true);
     try {
+      let preview = analysisPreview;
+      if (!preview) {
+        preview = await registeredTreeApi.analyze({
+          species: form.species,
+          gbh: Number(form.gbh),
+          height: Number(form.height),
+          crownDiameter: form.crownDiameter ? Number(form.crownDiameter) : null,
+          age: form.age ? Number(form.age) : null,
+          latitude: Number(form.latitude),
+          longitude: Number(form.longitude),
+        });
+        setAnalysisPreview(preview);
+      }
+
       const fd = new FormData();
       Object.entries({
-        treeId: form.treeId.startsWith('TR-DRAFT') ? '' : form.treeId,
+        treeId: form.treeId?.startsWith('TR-DRAFT') ? '' : (form.treeId || ''),
         treeName: form.treeName,
-        scientificName: form.scientificName || analysisPreview.scientificName,
+        scientificName: form.scientificName || preview?.scientificName || '',
         species: form.species,
-        family: form.family || analysisPreview.family,
-        commonName: form.commonName,
-        age: form.age,
+        family: form.family || preview?.family || '',
+        commonName: form.commonName || '',
+        age: form.age || preview?.calculations?.age || '',
         height: form.height,
         gbh: form.gbh,
-        crownDiameter: form.crownDiameter,
-        healthStatus: form.healthStatus,
+        crownDiameter: form.crownDiameter || '',
+        healthStatus: form.healthStatus || 'Healthy',
         latitude: form.latitude,
         longitude: form.longitude,
-        address: form.address,
-        ward: form.ward,
-        zone: form.zone,
-        calculationsJson: JSON.stringify(analysisPreview.calculations),
-        climaticAnalysisJson: JSON.stringify(analysisPreview.climaticAnalysis),
-        analysisSource: analysisPreview.analysisSource || 'local-rag',
+        address: form.address || '',
+        ward: form.ward || '',
+        zone: form.zone || '',
+        calculationsJson: preview?.calculations ? JSON.stringify(preview.calculations) : '',
+        climaticAnalysisJson: preview?.climaticAnalysis ? JSON.stringify(preview.climaticAnalysis) : '',
+        analysisSource: preview?.analysisSource || 'local-rag',
       }).forEach(([k, v]) => {
         if (v !== '' && v != null) fd.append(k, v);
       });

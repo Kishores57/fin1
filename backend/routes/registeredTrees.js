@@ -29,7 +29,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 8 * 1024 * 1024 },
+  limits: { fileSize: 15 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype.startsWith('image/')) {
       return cb(new Error('Only image uploads are allowed.'));
@@ -75,9 +75,18 @@ function serializeTree(doc) {
 }
 
 async function lookupSpecies(speciesName) {
-  const row = await db.get('SELECT * FROM species WHERE name = ? COLLATE NOCASE', [speciesName]);
+  if (!speciesName) return null;
+  const trimmed = speciesName.trim();
+  let row = await db.get('SELECT * FROM species WHERE name = ? COLLATE NOCASE', [trimmed]);
   if (row) return row;
-  const meta = resolveSpeciesMeta(speciesName);
+
+  // Normalized search (handles "raintree" vs "Rain Tree", "badam" vs "Badam", etc.)
+  const all = await db.all('SELECT * FROM species');
+  const cleanInput = trimmed.replace(/[\s_-]+/g, '').toLowerCase();
+  row = all.find((s) => s.name.replace(/[\s_-]+/g, '').toLowerCase() === cleanInput);
+  if (row) return row;
+
+  const meta = resolveSpeciesMeta(trimmed);
   if (meta && meta.common) {
     return {
       name: meta.common,

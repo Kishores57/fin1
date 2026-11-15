@@ -236,7 +236,10 @@ router.post('/predict', upload.single('file'), async (req, res) => {
 
     if (pyResponse.ok) {
       const data = await pyResponse.json();
-      return res.json(data);
+      if (!data.error && (data.prediction || data.display_name)) {
+        return res.json(data);
+      }
+      console.warn('PyTorch species prediction returned error/incomplete response, falling back:', data.error);
     }
   } catch (_) {
     // PyTorch service offline or timed out; seamlessly transition to vision engines
@@ -337,7 +340,10 @@ router.post('/predict-age', upload.single('file'), async (req, res) => {
 
     if (pyResponse.ok) {
       const data = await pyResponse.json();
-      return res.json(data);
+      if (!data.error && (data.prediction || data.display_name)) {
+        return res.json(data);
+      }
+      console.warn('PyTorch bark age prediction returned error/incomplete response, falling back:', data.error);
     }
   } catch (_) {
     // PyTorch service offline or timed out; seamlessly transition to vision engines
